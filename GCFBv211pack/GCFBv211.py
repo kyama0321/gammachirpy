@@ -57,6 +57,6 @@ def GCFBv211(SndIn, GCparam, *args):
     """
     if len(GCparam.OutMidCrct) < 2:
         print("*** Outer/Middle Ear correction (minimum phase) : {} ***".format(GCparam.OutMidCrct))
-    # CmpnOutMid = utils.OutMidCrctFilt(GCparam.OUtMidCrct, fs, 0, 2) # 2) minimum phase
+    CmpnOutMid, _ = utils.OutMidCrctFilt(GCparam.OUtMidCrct, fs, 0, 2) # 2) minimum phase
 
     return cGCout, pGCout, GCparam, GCresp

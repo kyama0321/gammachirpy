@@ -217,3 +217,21 @@ def Fr2Fpeak(n, b, c, fr):
     fpeak = fr + c*ERBw*b/n
 
     return fpeak, ERBw
+
+
+def OutMidCrctFilt(StrCrct, SR, SwPlot, SwFilter):
+    """Outer/middle ear compensation filter
+
+    Args:
+        StrCrct (string): String for Correction ELC/MAF/MAP
+        SR (int): Sampling rate
+        SwPlot (int): Switch of plot (0:OFF/1:ON)
+        SwFilter (int): Switch of filter type
+            1: FIR linear phase filter
+            2: FIR mimimum phase filter (length: half of linear phase filter)
+
+    Returns:
+        FIRCoef (array): FIR filter coefficients
+        StrFilt (string): Filter infomation
+    """
+    return FIRCoef, StrFilt

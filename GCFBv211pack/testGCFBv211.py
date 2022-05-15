@@ -2,12 +2,13 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import utils
+import GCFBv211 as gcfb_Main
 
 
 class GCparam_default:
     fs = 48000
     NumCh = 100
-    Frange = [100, 6000]
+    FRange = np.array([100, 6000])
     OutMidCrct = "No"
     # OutMidCrct = "ELC"
     Ctrl = "dynamic" # used to be 'tyme-varying'
@@ -35,6 +36,8 @@ for SwDySt in range(1): # 0: only dynamic, 1: dynamic and static
             GCparam.Ctrl = "dynamic"
         else: 
             GCparam.Ctrl = "Static"
+        
+        cGCout, pGCout, GCparam, GCrest = gcfb_Main.GCFBv211(Snd, GCparam)
 
         
 

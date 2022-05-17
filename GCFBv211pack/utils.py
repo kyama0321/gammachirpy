@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import sys
+from functools import lru_cache
 import numpy as np
 import wave as wave
 
@@ -219,19 +220,62 @@ def Fr2Fpeak(n, b, c, fr):
     return fpeak, ERBw
 
 
-def OutMidCrctFilt(StrCrct, SR, SwPlot, SwFilter):
+@lru_cache(maxsize=None)
+def OutMidCrctFilt(StrCrct, SR, SwPlot=0, SwFilter=0):
     """Outer/middle ear compensation filter
 
     Args:
         StrCrct (string): String for Correction ELC/MAF/MAP
         SR (int): Sampling rate
-        SwPlot (int): Switch of plot (0:OFF/1:ON)
+        SwPlot (int): Switch of plot (0:OFF/1:ON) (default:0)
         SwFilter (int): Switch of filter type
-            1: FIR linear phase filter
+            0: FIR linear phase filter (default)
+            1: FIR linear phase inverse filter filter
             2: FIR mimimum phase filter (length: half of linear phase filter)
 
     Returns:
         FIRCoef (array): FIR filter coefficients
         StrFilt (string): Filter infomation
+
+    Notes:
+        In the original Matlab code of OutMidCrctFilt.m, persistent variables 
+        are called by "persistent" function. The GammachirPy uses the "lru_cache"  
+        instead of the persistent variables to call outputs if args are same 
+        to previous one. 
+
+    Reference:
+        https://docs.python.org/3/library/functools.html
     """
+
+    if SR > 48000:
+        print("OutMidCrctFilt : Sampling rate of {} (Hz) (> 48000 (Hz) is not recommended)".format(SR))
+        print("<-- ELC etc. is only defined below 16000 (Hz)")
+
+    if SwFilter == 0:
+        StrFilt = "FIR linear phase filter"
+    elif SwFilter == 1:
+        StrFilt = "FIR linear phase inverse filter"
+    elif SwFilter == 2:
+        StrFilt = "FIR minimum phase filter"
+    else:
+        help(OutMidCrctFilt)
+        print("Specify filter type", file=sys.stderr)
+        sys.exit(1)        
+
+    if not StrCrct in ['ELC', 'MAF', 'MAP']:
+        help(OutMidCrctFilt)
+        print("Specifiy correction: ELC / MAF / MAP", file=sys.stderr)
+        sys.exit(1)
+
+    """
+    Generating filter at the first time
+    """
+    print("*** OutMidCrctFilt: Generating {} {} ***".format(StrCrct, StrFilt))
+    Nint = 1024
+    # Nint = 0 # No spline interpolation:  NG no convergence at remez
+
+    # crctPwr, freq, _ = OutMidCrct(StrCrct, Nint, SR, 0)
+
+    FIRCoef = [1,3,5] # dummy for test
+
     return FIRCoef, StrFilt

@@ -55,8 +55,12 @@ def GCFBv211(SndIn, GCparam, *args):
     """
     Outer-Mid Ear Compensation
     """
-    if len(GCparam.OutMidCrct) < 2:
+    if GCparam.OutMidCrct == 'No':
+        print("*** No Outer/Middle Ear correction ***")
+        Snd = SndIn
+    else:
+        # if GCparam.OutMidCrct in ["ELC", "MAF", "MAP"]:
         print("*** Outer/Middle Ear correction (minimum phase) : {} ***".format(GCparam.OutMidCrct))
-    CmpnOutMid, _ = utils.OutMidCrctFilt(GCparam.OUtMidCrct, fs, 0, 2) # 2) minimum phase
+        CmpnOutMid, _ = utils.OutMidCrctFilt(GCparam.OutMidCrct, fs, 0, 2) # 2) minimum phase
 
     return cGCout, pGCout, GCparam, GCresp

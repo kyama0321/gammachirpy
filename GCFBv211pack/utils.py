@@ -262,9 +262,9 @@ def OutMidCrctFilt(StrCrct, SR, SwPlot=0, SwFilter=0):
         print("Specify filter type", file=sys.stderr)
         sys.exit(1)        
 
-    if not StrCrct in ['ELC', 'MAF', 'MAP']:
+    if not StrCrct in ['ELC', 'MAF', 'MAP', 'MidEar']:
         help(OutMidCrctFilt)
-        print("Specifiy correction: ELC / MAF / MAP", file=sys.stderr)
+        print("Specifiy correction: ELC/MAF/MAP/MidEar", file=sys.stderr)
         sys.exit(1)
 
     """
@@ -282,17 +282,74 @@ def OutMidCrctFilt(StrCrct, SR, SwPlot=0, SwFilter=0):
 
 
 
-def OutMidCrct(StrCrct,NfrqRsl,fs,SwPlot):
-    """Correction of ELC, MAF, MAP. It produces interpolated points for the ELC/MAF/MAP/MidEar correction.
+def OutMidCrct(StrCrct, NfrqRsl=0, fs=32000, SwPlot=1):
+    """Correction of ELC, MAF, MAP, MID. 
+    It produces interpolated points for the ELC/MAF/MAP/MidEar correction.
 
     Args:
-        StrCrct (_type_): _description_
-        NfrqRsl (_type_): _description_
-        fs (_type_): _description_
-        SwPlot (_type_): _description_
+        StrCrct (string): Correction ELC/MAF/MAP/MidEar
+        NfrqRsl (int): Number of data points, if zero, then direct out (default: 0)
+        fs (int): Sampling frequency (default: 32000)
+        SwPlot (int): Switch for plot (0/1, default:1)
 
     Returns:
-        _type_: _description_
+        CrctLinPwr (array): Correction value in LINEAR POWER. 
+            This is defined as:  CrctLiPwr =10^(-FreqChardB_toBeCmpnstd/10)
+        freq (array): Corresponding Frequency at the data point
+        FreqChardB_toBeCmpnstd (array): Frequency char of ELC/MAP dB 
+            to be compensated for filterbank (defined By Glassberg and Moore.)
+
+    Note: 
+        "ER4B" option in StrCrct was omitted because the option uses a special measurement data. 
     """
+
+    # ER4B: Omitted 
+    """  
+    if StrCrct == 'ER4B':
+        CrctLinPwr, freq, FreqChardB_toBeCmpnstd = OutMidCrct_ER4B(NfrqRsl, fs, SwPlot)
+        return CrctLinPwr, freq, FreqChardB_toBeCmpnstd
+    """
+
+    """
+    Conventional ELC/MAF/MAP/MidEar
+    """
+
+    f1 = [	20,   25,  30,     35,  40,    45,  50,   55,   60,   70,  # 1-10
+            80,   90,  100,   125,  150,   177, 200,  250,  300,  350,  # 11-20
+            400,  450, 500,   550,  600,   700, 800,  900,  1000, 1500,  # 21-30
+            2000, 2500, 2828, 3000, 3500, 4000, 4500, 5000, 5500, 6000,  # 31-40
+            7000, 8000, 9000, 10000, 12748, 15000]   # 41-46
+
+    ELC = [ 31.8, 26.0, 21.7, 18.8, 17.2, 15.4, 14.0, 12.6, 11.6, 10.6, 
+            9.2, 8.2, 7.7, 6.7, 5.3, 4.6, 3.9, 2.9, 2.7, 2.3, 
+            2.2, 2.3, 2.5, 2.7, 2.9, 3.4, 3.9, 3.9, 3.9, 2.7, 
+            0.9, -1.3, -2.5, -3.2, -4.4, -4.1, -2.5, -0.5, 2.0, 5.0, 
+            10.2, 15.0, 17.0, 15.5, 11.0, 22.0]
+
+    MAF = [ 73.4, 65.2, 57.9, 52.7, 48.0, 45.0, 41.9, 39.3, 36.8, 33.0, 
+            29.7, 27.1, 25.0, 22.0, 18.2, 16.0, 14.0, 11.4, 9.2, 8.0, 
+            6.9,  6.2,  5.7,  5.1,  5.0,  5.0,  4.4,  4.3, 3.9, 2.7, 
+            0.9, -1.3, -2.5, -3.2, -4.4, -4.1, -2.5, -0.5, 2.0, 5.0, 
+            10.2, 15.0, 17.0, 15.5, 11.0, 22.0]
+
+    f2  = [  125,  250,  500, 1000, 1500, 2000, 3000, 
+            4000, 6000, 8000,10000,12000,14000,16000]
+
+    MAP = [ 30.0, 19.0, 12.0,  9.0, 11.0, 16.0, 16.0, 
+            14.0, 14.0,  9.9, 24.7, 32.7, 44.1, 63.7]
+
+    # MidEar Correction (little modification at 17000:1000:20000)
+    f3 =  [   1,  20,  25, 31.5,   40,   50,   63,   80,  100,  125, 
+            160, 200, 250,  315,  400,  500,  630,  750,  800, 1000,
+            1250, 1500, 1600,  2000,  2500,  3000,  3150,  4000,  5000,  6000, 
+            6300, 8000, 9000, 10000, 11200, 12500, 14000, 15000, 16000,  20000]
+
+    MID =  [  50,  39.15, 31.4, 25.4, 20.9,  18, 16.1, 14.2, 12.5, 11.13,
+            9.71,   8.42,  7.2,  6.1,  4.7, 3.7,  3.0,  2.7,  2.6,   2.6,
+             2.7,    3.7,  4.6,  8.5, 10.8, 7.3,  6.7,  5.7,  5.7,   7.6,
+             8.4,   11.3, 10.6,  9.9, 11.9, 13.9, 16.0, 17.3, 17.8,  20.0] 
+
+
+
 
     return CrctLinPwr, freq, FreqChardB_toBeCmpnstd

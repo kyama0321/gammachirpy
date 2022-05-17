@@ -279,3 +279,20 @@ def OutMidCrctFilt(StrCrct, SR, SwPlot=0, SwFilter=0):
     FIRCoef = [1,3,5] # dummy for test
 
     return FIRCoef, StrFilt
+
+
+
+def OutMidCrct(StrCrct,NfrqRsl,fs,SwPlot):
+    """Correction of ELC, MAF, MAP. It produces interpolated points for the ELC/MAF/MAP/MidEar correction.
+
+    Args:
+        StrCrct (_type_): _description_
+        NfrqRsl (_type_): _description_
+        fs (_type_): _description_
+        SwPlot (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """
+
+    return CrctLinPwr, freq, FreqChardB_toBeCmpnstd

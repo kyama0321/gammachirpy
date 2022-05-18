@@ -2,6 +2,7 @@
 import sys
 from functools import lru_cache
 import numpy as np
+import matplotlib.pyplot as plt
 import wave as wave
 
 
@@ -274,7 +275,7 @@ def OutMidCrctFilt(StrCrct, SR, SwPlot=0, SwFilter=0):
     Nint = 1024
     # Nint = 0 # No spline interpolation:  NG no convergence at remez
 
-    # crctPwr, freq, _ = OutMidCrct(StrCrct, Nint, SR, 0)
+    crctPwr, freq, _ = OutMidCrct(StrCrct, Nint, SR, 1)
 
     FIRCoef = [1,3,5] # dummy for test
 
@@ -350,6 +351,68 @@ def OutMidCrct(StrCrct, NfrqRsl=0, fs=32000, SwPlot=1):
              8.4,   11.3, 10.6,  9.9, 11.9, 13.9, 16.0, 17.3, 17.8,  20.0] 
 
 
+    frqTbl = []
+    TblFreqChar = []
+    if StrCrct == 'ELC':
+        frqTbl = np.array([f1]).T
+        TblFreqChar = np.array([ELC]).T
+        ValHalfFs = 130
+    elif StrCrct == 'MAF':
+        frqTbl = np.array([f1]).T
+        TblFreqChar = np.array([MAF]).T
+        ValHalfFs = 130
+    elif StrCrct == 'MAF':
+        frqTbl = np.array([f2]).T
+        TblFreqChar = np.array([MAP]).T
+        ValHalfFs = 180
+    elif StrCrct == 'MidEar':
+        frqTbl = np.array([f3]).T
+        TblFreqChar = np.array([MID]).T
+        ValHalfFs = 23
+    elif StrCrct == 'NO':
+        pass
+    else:
+        print("Specifiy correction: ELC/MAF/MAP/MidEar or NO correction", file=sys.stderr)
+        sys.exit(1)
 
+    """
+    Additional dummy data for high sampling frequency
+    """
+    if fs > 32000:
+        frqTbl = np.vstack([frqTbl, fs/2])
+        TblFreqChar = np.vstack([TblFreqChar, ValHalfFs])
+        frqTbl, indx = np.unique(frqTbl, return_index=True)
+        frqTbl = np.array([frqTbl]).T
+        TblFreqChar = TblFreqChar[indx]
+
+    str1 = ''
+    if NfrqRsl <= 0:
+        str1 = 'No interpolation. Output: values in original table.'
+        freq = frqTbl
+        FreqChardB_toBeCmpnstd = TblFreqChar
+    else:
+        freq = np.array([np.arange(NfrqRsl)/NfrqRsl * fs/2]).T
+        if StrCrct == 'NO':
+            FreqChardB_toBeCmpnstd = np.zeros(freq.shape)
+        else:
+            str1 = 'Spline interpolated value in equal frequency spacing.'
+            freq_1d = freq.T[0,:]
+            frqTbl_1d = frqTbl.T[0,:]
+            TblFreqChar_1d = TblFreqChar.T[0,:]
+            #FreqChardB_toBeCmpnstd = np.interp(freq_1d, frqTbl_1d, TblFreqChar_1d)
+            ### you need to spline function in SciPy
+    
+    if SwPlot == 1:
+        str = "*** Frequency Characteristics (" + StrCrct + "): Its inverse will be corrected. ***"
+        print(str) 
+        print("{}".format(str1))
+        fig, ax = plt.subplots()
+        plt.plot(frqTbl, TblFreqChar, 'b-',freq, FreqChardB_toBeCmpnstd, 'r--')
+        ax.set_title(str)
+        ax.set_xlabel('Frequency (Hz)')
+        ax.set_ylabel('Level (dB)')
+        plt.show()
+
+    CrctLinPwr = 10**(-FreqChardB_toBeCmpnstd/10) # in Linear Power. Checked 19 Apr 2016
 
     return CrctLinPwr, freq, FreqChardB_toBeCmpnstd

@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 import sys
-from functools import lru_cache
 import numpy as np
 import matplotlib.pyplot as plt
 import wave as wave
+from scipy.interpolate import UnivariateSpline
+from scipy import signal
+from functools import lru_cache
 
 
 def audioread(filepath):
@@ -275,9 +277,15 @@ def OutMidCrctFilt(StrCrct, SR, SwPlot=0, SwFilter=0):
     Nint = 1024
     # Nint = 0 # No spline interpolation:  NG no convergence at remez
 
-    crctPwr, freq, _ = OutMidCrct(StrCrct, Nint, SR, 1)
-
-    FIRCoef = [1,3,5] # dummy for test
+    crctPwr, freq, _ = OutMidCrct(StrCrct, Nint, SR, 0)
+    crct = np.sqrt(crctPwr)
+    if SwFilter == 1:
+        crct = 1 / np.max(np.sqrt(crctPwr), 0.1) # Giving up less tan -20 dB : f>15000 Hz
+                                                 # if requered, the response becomes worse
+    
+    LenCoef = 200 # ( -45 dB) <- 300 (-55 dB)
+    NCoef = np.fix(LenCoef/16000*SR/2)*2 # even number only
+    # FIRCoef = signal.remez(NCoef, freq/SR*2, crct)
 
     return FIRCoef, StrFilt
 
@@ -399,8 +407,9 @@ def OutMidCrct(StrCrct, NfrqRsl=0, fs=32000, SwPlot=1):
             freq_1d = freq.T[0,:]
             frqTbl_1d = frqTbl.T[0,:]
             TblFreqChar_1d = TblFreqChar.T[0,:]
-            #FreqChardB_toBeCmpnstd = np.interp(freq_1d, frqTbl_1d, TblFreqChar_1d)
-            ### you need to spline function in SciPy
+            spl = UnivariateSpline(frqTbl_1d, TblFreqChar_1d, s=0)
+            FreqChardB_toBeCmpnstd = spl(freq_1d)
+            FreqChardB_toBeCmpnstd = np.array([FreqChardB_toBeCmpnstd]).T
     
     if SwPlot == 1:
         str = "*** Frequency Characteristics (" + StrCrct + "): Its inverse will be corrected. ***"
@@ -408,6 +417,8 @@ def OutMidCrct(StrCrct, NfrqRsl=0, fs=32000, SwPlot=1):
         print("{}".format(str1))
         fig, ax = plt.subplots()
         plt.plot(frqTbl, TblFreqChar, 'b-',freq, FreqChardB_toBeCmpnstd, 'r--')
+        plt.xlim(0, 25000)
+        plt.ylim(-20,140)
         ax.set_title(str)
         ax.set_xlabel('Frequency (Hz)')
         ax.set_ylabel('Level (dB)')

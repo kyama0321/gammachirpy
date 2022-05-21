@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
 import sys
+from tkinter import SW
 import numpy as np
 import matplotlib.pyplot as plt
 import wave as wave
 from scipy.interpolate import UnivariateSpline
 from scipy import signal
 from functools import lru_cache
+
+from sklearn.mixture import GaussianMixture
 
 
 def audioread(filepath):
@@ -59,7 +62,7 @@ def Eqlz2MeddisHCLevel(Snd, OutLeveldB, *args):
 
     Returns:
         SndEqM (float): Equalized Sound (rms value of 1 is 30 dB SPL)
-        AmpdB (array): 3 values in dB, [OutputLevel_dB, CompensationValue_dB, SourceLevel_dB]
+        AmpdB (array_like): 3 values in dB, [OutputLevel_dB, CompensationValue_dB, SourceLevel_dB]
 
     Matlab examples:
         rms(s(t)) == sqrt(mean(s.^2)) == 1   --> 30 dB SPL
@@ -85,11 +88,11 @@ def EqualFreqScale(NameScale, NumCh, RangeFreq):
     Args:
         NameScale (string): 'ERB', 'mel', 'log', 'linear'
         NumCh (int): Number of channels
-        RangeFreq (array): Frequency Range
+        RangeFreq (array_like): Frequency Range
 
     Returns:
-        Frs (array): Fr vector
-        WFval (array): Wraped freq. value
+        Frs (array_like): Fr vector
+        WFval (array_like): Wraped freq. value
     """
     eps = np.finfo(float).eps # epsilon
 
@@ -131,10 +134,10 @@ def Freq2FMel(freq):
     """Convert mel to linear frequency
 
     Args:
-        freq (array): linaer-scale frequency [Hz] 
+        freq (array_like): linaer-scale frequency [Hz] 
 
     Returns:
-        mel (array): mel-scale frequency [mel]
+        mel (array_like): mel-scale frequency [mel]
 
     Note:
         The function was made by the GammachirPy project because there is not original code of "mel2freq" in GCFBv211pack 
@@ -147,10 +150,10 @@ def Mel2Freq(mel):
     """Convert mel to linear frequency
 
     Args:
-        mel (array): mel-scale frequency [mel] 
+        mel (array_like): mel-scale frequency [mel] 
 
     Returns:
-        freq (array): linear-scale frequency [Hz]
+        freq (array_like): linear-scale frequency [Hz]
 
     Note:
         The function was made by the GammachirPy project because there is not original code of "mel2freq" in GCFBv211pack 
@@ -163,11 +166,11 @@ def Freq2ERB(cf):
     """Convert linear frequency to ERB
 
     Args:
-        cf (array): center frequency in linaer-scale [Hz] 
+        cf (array_like): center frequency in linaer-scale [Hz] 
 
     Returns:
-        ERBrate (array): ERB_N rate [ERB_N] or [cam] 
-        ERBwidth (array): ERB_N Bandwidth [Hz]
+        ERBrate (array_like): ERB_N rate [ERB_N] or [cam] 
+        ERBwidth (array_like): ERB_N Bandwidth [Hz]
     """
     # Warnig for frequency range
     cfmin = 50
@@ -187,11 +190,11 @@ def ERB2Freq(ERBrate):
     """Convert ERBrate to linear frequency
 
     Args:
-        ERBrate (array): ERB_N rate [ERB_N] or [cam] 
+        ERBrate (array_like): ERB_N rate [ERB_N] or [cam] 
     
     Returns:
-        cf (array): center frequency in linaer-scale [Hz] 
-        ERBwidth (array): ERB_N Bandwidth [Hz]
+        cf (array_like): center frequency in linaer-scale [Hz] 
+        ERBwidth (array_like): ERB_N Bandwidth [Hz]
     """
     cf = (10**(ERBrate/21.4)-1) / 4.37 * 1000
     ERBwidth = 24.7 * (4.37*cf/1000+1)
@@ -212,10 +215,6 @@ def Fr2Fpeak(n, b, c, fr):
         fpeak (float): peak frequency
         ERBw (float): ERBwidth at fr
     """
-    #n = np.array([n]).T
-    #b = np.array(b).T
-    #c = np.array(c).T
-    #fr = np.array(fr).T
 
     _, ERBw = Freq2ERB(fr)
     fpeak = fr + c*ERBw*b/n
@@ -237,7 +236,7 @@ def OutMidCrctFilt(StrCrct, SR, SwPlot=0, SwFilter=0):
             2: FIR mimimum phase filter (length: half of linear phase filter)
 
     Returns:
-        FIRCoef (array): FIR filter coefficients
+        FIRCoef (array_like): FIR filter coefficients
         StrFilt (string): Filter infomation
 
     Notes:
@@ -278,15 +277,60 @@ def OutMidCrctFilt(StrCrct, SR, SwPlot=0, SwFilter=0):
     # Nint = 0 # No spline interpolation:  NG no convergence at remez
 
     crctPwr, freq, _ = OutMidCrct(StrCrct, Nint, SR, 0)
-    crct = np.sqrt(crctPwr)
+    crct = np.sqrt(crctPwr[:,0])
+    freq = freq[:,0]
+
+    LenCoef = 200 # ( -45 dB) <- 300 (-55 dB)
+    NCoef = int(np.fix(LenCoef/16000*SR/2)*2) # even number only
+
     if SwFilter == 1:
         crct = 1 / np.max(np.sqrt(crctPwr), 0.1) # Giving up less tan -20 dB : f>15000 Hz
                                                  # if requered, the response becomes worse
     
     LenCoef = 200 # ( -45 dB) <- 300 (-55 dB)
-    NCoef = np.fix(LenCoef/16000*SR/2)*2 # even number only
-    # FIRCoef = signal.remez(NCoef, freq/SR*2, crct)
+    NCoef = int(np.fix(LenCoef/16000*SR/2)*2) # even number only
+    
+    """ 
+    Calculate the minimax optimal filter with a frequency response
+    instead of "FIRCoef = firpm(NCoef,freq/SR*2,crct)" in the original code OutMidCrctFilt.m
+    """
+    x1 = np.array(np.arange(len(freq))).T * 2
+    x2 = np.array(np.arange(len(freq)*2)).T
+    freq_interp = np.interp(x2, x1, freq)
+    FIRCoef = signal.remez(NCoef+1, freq_interp, crct, fs=SR) # len(freq_interp) must be twice of len(crct)
 
+    Win, _ = TaperWindow(len(FIRCoef),'HAN',LenCoef/10)
+    FIRCoef = Win * FIRCoef
+
+    """
+    Minimum phase reconstruction
+    """
+    if SwFilter == 2: 
+        _, x_mp = rceps(FIRCoef)
+        FIRCoef = x_mp[0:int(np.fix(len(x_mp)/2))]
+
+    """
+    Plot
+    """
+    if SwPlot == 1:
+        Nrsl = 1024
+        freq2, frsp = signal.freqz(FIRCoef, 1, Nrsl, fs=SR)
+
+        fig = plt.figure()
+        ax1 = fig.add_subplot(2, 1, 1)
+        plt.plot(FIRCoef)
+        ax1.set_xlabel('Sample')
+        ax1.set_ylabel('Amplitude')
+        ax1.set_xlim([0, 300])
+        ax1.set_ylim([-0.3, 0.3])
+        
+        ax2 = fig.add_subplot(2, 1, 2)
+        plt.plot(freq2, abs(frsp), freq, crct, '--')
+        ax2.set_xlabel('Frequency (Hz)')
+        ax2.set_ylabel('Amplitude (linear term)')
+        ax2.set_xlim([0, 25000])
+        ax2.set_ylim([0, 1.8])
+        
     return FIRCoef, StrFilt
 
 
@@ -302,10 +346,10 @@ def OutMidCrct(StrCrct, NfrqRsl=0, fs=32000, SwPlot=1):
         SwPlot (int): Switch for plot (0/1, default:1)
 
     Returns:
-        CrctLinPwr (array): Correction value in LINEAR POWER. 
+        CrctLinPwr (array_like): Correction value in LINEAR POWER. 
             This is defined as:  CrctLiPwr =10^(-FreqChardB_toBeCmpnstd/10)
-        freq (array): Corresponding Frequency at the data point
-        FreqChardB_toBeCmpnstd (array): Frequency char of ELC/MAP dB 
+        freq (array_like): Corresponding Frequency at the data point
+        FreqChardB_toBeCmpnstd (array_like): Frequency char of ELC/MAP dB 
             to be compensated for filterbank (defined By Glassberg and Moore.)
 
     Note: 
@@ -427,3 +471,153 @@ def OutMidCrct(StrCrct, NfrqRsl=0, fs=32000, SwPlot=1):
     CrctLinPwr = 10**(-FreqChardB_toBeCmpnstd/10) # in Linear Power. Checked 19 Apr 2016
 
     return CrctLinPwr, freq, FreqChardB_toBeCmpnstd
+
+
+def TaperWindow(LenWin, TypeTaper, LenTaper=None, RangeSigma=3, SwPlot=0):
+    """Taper Window Generator for signal onset/offset
+
+    Args:
+        LenWin (int): Length of window (number of points)
+        TypeTaper (string): Type of Taper (KeyWords of 3 letters)
+            - HAM: Hamming
+            - HAN/COS: Hanning/Cosine
+            - BLA: Blackman
+            - GAU: Gaussian
+            - (other): Linear
+        LenTaper (int, optional): Length of taper. Defaults to None.
+        RangeSigma (int, optional): Range in sigma. Defaults to 3.
+        SwPlot (int, optional): OFF/ON. Defaults to 0.
+
+    Returns:
+        TaperWin (array_like): Taper window points (max: 1)
+        TypeTaper (string): Type of taper (full name)
+    """
+
+    if LenTaper == None:
+        LenTaper = int(np.fix(LenWin/2))
+    
+    elif LenTaper*2+1 >= LenWin:
+        print("Caution (TaperWindow) : No flat part. ")
+        
+        if not LenTaper == np.fix(LenWin/2):
+            print("Caution (TaperWindow) : LenTaper <-- fix(LenWin/2)")
+            
+        LenTaper = int(np.fix(LenWin/2))
+
+    LenTaper= int(LenTaper)
+
+    if TypeTaper == 'HAM':
+        Taper = np.hamming(LenTaper*2+1)
+        TypeTaper = 'Hamming'
+
+    elif TypeTaper == 'HAN' or TypeTaper == 'COS':
+        Taper = np.hamming(LenTaper*2+1)
+        TypeTaper = 'Hanning/Cosine'
+
+    elif TypeTaper == 'BLA':
+        Taper = np.blackman(LenTaper*2+1)
+        TypeTaper = 'Blackman'
+
+    elif TypeTaper == 'GAU':
+        if len(RangeSigma) == 0:
+            RangeSigma = 3
+        nn = np.arange(-LenTaper, LenTaper, 1)
+        Taper = np.exp(-(RangeSigma/LenTaper)**2 / 2)
+        TypeTaper == 'Gauss'
+
+    else:
+        Taper = np.array(list(np.arange(1,LenTaper+1,1)) + list([LenTaper+1]) + list(np.arange(LenTaper,1-1,-1))) / (LenTaper+1)
+        TypeTaper = 'Line'
+
+    LenTaper = int(np.fix(LenTaper))
+    TaperWin = list(Taper[0:LenTaper]) + list(np.ones(LenWin-LenTaper*2)) + list(Taper[(LenTaper+1):(LenTaper*2+1)])
+
+    if SwPlot == 1:
+        fig, ax = plt.subplots()
+        plt.plot(TaperWin)
+        ax.set_xlabel('Points')
+        ax.set_ylabel('Amplitude')
+        plt.title('TypeTaper: {}'.format(TypeTaper))
+
+    return TaperWin, TypeTaper
+
+
+def rceps(x):
+    """returns the real cepstrum of the real sequence X
+
+    Args:
+        x (array_like): input signal
+
+    Returns:
+        xhat: real cepstrum
+        yhat: a unique minimum-phase sequence that has the reame real cepstrum as x
+
+    Note:
+        This code is based on "rceps.m" in MATLAB and is under-construction. 
+
+    Examples:
+        x = [4 1 5]; % Non-minimum phase sequence
+        xhat = array([1.62251148, 0.3400368 , 0.3400368 ])
+        yhat = array([5.33205452, 3.49033278, 1.1776127 ])
+
+    References:
+    - A.V. Oppenheim and R.W. Schafer, Digital Signal Processing, Prentice-Hall, 1975.
+    - Programs for Digital Signal Processing, IEEE Press, John Wiley & Sons, 1979, algorithm 7.2.
+    - https://mathworks.com/help/signal/ref/rceps.html
+    """
+
+    if isrow(x):
+        xT = np.array([x]).T
+    else:
+        xT = x
+
+    fftxabs = np.abs(np.fft.fft(xT, n=None, axis=0))
+
+    xhatT = np.real(np.fft.ifft(np.log(fftxabs), n=None, axis=0))
+
+    # xhat
+    if isrow(x):
+        # transform the result to a row vector
+        xhat = xhatT[:,0]
+    else:
+        xhat = xhatT
+
+    # yhat
+    nRows = xhatT.shape[0]
+    nCols = xhatT.shape[1]
+    odd = nRows % 2
+    a1 = np.array([1])
+    a2 = 2*np.ones((int((nRows+odd)/2)-1, 1))
+    a3 = np.zeros((int((nRows+odd)/2)-1,1))
+    wn = np.kron(np.ones((1, nCols)), np.vstack((a1,a2,a3)))
+    """
+    Matlab can use zero and negative numbers for args of ones function, but the np.ones cannot. So, an internal array is removed. The original code is: 
+    wn = np.kron(np.ones((1, nCols)), np.array([[1], 2*np.ones((int((nRows+odd)/2)-1, 1)), np.ones(1-odd, 1), np.zeros((int((nRows+odd)/2)-1,1))]))
+    """
+    yhatT = np.real(np.fft.ifft(np.exp(np.fft.fft((wn*xhatT),n=None, axis=0)), n=None, axis=0))
+    if isrow(x):
+        # transform the result to a row vector
+        yhat = yhatT[:,0]
+    else:
+        yhat = yhatT
+
+    return xhat, yhat
+
+
+def isrow(x):
+    """returns True if x is a row vector, False otherwise.
+
+    Args:
+        x (array_like): verctors
+
+    Returns:
+        logical (bool): True/False
+    """
+
+    if np.size(np.shape(x)) == 1:
+        logical = True
+    else:
+        logical = False
+
+    return logical
+    

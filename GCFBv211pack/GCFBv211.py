@@ -61,6 +61,9 @@ def GCFBv211(SndIn, GCparam, *args):
     else:
         # if GCparam.OutMidCrct in ["ELC", "MAF", "MAP"]:
         print("*** Outer/Middle Ear correction (minimum phase) : {} ***".format(GCparam.OutMidCrct))
-        CmpnOutMid, _ = utils.OutMidCrctFilt(GCparam.OutMidCrct, fs, 0, 2) # 2) minimum phase
+        CmpnOutMid, _ = utils.OutMidCrctFilt(GCparam.OutMidCrct, fs, 1, 2) # 2) minimum phase
+        # 1kHz: -4 dB, 2kHz: -1 dB, 4kHz: +4 dB (ELC)
+        # Now we use Minimum phase version of OutMidCrctFilt (modified 16 Apr. 2006).
+        # No compensation is necessary.  16 Apr. 2006
 
     return cGCout, pGCout, GCparam, GCresp

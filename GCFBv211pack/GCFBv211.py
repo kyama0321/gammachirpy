@@ -54,6 +54,7 @@ def GCFBv211(SndIn, GCparam, *args):
 
     """
     Outer-Mid Ear Compensation
+    for inverse filter, use Out utits.OutMidCrctFilt('ELC', fs, 0, 1)
     """
     if GCparam.OutMidCrct == 'No':
         print("*** No Outer/Middle Ear correction ***")
@@ -65,5 +66,28 @@ def GCFBv211(SndIn, GCparam, *args):
         # 1kHz: -4 dB, 2kHz: -1 dB, 4kHz: +4 dB (ELC)
         # Now we use Minimum phase version of OutMidCrctFilt (modified 16 Apr. 2006).
         # No compensation is necessary.  16 Apr. 2006
+
+    
+    """
+    Gammachirp
+    """
+    print("*** Gammachirp Calculation ***")
+
+    SwFastPrcs = 1 # ON: fast processing for static filter
+    if not SwFastPrcs == 1:
+        print("SwFastPrcs should be 1.", file=sys.stderr)
+        sys.exit
+    if SwFastPrcs == 1 and GCparam.Ctrl == "static":
+        # 'Fast processing for linear cGC gain at GCparam.LeveldBscGCFB'
+        """
+        for HP-AF
+        """
+        LvldB =GCparam.LeveldBscGCFB
+        fratVal = GCparam.frat[0,0] + GCparam.frat[0,1] * GCresp.Ef \
+            + (GCparam.frat[1,0] + GCparam.frat[1,1] * GCresp.Ef) * LvldB
+        Fr2val = fratVal * GCresp.Fp1
+        GCresp.Fr2 = Fr2val
+        #ACFcoefFastPrcs = utils.MakeAsymCmpFilter2V2(fs, Fr2val, GCresp.b2val, GCresp.c2val)
+
 
     return cGCout, pGCout, GCparam, GCresp

@@ -11,7 +11,7 @@ class GCparam_default:
     FRange = np.array([100, 6000])
     #OutMidCrct = "No"
     OutMidCrct = "ELC"
-    Ctrl = "dynamic" # used to be 'tyme-varying'
+    # Ctrl = "dynamic" # used to be 'tyme-varying'
     # Ctrl = "static" # or 'fixed'
 
 
@@ -33,7 +33,8 @@ for SwDySt in range(1): # 0: only dynamic, 1: dynamic and static
         # GCFB
         GCparam = GCparam_default() # reset all
         if SwDySt == 0: 
-            GCparam.Ctrl = "dynamic"
+            # GCparam.Ctrl = "dynamic"
+            GCparam.Ctrl = "static"
         else: 
             GCparam.Ctrl = "Static"
         

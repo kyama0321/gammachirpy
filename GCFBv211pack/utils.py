@@ -664,9 +664,9 @@ def MakeAsymCmpFiltersV2(fs,Frs,b,c):
     # New coefficients. See [1]
     NumFilt = 4
     p0 = 2
-    p1 = 1.7818 * (1 - 0.0791*b) * (1 - 0.1655*np.abs(c))
-    p2 = 0.5689 * (1 - 0.1620*b) * (1 - 0.0857*np.abs(c))
-    p3 = 0.2523 * (1 - 0.0244*b) * (1 + 0.0574*np.abs(c))
+    p1 = 1.7818 * (1-0.0791*b) * (1-0.1655*np.abs(c))
+    p2 = 0.5689 * (1-0.1620*b) * (1-0.0857*np.abs(c))
+    p3 = 0.2523 * (1-0.0244*b) * (1+0.0574*np.abs(c))
     p4 = 1.0724
 
     if NumFilt > 4:

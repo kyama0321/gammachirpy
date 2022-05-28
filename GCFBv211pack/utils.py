@@ -8,9 +8,6 @@ from scipy.interpolate import UnivariateSpline
 from scipy import signal
 from functools import lru_cache
 
-from sklearn.mixture import GaussianMixture
-
-
 def audioread(filepath):
     """Reads a wavfile as a float 
         

@@ -75,7 +75,7 @@ def SetParam(GCparam):
         GCparam.c1.append(0) # frequency independent by 0
     
     if not hasattr(GCparam, 'frat'):
-        GCparam.frat = np.array([[0.4666, 0], [0.0109, 0]])
+        GCparam.frat = np.array([[0.4660, 0], [0.0109, 0]])
     
     if not hasattr(GCparam, 'b2'):
         GCparam.b2 = np.array([[2.17, 0], [0, 0]]) # no level-dependency  (8 Jul 05)

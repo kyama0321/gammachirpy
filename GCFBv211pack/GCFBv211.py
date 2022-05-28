@@ -90,6 +90,17 @@ def GCFBv211(SndIn, GCparam, *args):
         ACFcoefFastPrcs = utils.MakeAsymCmpFiltersV2(fs, Fr2val, GCresp.b2val, GCresp.c2val)
     else:
         # HP-AF for dynamic-GC level estimation path. 18 Dec 2012 Checked
+        Fr2LvlEst = GCparam.LvlEst.frat * GCresp.Fp1
+        # default GCparam.LvlEst.frat = 1.08 (GCFBv208_SetParam(GCparam))
+        # ---> Linear filter for level estimation
+        ACFcoefLvlEst = utils.MakeAsymCmpFiltersV2(fs,Fr2LvlEst,GCparam.LvlEst.b2, GCparam.LvlEst.c2)
 
+    """
+    Start calculation
+    """
+    """
+    Passive Gammachirp & Levfel estimation filtering
+    """
+    
 
     return cGCout, pGCout, GCparam, GCresp

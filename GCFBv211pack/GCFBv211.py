@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 import numpy as np
-import datetime
 import sys
+import time
 import utils
 import GCFBv211_SetParam as gcfb_SetParam
+import GammaChirp as gcfb
 
 
 def GCFBv211(SndIn, GCparam, *args):
@@ -41,12 +42,11 @@ def GCFBv211(SndIn, GCparam, *args):
         help(GCFBv211)
         sys.exit()
 
-    Tstart0 = datetime.datetime.now()
-
-    size = SndIn.shape
-    if len(size) != 1:
+    size = np.shape(SndIn)
+    if not len(size) == 1:
         print("Check SndIn. It should be 1 ch (Monaural) and  a single row vector.", file=sys.stderr)
         sys.exit(1)
+    LenSnd = len(SndIn)
     
     GCparam, GCresp = gcfb_SetParam.SetParam(GCparam)
     fs = GCparam.fs
@@ -101,6 +101,18 @@ def GCFBv211(SndIn, GCparam, *args):
     """
     Passive Gammachirp & Levfel estimation filtering
     """
-    
+    Tstart = time.clock()
+    cGCout = np.zeros((NumCh, LenSnd))
+    pGCout = np.zeros((NumCh, LenSnd))
+    Ppgc = np.zeros((NumCh, LenSnd))
+    cGCoutLvlEst = np.zeros((NumCh, LenSnd))
+
+    print("--- Channel-by-channel processing ---")
+
+    for nch in range(NumCh):
+
+        # passive gammachirp
+        pgc, _, _, _ = gcfb.GammaChrp(GCresp.Fr1(nch+1), fs, GCparam.n, GCresp.b1val(nch+1), GCresp.c1val(nch+1), 0, '', 'peak')
+
 
     return cGCout, pGCout, GCparam, GCresp

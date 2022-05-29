@@ -61,7 +61,7 @@ def GammaChirp(Frs, SR, OrderG=4, CoefERBw=1.019, CoefC=0, Phase=0, SwCarr='cos'
         elif SwCarr == 'com': # complex
             Carrier = np.array([0] + list(np.exp(1j*(2*np.pi*Frs[nch]*t + CoefC[nch]*np.log(t) + Phase[nch]))))
         else:
-            Carrier = np.array([0] + list(np.cos(2*np.pi*Frs[nch]*t) + CoefC[nch]*np.log(t) + Phase[nch]))
+            Carrier = np.array([0] + list(np.cos(2*np.pi*Frs[nch]*t + CoefC[nch]*np.log(t) + Phase[nch])))
         
         GC[nch, 0: int(LenGC[nch])] = GammaEnv * Carrier
 

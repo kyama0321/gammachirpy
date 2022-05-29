@@ -114,5 +114,7 @@ def GCFBv211(SndIn, GCparam, *args):
         # passive gammachirp
         pgc, _, _, _ = gcfb.GammaChirp(GCresp.Fr1[nch], fs, GCparam.n, GCresp.b1val[nch], GCresp.c1val[nch], 0, '', 'peak')
 
+        pGCout = pgc
+
 
     return cGCout, pGCout, GCparam, GCresp

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import numpy as np
+from scipy import signal
 import utils
 
 def GammaChirp(Frs, SR, OrderG=4, CoefERBw=1.019, CoefC=0, Phase=0, SwCarr='cos', SwNorm='no'):
@@ -44,14 +45,32 @@ def GammaChirp(Frs, SR, OrderG=4, CoefERBw=1.019, CoefC=0, Phase=0, SwCarr='cos'
     """
     Production of GammaChirp
     """
+    GC = np.zeros((NumCh, int(max(LenGC))))
 
+    Fps = utils.Fr2Fpeak(OrderG, CoefERBw, CoefC, Frs) # Peak freq.
+    InstFreq = np.zeros((NumCh, int(max(LenGC))))
 
+    for nch in range(NumCh):
+        t = np.arange(1, int(LenGC[nch]))/SR
 
+        GammaEnv = t**(OrderG[nch]-1) * np.exp(-2*np.pi*CoefERBw[nch]*ERBw[nch]*t)
+        GammaEnv = np.array([0] + list(GammaEnv/max(GammaEnv)))
 
+        if SwCarr == 'env': # envelope
+            Carrier = np.ones(np.shape(GammaEnv))
+        elif SwCarr == 'com': # complex
+            Carrier = np.array([0] + list(np.exp(1j*(2*np.pi*Frs[nch]*t + CoefC[nch]*np.log(t) + Phase[nch]))))
+        else:
+            Carrier = np.array([0] + list(np.cos(2*np.pi*Frs[nch]*t) + CoefC[nch]*np.log(t) + Phase[nch]))
+        
+        GC[nch, 0: int(LenGC[nch])] = GammaEnv * Carrier
 
+        InstFreq[nch, 0: int(LenGC[nch])] = np.array([0] + list(Frs[nch] + list(CoefC[nch]/(2*np.pi*t))))
 
-
-
-
+        if SwNorm == 'peak': # peak gain normalization
+            freq, frsp = signal.freqz(GC[nch, 0: int(LenGC[nch])], 1, 2**utils.nextpow2(int(LenGC[nch])), fs=SR)
+            fp, _ = utils.Fr2Fpeak(OrderG[nch], CoefERBw[nch], CoefC[nch], Frs[nch])
+            npeak = np.argmin(np.abs(freq - fp))
+            GC[nch, :] = GC[nch, :] / abs(frsp[npeak])
 
     return GC, LenGC, Fps, InstFreq

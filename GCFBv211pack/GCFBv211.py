@@ -101,7 +101,7 @@ def GCFBv211(SndIn, GCparam, *args):
     """
     Passive Gammachirp & Levfel estimation filtering
     """
-    Tstart = time.clock()
+    # Tstart = time.perf_counter()
     cGCout = np.zeros((NumCh, LenSnd))
     pGCout = np.zeros((NumCh, LenSnd))
     Ppgc = np.zeros((NumCh, LenSnd))
@@ -112,7 +112,7 @@ def GCFBv211(SndIn, GCparam, *args):
     for nch in range(NumCh):
 
         # passive gammachirp
-        pgc, _, _, _ = gcfb.GammaChrp(GCresp.Fr1(nch+1), fs, GCparam.n, GCresp.b1val(nch+1), GCresp.c1val(nch+1), 0, '', 'peak')
+        pgc, _, _, _ = gcfb.GammaChirp(GCresp.Fr1[nch], fs, GCparam.n, GCresp.b1val[nch], GCresp.c1val[nch], 0, '', 'peak')
 
 
     return cGCout, pGCout, GCparam, GCresp

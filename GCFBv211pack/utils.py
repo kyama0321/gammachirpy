@@ -48,6 +48,21 @@ def rms(x):
     y = np.sqrt(np.mean(x * x))
     return y
 
+def nextpow2(n):
+    """Find exponent of next higher power of 2
+
+    Args:
+        n (array-like): Input values
+
+    Returns:
+        p (array-like): Exponent of next higher power of 2
+    """
+    m_f = np.log2(n)
+    m_i = np.ceil(m_f)
+    p = int(np.log2(2**m_i))
+
+    return p
+
 
 def Eqlz2MeddisHCLevel(Snd, OutLeveldB, *args):
     """ Equalizing Signal RMS Level to the Level for MeddisHairCell

@@ -6,6 +6,8 @@ from scipy import signal
 import utils
 import GCFBv211_SetParam as gcfb_SetParam
 import GammaChirp as gcfb
+from thirdparty.overlapadd.olafilt import olafilt
+import matplotlib.pyplot as plt
 
 
 def GCFBv211(SndIn, GCparam, *args):
@@ -115,8 +117,10 @@ def GCFBv211(SndIn, GCparam, *args):
         # passive gammachirp
         pgc, _, _, _ = gcfb.GammaChirp(GCresp.Fr1[nch], fs, GCparam.n, GCresp.b1val[nch], GCresp.c1val[nch], 0, '', 'peak')
 
+        pGCout[nch,0:LenSnd] = olafilt(pgc[0,:], Snd) # fast FFT-based filtering
 
-        #pGCout[nch,0:LenSnd] = signal.convolve(pgc[0,:], SndIn, mode='full', method='fft')
+        # Fast processing for fixed cGC
+        pGCout
 
 
     return cGCout, pGCout, GCparam, GCresp

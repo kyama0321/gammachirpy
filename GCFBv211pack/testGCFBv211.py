@@ -9,8 +9,8 @@ class GCparam_default:
     fs = 48000
     NumCh = 100
     FRange = np.array([100, 6000])
-    #OutMidCrct = "No"
-    OutMidCrct = "ELC"
+    OutMidCrct = "No"
+    # OutMidCrct = "ELC"
     # Ctrl = "dynamic" # used to be 'tyme-varying'
     # Ctrl = "static" # or 'fixed'
 

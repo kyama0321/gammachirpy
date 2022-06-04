@@ -104,7 +104,7 @@ def GCFBv211(SndIn, GCparam, *args):
     """
     Passive Gammachirp & Levfel estimation filtering
     """
-    # Tstart = time.perf_counter()
+    Tstart = time.time()
     cGCout = np.zeros((NumCh, LenSnd))
     pGCout = np.zeros((NumCh, LenSnd))
     Ppgc = np.zeros((NumCh, LenSnd))
@@ -117,10 +117,30 @@ def GCFBv211(SndIn, GCparam, *args):
         # passive gammachirp
         pgc, _, _, _ = gcfb.GammaChirp(GCresp.Fr1[nch], fs, GCparam.n, GCresp.b1val[nch], GCresp.c1val[nch], 0, '', 'peak')
 
-        pGCout[nch,0:LenSnd] = olafilt(pgc[0,:], Snd) # fast FFT-based filtering
+        pGCout[nch, 0:LenSnd] = olafilt(pgc[0,:], Snd) # fast FFT-based filtering
 
         # Fast processing for fixed cGC
-        pGCout
+        if SwFastPrcs == 1 and GCparam.Ctrl == 'static': # Static
+            StrGC = "Static (Fixed) Compressive-Gammachirp"
+            GCout1 = pGCout[nch, :]
+            for Nfilt in range(5):
+                GCout1 = signal.lfilter(ACFcoefFastPrcs.bz[nch, :, Nfilt], ACFcoefFastPrcs.ap[nch, :, Nfilt], GCout1)
+            cGCoutLvlEst[nch, :] = GCout1
+            # GCresp.Fp2[nch] = Fr1toFp2()
+
+        else: # Level estimation pass for Dynamic.
+            StrGC = "Passive-Gammachirp & Level estimation filter"
+            GCout1 = pGCout[nch, :]
+            for Nfilt in range(5):
+                GCout1 = signal.lfilter(ACFcoefLvlEst.bz[nch, :, Nfilt], ACFcoefLvlEst.az[nch, :, Nfilt], GCout1)
+            cGCoutLvlEst[nch, :] = GCout1
+
+        # if nch == 1 or rem[nch, 20-1] == 0: # "rem" is not defined in the original code! 
+        if nch == 1:
+            Tnow = time.time()
+            print(StrGC + " ch #{}".format(nch) + " / #{}.   ".format(NumCh) \
+                 + "elapsed time = {} (sec)".format(np.fix(Tnow - Tstart)))
+
 
 
     return cGCout, pGCout, GCparam, GCresp

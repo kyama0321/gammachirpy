@@ -712,3 +712,49 @@ def MakeAsymCmpFiltersV2(fs,Frs,b,c):
         ACFcoef.bz[:,:,Nfilt] = bz
 
     return ACFcoef
+
+
+
+def Fr1toFp2(n, b1, c1, b2, c2, frat, Fr1, SR=24000, Nfft=2048):
+    """Convert Fr1 (for passive GC; pGC) to Fp2 (for compressive GC; cGC)
+
+    Args:
+        n (int): Parameter defining the envelope of the gamma distribution (for pGC)
+        b1 (array-like): Parameter defining the envelope of the gamma distribution (for pGC)
+        c1 (array-like): Chirp factor (for pGC)
+        b2 (array-like): Parameter defining the envelope of the gamma distribution (for cGC)
+        c2 (array-like): Chirp factor  (for cGC)
+        frat (array-like): Frequency ratio, the main level-dependent variable
+        Fr1 (array-like): Center frequency (for pGC)
+        SR (int, optional): Sampling rate. Defaults to 24000.
+        Nfft (int, optional): Size of FFT. Defaults to 2048.
+
+    Returns:
+        Fp2 (array-like): Peak frequency (for compressive GC)
+        Fr2 (array-like): Center Frequency (for compressive GC)
+    """
+
+    _, ERBw1 = Freq2ERB(Fr1)
+    Fp1 = Fr2Fpeak(n, b1, c1, Fr1)
+    Fr2 = frat * Fp1
+    _, ERBw2 = Freq2ERB(Fr2)
+
+    Bw1 = b1 * ERBw1
+    Bw2 = b2 * ERBw2
+
+    # Coef1*Fp2^3 + Coef2*Fp2^2 + Coef3*Fp2 + Coef4 = 0 
+    Coef1 = -n
+    Coef2 = c1*Bw1 + c2*Bw2 + n*Fr1 + 2*n*Fr2
+    Coef3 = -2*Fr2*(c1*Bw1+n*Fr1) - n*((Bw2)^2+Fr2^2) - 2*c2*Bw2*Fr1
+    Coef4 =  c2*Bw2*((Bw1)**2+Fr1^2) + (c1*Bw1+n*Fr1)*(Bw2**2+Fr2**2)
+    Coefs = [Coef1, Coef2, Coef3, Coef4]
+
+    p = np.roots(Coefs)
+    Fp2cand = p[np.imag(p)==0]
+    if len(Fp2cand) == 1:
+        Fp2 = Fp2cand
+    else:
+        val, ncl = np.min(np.abs(Fp2cand - Fp1))
+        Fp2 = Fp2cand(ncl) # in usual cGC range, Fp2 is close to Fp1
+
+    return Fp2, Fr2

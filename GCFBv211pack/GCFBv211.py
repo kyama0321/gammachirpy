@@ -123,23 +123,41 @@ def GCFBv211(SndIn, GCparam, *args):
         if SwFastPrcs == 1 and GCparam.Ctrl == 'static': # Static
             StrGC = "Static (Fixed) Compressive-Gammachirp"
             GCout1 = pGCout[nch, :]
-            for Nfilt in range(5):
+            for Nfilt in range(4):
                 GCout1 = signal.lfilter(ACFcoefFastPrcs.bz[nch, :, Nfilt], ACFcoefFastPrcs.ap[nch, :, Nfilt], GCout1)
             cGCoutLvlEst[nch, :] = GCout1
-            # GCresp.Fp2[nch] = Fr1toFp2()
+            GCresp.Fp2[nch] = utils.Fr1toFp2(GCparam.n, GCresp.b1val[nch], GCresp.c1val[nch], \
+                                             GCresp.b2val[nch], GCresp.c2val[nch], \
+                                             fratVal[nch], GCresp.Fr1[nch])
+            if nch == NumCh:
+                GCresp.Fp2 = GCresp.Fp2
 
         else: # Level estimation pass for Dynamic.
             StrGC = "Passive-Gammachirp & Level estimation filter"
             GCout1 = pGCout[nch, :]
-            for Nfilt in range(5):
-                GCout1 = signal.lfilter(ACFcoefLvlEst.bz[nch, :, Nfilt], ACFcoefLvlEst.az[nch, :, Nfilt], GCout1)
+            for Nfilt in range(4):
+                GCout1 = signal.lfilter(ACFcoefLvlEst.bz[nch, :, Nfilt], ACFcoefLvlEst.ap[nch, :, Nfilt], GCout1)
             cGCoutLvlEst[nch, :] = GCout1
 
         # if nch == 1 or rem[nch, 20-1] == 0: # "rem" is not defined in the original code! 
-        if nch == 1:
+        if nch == 0:
             Tnow = time.time()
-            print(StrGC + " ch #{}".format(nch) + " / #{}.   ".format(NumCh) \
+            print(StrGC + " ch #{}".format(nch+1) + " / #{}.   ".format(NumCh) \
                  + "elapsed time = {} (sec)".format(np.fix(Tnow - Tstart)))
+
+    # added level estimation circuit only, 25 Nov. 2013
+    if GCparam.Ctrl == 'Level':
+            cGCout = cGCoutLvlEst
+            LvldB = []
+
+    # Passive filter (static/level estimation) -->  jump to Gain Normalization
+
+
+    """
+    Dynamic Compressive Gammachirp filtering
+    Sample-by-sample processing
+    """
+
 
 
 

@@ -953,6 +953,23 @@ def GammaChirpFrsp(Frs=None, SR=48000, OrderG=4, CoefERBw=1.019, CoefC=0.0, Phas
     
 
 def AsymCmpFrspV2(Frs=None, fs=48000, b=None, c=None, NfrqRsl=1024, NumFilt=4):
+    """Amplitude spectrum of Asymmetric compensation IIR filter (ACF) for the gammachirp 
+    corresponding to MakeAsymCmpFiltersV2
+
+    Args:
+        Frs (array_like, optional): Center freqs. Defaults to None.
+        fs (int, optional): Sampling freq. Defaults to 48000.
+        b (array_like, optional): Bandwidth coefficient. Defaults to None.
+        c (array_like, optional): Asymmetric paramters. Defaults to None.
+        NfrqRsl (int, optional): Freq. resolution for linear freq. scale for specify renponse at Frs
+                                (NfrqRsl>64). Defaults to 1024.
+        NumFilt (int, optional): Number of 2nd-order filters. Defaults to 4.
+
+    Returns:
+        ACFFrsp: Absolute values of frequency response of ACF (NumCh * NfrqRsl)
+        freq: freq. (1 * NfrqRsl)
+        AsymFunc: Original asymmetric function (NumCh * NfrqRsl)
+    """
 
     if Frs == None:
         help(AsymCmpFrspV2)

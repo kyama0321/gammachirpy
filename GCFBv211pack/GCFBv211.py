@@ -126,7 +126,7 @@ def GCFBv211(SndIn, GCparam, *args):
             for Nfilt in range(4):
                 GCout1 = signal.lfilter(ACFcoefFastPrcs.bz[nch, :, Nfilt], ACFcoefFastPrcs.ap[nch, :, Nfilt], GCout1)
             cGCoutLvlEst[nch, :] = GCout1
-            GCresp.Fp2[nch] = utils.Fr1toFp2(GCparam.n, GCresp.b1val[nch], GCresp.c1val[nch], \
+            GCresp.Fp2[nch], _ = utils.Fr1toFp2(GCparam.n, GCresp.b1val[nch], GCresp.c1val[nch], \
                                              GCresp.b2val[nch], GCresp.c2val[nch], \
                                              fratVal[nch], GCresp.Fr1[nch])
             if nch == NumCh:
@@ -146,7 +146,7 @@ def GCFBv211(SndIn, GCparam, *args):
                  + "elapsed time = {} (sec)".format(np.fix(Tnow - Tstart)))
 
     # added level estimation circuit only, 25 Nov. 2013
-    if GCparam.Ctrl == 'Level':
+    if GCparam.Ctrl == 'level':
             cGCout = cGCoutLvlEst
             LvldB = []
 

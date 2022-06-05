@@ -715,7 +715,7 @@ def MakeAsymCmpFiltersV2(fs,Frs,b,c):
 
 
 
-def Fr1toFp2(n, b1, c1, b2, c2, frat, Fr1, SR=24000, Nfft=2048):
+def Fr1toFp2(n, b1, c1, b2, c2, frat, Fr1, SR=24000, Nfft=2048, SwPlot=0):
     """Convert Fr1 (for passive GC; pGC) to Fp2 (for compressive GC; cGC)
 
     Args:
@@ -757,36 +757,154 @@ def Fr1toFp2(n, b1, c1, b2, c2, frat, Fr1, SR=24000, Nfft=2048):
         val, ncl = np.min(np.abs(Fp2cand - Fp1))
         Fp2 = Fp2cand(ncl) # in usual cGC range, Fp2 is close to Fp1
 
+    """
+    if SwPlot == 1: # Check
+        fs = 48000
+        NfrqRsl = 2048
+        cGCresp = CmprsGCFrsp(Fr1, fs, n, b1, c1, frat, b2, c2, NfrqRsl)
+    """
+
     return Fp2, Fr2
 
 
+def CmprsGCFrsp(Fr1=None, fs=48000, n=4, b1=1.81, c1=-2.96, frat=1, b2=2.01, c2=2.20, NfrqRsl=1024):
+    """Frequency Response of Compressive GammaChirp
+
+    Args:
+        Fr1 (array-like): Resonance Freqs. Defaults to None.
+        fs (int, optional): Sampling Freq. Defaults to 48000.
+        n (int, optional): Order of Gamma function, t**(n-1). Defaults to 4.
+        b1 (float, optional): b1 for exp(-2*pi*b1*ERB(f)). Defaults to 1.81.
+        c1 (float, optional): c1 for exp(j*2*pi*Fr + c1*ln(t)). Defaults to -2.96.
+        frat (int, optional): Frequency ratio. Fr2 = frat*Fp1. Defaults to 1.
+        b2 (float, optional): _description_. Defaults to 2.01.
+        c2 (float, optional): _description_. Defaults to 2.20.
+        NfrqRsl (int, optional): _description_. Defaults to 1024.
+
+    Returns:
+        cGCresp: Struct of cGC response
+            pGCFrsp (array-like): Passive GC freq. resp. (NumCh*NfrqRsl matrix)
+            cGCFrsp (array-like): Comressive GC freq. resp. (NumCh*NfrqRsl matrix)
+            cGCNrmFrsp (array-like): Normalized cGCFrsp (NumCh*NfrqRsl matrix)
+            ACFrsp: Asym (array-like). Compensation Filter freq. resp.
+            AsymFunc (array-like): Asym Func
+            freq (array-like): Frequency (1*NfrqRsl)
+            Fp2 (array-like): Peak freq.
+            ValFp2 (array-like): Peak Value
     """
-    def CmprsGCFrsp(Fr1,fs,n,b1,c1,frat,b2,c2,NfrqRsl):
+    
+    class cGCresp:
+        Fr1 = []
+        n = []
+        b1 = []
+        c1 = []
+        frat = []
+        b2 = []
+        c2 = []
+        NfrqRsl = []
+        pGCFrsp = []
+        cGCFrsp = []
+        cGCNrmFrsp = []
+        ACFFrsp = []
+        AsymFunc = []
+        Fp1 = []
+        Fr2 = []
+        Fp2 = []
+        ValFp2 = []
+        NormFctFp2 = []
+        freq = []
 
-        class cGCresp:
-            Fr1 = []
-            n = []
-            b1 = []
-            c1 = []
-            frat = []
-            b2 = []
-            c2 = []
-            NfrqRsl = []
-            pGCFrsp = []
-            cGCFrsp = []
-            cGCNrmFrsp = []
-            ACFFrsp = []
-            AsymFunc = []
-            Fp1 = []
-            Fr2 = []
-            Fp2 = []
-            ValFp2 = []
-            NormFctFp2 = []
-            freq = []
+    if Fr1 == None:
+        help(CmprsGCFrsp)
+        sys.exit()
+    if isrow(Fr):
+        Fr = np.array([Fr]).T
 
+    NumCh = len(Fr1)
+
+    if len(n) == 1:
+        n = n * np.ones((NumCh, 1))
+    if len(b1) == 1:
+        b1 = b1 * np.ones((NumCh, 1))
+    if len(c1) == 1:
+        c1 = c1 * np.ones((NumCh, 1))
+    if len(frat) == 1:
+        frat = frat * np.ones((NumCh, 1))
+    if len(b2) == 1:
+        b2 = b2 * np.ones((NumCh, 1))
+    if len(c2) == 1:
+        c2 = c2 * np.ones((NumCh, 1))
+
+    pGCFrsp, freq, _, _, _ = GammaChirpFrsp(Fr1, fs, n, b1, c1, 0, NfrqRsl)
+    Fp1 = Fr2Fpeak(n, b1, c1, Fr1)
+    Fr2 = frat * Fp1
+    # ACFFresp, freq, AsymFunc = AsymCmpFrspV2(Fr2, fs, b2, c2, NfrqRsl);
+
+
+    return cGCresp
+
+
+def GammaChirpFrsp(Frs=None, SR=48000, OrderG=4, CoefERBw=1.019, CoefC=0, Phase=0, NfrqRsl=1024):
+    """Frequency Response of GammaChirp
+
+    Args:
+        Frs (array_like, optional): Resonance freq. Defaults to None.
+        SR (int, optional): Sampling freq. Defaults to 48000.
+        OrderG (int, optional): Order of Gamma function t**(OrderG-1). Defaults to 4.
+        CoefERBw (float, optional): Coeficient -> exp(-2*pi*CoefERBw*ERB(f)). Defaults to 1.019.
+        CoefC (int, optional): Coeficient -> exp(j*2*pi*Fr + CoefC*ln(t)). Defaults to 0.
+        Phase (list, optional): Coeficient -> exp(j*2*pi*Fr + CoefC*ln(t)). Defaults to 0.
+        NfrqRsl (int, optional): Freq. resolution. Defaults to 1024.
+
+    Returns:
+        AmpFrsp (array_like): Absolute of freq. resp. (NumCh*NfrqRsl matrix)
+        freq (array_like): Frequency (1*NfrqRsl)
+        Fpeak (array_like): Peak frequency (NumCh * 1)
+        GrpDlay (array_like): Group delay (NumCh*NfrqRsl matrix)
+        PhsFrsp (array_like): Angle of freq. resp. (NumCh*NfrqRsl matrix)
+    """
+
+    if Frs == None:
+        help(GammaChirpFrsp)
+        sys.exit()
+
+    if isrow(Frs):
+        Frs = np.array([Frs]).T
+
+    NumCh = len(Frs)
+
+    if len(OrderG) == 1:
+        OrderG = OrderG * np.ones((NumCh, 1))
+    if len(CoefERBw) == 1:
+        CoefERBw = CoefERBw * np.ones((NumCh, 1))
+    if len(CoefC) == 1:
+        CoefC = CoefC * np.ones((NumCh, 1))
+    if len(Phase) == 1:
+        Phase = Phase * np.ones((NumCh, 1))
+
+    if NfrqRsl < 256:
+        print("NfrqRsl < 256", file=sys.stderr)
+        sys.exit(1)
+
+    ERBrate, ERBw = Freq2ERB(Frs)
+    freq = range(NfrqRsl) / NfrqRsl * SR / 2
+    freq = np.array([freq]).T
+
+    one1 = np.ones((1, NfrqRsl))
+    bh = (CoefERBw * ERBw) * one1
+    fd = np.ones((NumCh, 1)) * freq - Frs * one1
+    cn = (CoefC / OrderG) * one1
+    n = OrderG * one1
+    c = CoefC * one1
+    Phase = Phase * one1
+
+    # Analytic form (normalized at Fpeak)
+    AmpFrsp = ((1+cn**2) / (1+(fd/bh)**2))**2\
+        * np.exp(c * np.arctan(fd/bh) - np.arctan(cn))
+    
+    Fpeak = Frs + CoefERBw * ERBw * CoefC / OrderG
+    GrpDly = 1/(2*np.pi) * (n*bh + c*fd) / (bh**2 + fd**2)
+    PhsFrsp = -n * np.arctan(fd/bh) - c / 2*np.log((2*np.pi*bh)**2 + (2*np.pi*fd)**2) + Phase
+
+    return AmpFrsp, freq, Fpeak, GrpDly, PhsFrsp
         
-
-
-
-        return cGCresp
-    """

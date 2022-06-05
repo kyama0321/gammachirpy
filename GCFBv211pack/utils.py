@@ -757,12 +757,21 @@ def Fr1toFp2(n, b1, c1, b2, c2, frat, Fr1, SR=24000, Nfft=2048, SwPlot=0):
         val, ncl = np.min(np.abs(Fp2cand - Fp1))
         Fp2 = Fp2cand(ncl) # in usual cGC range, Fp2 is close to Fp1
 
-    """
+    SwPlot = 1
     if SwPlot == 1: # Check
         fs = 48000
         NfrqRsl = 2048
-        cGCresp = CmprsGCFrsp(Fr1, fs, n, b1, c1, frat, b2, c2, NfrqRsl)
-    """
+        cGCrsp = CmprsGCFrsp(Fr1, fs, n, b1, c1, frat, b2, c2, NfrqRsl)
+
+        nFr2 = np.zeros((len(Fp2cand), 1))
+        for nn in range(len(Fp2cand)):
+            nFr2[nn] = np.argmin(abs(cGCrsp.freq - Fp2cand[nn]))
+        
+    fig, ax = plt.subplots()
+    ax.plot(cGCrsp.freq, cGCrsp.cGCFrsp/np.max(cGCrsp.cGCFrsp))
+    ax.plot(cGCrsp.freq, cGCrsp.cGCFrsp)
+    ax.set_xlim([0, np.max(Fp2cand)*2])
+
 
     return Fp2, Fr2
 
@@ -817,34 +826,62 @@ def CmprsGCFrsp(Fr1=None, fs=48000, n=4, b1=1.81, c1=-2.96, frat=1, b2=2.01, c2=
     if Fr1 == None:
         help(CmprsGCFrsp)
         sys.exit()
-    if isrow(Fr):
-        Fr = np.array([Fr]).T
+    if isrow(Fr1):
+        Fr1 = np.array([Fr1]).T
 
     NumCh = len(Fr1)
 
-    if len(n) == 1:
+    if isinstance(n, (int, float)):
         n = n * np.ones((NumCh, 1))
-    if len(b1) == 1:
+    if isinstance(b1, (int, float)):
         b1 = b1 * np.ones((NumCh, 1))
-    if len(c1) == 1:
+    if isinstance(c1, (int, float)):
         c1 = c1 * np.ones((NumCh, 1))
-    if len(frat) == 1:
+    if isinstance(frat, (int, float)):
         frat = frat * np.ones((NumCh, 1))
-    if len(b2) == 1:
+    if isinstance(b2, (int, float)):
         b2 = b2 * np.ones((NumCh, 1))
-    if len(c2) == 1:
+    if isinstance(c2, (int, float)):
         c2 = c2 * np.ones((NumCh, 1))
 
-    pGCFrsp, freq, _, _, _ = GammaChirpFrsp(Fr1, fs, n, b1, c1, 0, NfrqRsl)
-    Fp1 = Fr2Fpeak(n, b1, c1, Fr1)
+    pGCFrsp, freq, _, _, _ = GammaChirpFrsp(Fr1, fs, n, b1, c1, 0.0, NfrqRsl)
+    Fp1, _ = Fr2Fpeak(n, b1, c1, Fr1)
     Fr2 = frat * Fp1
-    # ACFFresp, freq, AsymFunc = AsymCmpFrspV2(Fr2, fs, b2, c2, NfrqRsl);
+    ACFFrsp, freq, AsymFunc = AsymCmpFrspV2(Fr2, fs, b2, c2, NfrqRsl)
+    cGCFrsp = pGCFrsp * AsymFunc # cGCFrsp = pGCFrsp * ACFFrsp
+    
+    ValFp2 = np.max(cGCFrsp)
+    nchFp2 = np.argmax(cGCFrsp)
+    if isrow(ValFp2):
+        ValFp2 = np.array([ValFp2]).T
+    
+    NormFactFp2 = 1/ValFp2
 
+    # function cGCresp = CmprsGCFrsp(Fr1,fs,n,b1,c1,frat,b2,c2,NfrqRsl)
+    cGCresp.Fr1 = Fr1
+    cGCresp.n = n
+    cGCresp.b1 = b1
+    cGCresp.c1 = c1
+    cGCresp.frat = frat
+    cGCresp.b2 = b2
+    cGCresp.c2 = c2
+    cGCresp.NfrqRsl = NfrqRsl
+    cGCresp.pGCFrsp = pGCFrsp
+    cGCresp.cGCFrsp = cGCFrsp
+    cGCresp.cGCNrmFrsp = cGCFrsp * (NormFactFp2 * np.ones((1,NfrqRsl)))
+    cGCresp.ACFFrsp = ACFFrsp
+    cGCresp.AsymFunc   = AsymFunc
+    cGCresp.Fp1        = Fp1
+    cGCresp.Fr2        = Fr2
+    cGCresp.Fp2        = freq[nchFp2]
+    cGCresp.ValFp2     = ValFp2
+    cGCresp.NormFctFp2 = NormFactFp2
+    cGCresp.freq       = [freq]
 
     return cGCresp
 
 
-def GammaChirpFrsp(Frs=None, SR=48000, OrderG=4, CoefERBw=1.019, CoefC=0, Phase=0, NfrqRsl=1024):
+def GammaChirpFrsp(Frs=None, SR=48000, OrderG=4, CoefERBw=1.019, CoefC=0.0, Phase=0.0, NfrqRsl=1024):
     """Frequency Response of GammaChirp
 
     Args:
@@ -852,8 +889,8 @@ def GammaChirpFrsp(Frs=None, SR=48000, OrderG=4, CoefERBw=1.019, CoefC=0, Phase=
         SR (int, optional): Sampling freq. Defaults to 48000.
         OrderG (int, optional): Order of Gamma function t**(OrderG-1). Defaults to 4.
         CoefERBw (float, optional): Coeficient -> exp(-2*pi*CoefERBw*ERB(f)). Defaults to 1.019.
-        CoefC (int, optional): Coeficient -> exp(j*2*pi*Fr + CoefC*ln(t)). Defaults to 0.
-        Phase (list, optional): Coeficient -> exp(j*2*pi*Fr + CoefC*ln(t)). Defaults to 0.
+        CoefC (int, optional): Coeficient -> exp(j*2*pi*Fr + CoefC*ln(t)). Defaults to 0.0.
+        Phase (int, optional): Coeficient -> exp(j*2*pi*Fr + CoefC*ln(t)). Defaults to 0.9.
         NfrqRsl (int, optional): Freq. resolution. Defaults to 1024.
 
     Returns:
@@ -873,13 +910,13 @@ def GammaChirpFrsp(Frs=None, SR=48000, OrderG=4, CoefERBw=1.019, CoefC=0, Phase=
 
     NumCh = len(Frs)
 
-    if len(OrderG) == 1:
+    if isinstance(OrderG, (int, float)) or len(OrderG) == 1:
         OrderG = OrderG * np.ones((NumCh, 1))
-    if len(CoefERBw) == 1:
+    if isinstance(CoefERBw, (int, float)) or len(CoefERBw) == 1:
         CoefERBw = CoefERBw * np.ones((NumCh, 1))
-    if len(CoefC) == 1:
+    if isinstance(CoefC, (int, float)) or len(CoefC) == 1:
         CoefC = CoefC * np.ones((NumCh, 1))
-    if len(Phase) == 1:
+    if isinstance(Phase, (int, float)) or len(Phase) == 1:
         Phase = Phase * np.ones((NumCh, 1))
 
     if NfrqRsl < 256:
@@ -887,24 +924,107 @@ def GammaChirpFrsp(Frs=None, SR=48000, OrderG=4, CoefERBw=1.019, CoefC=0, Phase=
         sys.exit(1)
 
     ERBrate, ERBw = Freq2ERB(Frs)
-    freq = range(NfrqRsl) / NfrqRsl * SR / 2
+    freq = np.arange(NfrqRsl) / NfrqRsl * SR / 2
     freq = np.array([freq]).T
 
     one1 = np.ones((1, NfrqRsl))
     bh = (CoefERBw * ERBw) * one1
-    fd = np.ones((NumCh, 1)) * freq - Frs * one1
+    fd = (np.ones((NumCh, 1)) * freq[:,0]) - Frs * one1
     cn = (CoefC / OrderG) * one1
     n = OrderG * one1
     c = CoefC * one1
     Phase = Phase * one1
 
     # Analytic form (normalized at Fpeak)
-    AmpFrsp = ((1+cn**2) / (1+(fd/bh)**2))**2\
-        * np.exp(c * np.arctan(fd/bh) - np.arctan(cn))
+    AmpFrsp = ((1+cn**2) / (1+(fd/bh)**2))**(n/2) \
+                * np.exp(c * (np.arctan(fd/bh)-np.arctan(cn)))
     
     Fpeak = Frs + CoefERBw * ERBw * CoefC / OrderG
     GrpDly = 1/(2*np.pi) * (n*bh + c*fd) / (bh**2 + fd**2)
     PhsFrsp = -n * np.arctan(fd/bh) - c / 2*np.log((2*np.pi*bh)**2 + (2*np.pi*fd)**2) + Phase
 
     return AmpFrsp, freq, Fpeak, GrpDly, PhsFrsp
-        
+    
+
+def AsymCmpFrspV2(Frs=None, fs=48000, b=None, c=None, NfrqRsl=1024, NumFilt=4):
+
+    if Frs == None:
+        help(AsymCmpFrspV2)
+        sys.exit()
+
+    if isrow(Frs):
+        Frs = np.array([Frs]).T
+    if isrow(b):
+        b = np.array([b]).T
+    if isrow(c):
+        c = np.array([c]).T
+    NumCh = len(Frs)
+
+    if NfrqRsl >= 64:
+        freq = np.arange(NfrqRsl) / NfrqRsl * fs/2
+    elif NfrqRsl == 0:
+        freq = Frs
+        NfrqRsl = len(freq)
+    else:
+        help(AsymCmpFrspV2)
+        print("Specify NfrqRsl 0) for Frs or N>=64 for linear-freq scale", file=sys.stderr)
+        sys.exit(1)
+
+    # coef.
+    SwCoef = 0 # self consistency
+    # SwCoef = 1 # reference to MakeAsymCmpFiltersV2
+
+    if SwCoef == 0:
+        # New Coefficients. NumFilter = 4; See [1]
+        p0 = 2
+        p1 = 1.7818 * (1 - 0.0791*b) * (1 - 0.1655*np.abs(c))
+        p2 = 0.5689 * (1 - 0.1620*b) * (1 - 0.0857*np.abs(c))
+        p3 = 0.2523 * (1 - 0.0244*b) * (1 + 0.0574*np.abs(c))
+        p4 = 1.0724
+    else:
+        ACFcoef = MakeAsymCmpFiltersV2(fs, Frs, b, c)
+
+    # filter coef.
+    _, ERBw = Freq2ERB(Frs)
+    ACFFrsp = np.ones((NumCh, NfrqRsl))
+    freq2 = np.concatenate([np.ones((NumCh,1))*freq, Frs], axis=1)
+
+    for Nfilt in range(NumFilt):
+
+        if SwCoef == 0:
+            r = np.exp(-p1 * (p0/p4)**(Nfilt-1) * 2 * np.pi * b * ERBw / fs)
+            delfr = (p0*p4)**(Nfilt-1) * p2 * c * b * ERBw
+            phi = 2*np.pi*max(Frs + delfr, 0)/fs
+            psi = 2*np.pi*max(Frs - delfr, 0)/fs
+            fn = Frs
+            ap = np.concatenate([np.ones((NumCh, 1)), -2*r*np.cos(phi), r**2], axis=1)
+            bz = np.concatenate([np.ones((NumCh, 1)), -2*r*np.cos(psi), r**2], axis=1)
+        else:
+            ap = ACFcoef.ap[:, :, Nfilt]
+            bz = ACFcoef.bz[:, :, Nfilt]
+
+        cs1 = np.cos(2*np.pi*freq2/fs)
+        cs2 = np.cos(4*np.pi*freq2/fs)
+        bzz0 = (bz[:, 0]**2 + bz[:, 1]**2 + bz[:, 2]**2) * np.ones((1, NfrqRsl+1))
+        bzz1 = (2 * bz[:, 1] * (bz[:, 0] + bz[:, 2])) * np.ones((1, NfrqRsl+1))
+        bzz2 = (2 * bz[:, 0] * bz[:, 2]) * np.ones((1, NfrqRsl+1))
+        hb = bzz0 + bzz1*cs1 + bzz2*cs2
+
+        app0 = (ap[:, 0]**2 + ap[:, 1]**2 + ap[:, 2]**2) * np.ones((1, NfrqRsl+1))
+        app1 = (2 * ap[:, 1] * (ap[:, 0] + ap[:, 2])) * np.ones((1, NfrqRsl+1))
+        app2 = (2 * ap[:, 0] * ap[:, 2]) * np.ones((1, NfrqRsl+1))
+        ha = app0 + app1*cs1 + app2*cs2
+
+        H = np.sqrt(hb/ha)
+        Hnorm = H[:, NfrqRsl] * np.ones((1, NfrqRsl)) # Normalizatoin by fn value
+
+        ACFFrsp = ACFFrsp * H[:,0:NfrqRsl] / Hnorm
+
+    # original Asymmetric Function without shift centering
+    fd = np.ones((NumCh, 1))*freq - Frs*np.ones((1,NfrqRsl))
+    be = (b * ERBw) * np.ones((1, NfrqRsl))
+    cc = (c * np.ones((NumCh, 1)) * np.ones((1, NfrqRsl))) # in case when c is scalar
+    AsymFunc = np.exp(cc * np.arctan(fd, be))
+
+
+    return ACFFrsp, freq, AsymFunc

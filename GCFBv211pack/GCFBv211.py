@@ -139,8 +139,8 @@ def GCFBv211(SndIn, GCparam, *args):
                 GCout1 = signal.lfilter(ACFcoefLvlEst.bz[nch, :, Nfilt], ACFcoefLvlEst.ap[nch, :, Nfilt], GCout1)
             cGCoutLvlEst[nch, :] = GCout1
 
-        # if nch == 1 or rem[nch, 20-1] == 0: # "rem" is not defined in the original code! 
-        if nch == 0:
+        if nch == 1 or np.mod(nch+1, 20) == 0: # "rem" is not defined in the original code! 
+        # if nch == 0:
             Tnow = time.time()
             print(StrGC + " ch #{}".format(nch+1) + " / #{}.   ".format(NumCh) \
                  + "elapsed time = {} (sec)".format(np.fix(Tnow - Tstart)))

@@ -757,7 +757,7 @@ def Fr1toFp2(n, b1, c1, b2, c2, frat, Fr1, SR=24000, Nfft=2048, SwPlot=0):
         val, ncl = np.min(np.abs(Fp2cand - Fp1))
         Fp2 = Fp2cand(ncl) # in usual cGC range, Fp2 is close to Fp1
 
-    SwPlot = 1
+    # SwPlot = 1
     if SwPlot == 1: # Check
         fs = 48000
         NfrqRsl = 2048
@@ -767,11 +767,17 @@ def Fr1toFp2(n, b1, c1, b2, c2, frat, Fr1, SR=24000, Nfft=2048, SwPlot=0):
         for nn in range(len(Fp2cand)):
             nFr2[nn] = np.argmin(abs(cGCrsp.freq - Fp2cand[nn]))
         
-    fig, ax = plt.subplots()
-    ax.plot(cGCrsp.freq, cGCrsp.cGCFrsp/np.max(cGCrsp.cGCFrsp))
-    ax.plot(cGCrsp.freq, cGCrsp.cGCFrsp)
-    ax.set_xlim([0, np.max(Fp2cand)*2])
+        fig, ax = plt.subplots()
+        plt_freq = np.array(cGCrsp.freq).T
+        plt_cGCFrsp = np.array(cGCrsp.cGCFrsp/np.max(cGCrsp.cGCFrsp)).T
+        plt_pGCFrsp = np.array(cGCrsp.pGCFrsp).T
 
+        ax.plot(plt_freq, plt_cGCFrsp, label="cGCFrsp") # compressive GC
+        ax.plot(plt_freq, plt_pGCFrsp, label="pGCFrsp") # passive GC
+        ax.set_xlim([0, np.max(Fp2cand)*2])
+        ax.set_ylim([0, 1])
+        ax.legend()
+        plt.show()
 
     return Fp2, Fr2
 
@@ -992,8 +998,8 @@ def AsymCmpFrspV2(Frs=None, fs=48000, b=None, c=None, NfrqRsl=1024, NumFilt=4):
     for Nfilt in range(NumFilt):
 
         if SwCoef == 0:
-            r = np.exp(-p1 * (p0/p4)**(Nfilt-1) * 2 * np.pi * b * ERBw / fs)
-            delfr = (p0*p4)**(Nfilt-1) * p2 * c * b * ERBw
+            r = np.exp(-p1 * (p0/p4)**Nfilt * 2 * np.pi * b * ERBw / fs)
+            delfr = (p0*p4)**Nfilt * p2 * c * b * ERBw
             phi = 2*np.pi*max(Frs + delfr, 0)/fs
             psi = 2*np.pi*max(Frs - delfr, 0)/fs
             fn = Frs
@@ -1024,7 +1030,7 @@ def AsymCmpFrspV2(Frs=None, fs=48000, b=None, c=None, NfrqRsl=1024, NumFilt=4):
     fd = np.ones((NumCh, 1))*freq - Frs*np.ones((1,NfrqRsl))
     be = (b * ERBw) * np.ones((1, NfrqRsl))
     cc = (c * np.ones((NumCh, 1)) * np.ones((1, NfrqRsl))) # in case when c is scalar
-    AsymFunc = np.exp(cc * np.arctan(fd, be))
+    AsymFunc = np.exp(cc * np.arctan2(fd, be))
 
 
     return ACFFrsp, freq, AsymFunc

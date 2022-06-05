@@ -12,6 +12,7 @@ class GCresp:
     b1val = []
     c1val = []
     Fp1 = []
+    Fp2 = []
     b2val = []
     c1val = []
 
@@ -168,6 +169,7 @@ def SetParam(GCparam):
     GCresp.c1val = GCparam.c1[0]*OneVec + GCparam.c1[1]*GCresp.Ef
 
     GCresp.Fp1, _ = utils.Fr2Fpeak(GCparam.n, GCresp.b1val, GCresp.c1val, GCresp.Fr1)
+    GCresp.Fp2 = np.zeros(np.shape(GCresp.Fp1))
 
     GCresp.b2val = GCparam.b2[0, 0]*OneVec + GCparam.b2[0, 1]*GCresp.Ef
     GCresp.c2val = GCparam.c2[0, 0]*OneVec + GCparam.c2[0, 1]*GCresp.Ef

@@ -33,9 +33,10 @@ for SwDySt in range(1): # 0: only dynamic, 1: dynamic and static
         # GCFB
         GCparam = GCparam_default() # reset all
         if SwDySt == 0: 
-            GCparam.Ctrl = "dynamic"
+            # GCparam.Ctrl = "dynamic"
+            GCparam.Ctrl = "static" # for checking
         else: 
-            GCparam.Ctrl = "Static"
+            GCparam.Ctrl = "static"
         
         cGCout, pGCout, GCparam, GCrest = gcfb_Main.GCFBv211(Snd, GCparam)
 

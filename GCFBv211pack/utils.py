@@ -715,7 +715,7 @@ def MakeAsymCmpFiltersV2(fs,Frs,b,c):
 
 
 
-def Fr1toFp2(n, b1, c1, b2, c2, frat, Fr1, SR=24000, Nfft=2048):
+def Fr1toFp2(n, b1, c1, b2, c2, frat, Fr1, SR=24000, Nfft=2048, SwPlot=0):
     """Convert Fr1 (for passive GC; pGC) to Fp2 (for compressive GC; cGC)
 
     Args:
@@ -728,6 +728,7 @@ def Fr1toFp2(n, b1, c1, b2, c2, frat, Fr1, SR=24000, Nfft=2048):
         Fr1 (float): Center frequency (for pGC)
         SR (int, optional): Sampling rate. Defaults to 24000.
         Nfft (int, optional): Size of FFT. Defaults to 2048.
+        SwPlot (int, optional): Show plot of cGCFrsp and pGCFrsp. Defaults to 0.
 
     Returns:
         Fp2 (float): Peak frequency (for compressive GC)

@@ -715,7 +715,7 @@ def MakeAsymCmpFiltersV2(fs,Frs,b,c):
 
 
 
-def Fr1toFp2(n, b1, c1, b2, c2, frat, Fr1, SR=24000, Nfft=2048, SwPlot=0):
+def Fr1toFp2(n, b1, c1, b2, c2, frat, Fr1, SR=24000, Nfft=2048):
     """Convert Fr1 (for passive GC; pGC) to Fp2 (for compressive GC; cGC)
 
     Args:

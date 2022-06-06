@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from turtle import end_fill
 import numpy as np
 import sys
 import time
@@ -143,7 +144,7 @@ def GCFBv211(SndIn, GCparam, *args):
         # if nch == 0:
             Tnow = time.time()
             print(StrGC + " ch #{}".format(nch+1) + " / #{}.   ".format(NumCh) \
-                 + "elapsed time = {} (sec)".format(np.fix(Tnow - Tstart)))
+                 + "elapsed time = {} (sec)".format(np.round(Tnow - Tstart, 2)))
 
     # added level estimation circuit only, 25 Nov. 2013
     if GCparam.Ctrl == 'level':
@@ -158,7 +159,14 @@ def GCFBv211(SndIn, GCparam, *args):
     Sample-by-sample processing
     """
 
+    #if GCparam.Ctrl == 'dynamic':
 
+        # Initial settings
+
+
+
+
+        
 
 
     return cGCout, pGCout, GCparam, GCresp

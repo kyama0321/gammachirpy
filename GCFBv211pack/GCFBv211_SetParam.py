@@ -7,6 +7,7 @@ import utils
 
 class GCresp:
     Fr1 = []
+    Fr2 = []
     ERBspace1 = []
     Ef = []
     b1val = []
@@ -15,6 +16,7 @@ class GCresp:
     Fp2 = []
     b2val = []
     c1val = []
+    fratVal = []
 
 class LvlEst:
     LctERB = []

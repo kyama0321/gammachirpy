@@ -18,7 +18,7 @@ class GCparam_default:
 # Stiuli : a simple pulse train
 fs = 48000
 Tp = 10 # (ms) 100 Hz pulse train
-Snd = np.array(([1]+[0]*int(Tp*fs/1000))*10)
+Snd = np.array(([1]+[0]*int(Tp*fs/1000-1))*10)
 Tsnd = len(Snd)/fs
 print("Duration of sound = {} (ms)".format(Tsnd*1000))
 
@@ -33,8 +33,8 @@ for SwDySt in range(1): # 0: only dynamic, 1: dynamic and static
         # GCFB
         GCparam = GCparam_default() # reset all
         if SwDySt == 0: 
-            # GCparam.Ctrl = "dynamic"
-            GCparam.Ctrl = "static" # for checking
+            GCparam.Ctrl = "dynamic"
+            # GCparam.Ctrl = "static" # for checking
         else: 
             GCparam.Ctrl = "static"
         

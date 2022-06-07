@@ -144,7 +144,7 @@ def GCFBv211(SndIn, GCparam, *args):
         # if nch == 0:
             Tnow = time.time()
             print(StrGC + " ch #{}".format(nch+1) + " / #{}.   ".format(NumCh) \
-                 + "elapsed time = {} (sec)".format(np.round(Tnow - Tstart, 2)))
+                 + "elapsed time = {} (sec)".format(np.round(Tnow-Tstart, 1)))
 
     # added level estimation circuit only, 25 Nov. 2013
     if GCparam.Ctrl == 'level':
@@ -159,14 +159,53 @@ def GCFBv211(SndIn, GCparam, *args):
     Sample-by-sample processing
     """
 
-    #if GCparam.Ctrl == 'dynamic':
+    if GCparam.Ctrl == 'dynamic':
 
         # Initial settings
+        nDisp = np.fix(LenSnd/10) # display 10 times per Snd
+        cGCout = np.zeros((NumCh, LenSnd))
+        GCresp.Fr2 = np.zeros((NumCh, LenSnd))
+        GCresp.fratVal = np.zeros((NumCh, LenSnd))
+        GCresp.Fp2 = []
+        LvldB = np.zeros((NumCh, LenSnd))
+        LvlLin = np.zeros((NumCh, 2))
+        LvlLinPrev = np.zeros((NumCh, 2))
+
+        # Sample-by-sample processing
+        print("--- Sample-by-sample processing ---")
+        Tstart = time.time()
+
+        for nsmpl in range(LenSnd):
+
+            """
+            Level estimation circuit
+            """
+            LvlLin[0:NumCh, 0] = \
+                np.maximum(np.max(pGCout[GCparam.LvlEst.NchLvlEst.astype(int)-1, nsmpl], initial=0, axis=1),\
+                     LvlLinPrev[:, 0]*GCparam.LvlEst.ExpDecayVal)
+            LvlLin[0:NumCh, 1] = \
+                np.maximum(np.max(cGCoutLvlEst[GCparam.LvlEst.NchLvlEst.astype(int)-1, nsmpl], initial=0, axis=1), \
+                    LvlLinPrev[:, 1]*GCparam.LvlEst.ExpDecayVal)
+
+            LvlLinPrev = LvlLin
+
+            LvlLinTtl = GCparam.LvlEst.Weight \
+                * GCparam.LvlEst.LvlLinRef * (LvlLin[:, 0] / GCparam.LvlEst.LvlLinRef)**GCparam.LvlEst.Pwr[0] \
+                    + (1 - GCparam.LvlEst.Weight) \
+                        * GCparam.LvlEst.LvlLinRef * (LvlLin[:, 1] / GCparam.LvlEst.LvlLinRef)**GCparam.LvlEst.Pwr[1]
+                
+            LvldB[:, nsmpl] = 20 * np.log10(np.maximum(LvlLinTtl, GCparam.LvlEst.LvlLinMinLim)) + GCparam.LvlEst.RMStoSPLdB
 
 
 
 
-        
+            if nsmpl == 1 or np.mod(nsmpl+1, nDisp) == 0:
+                Tnow = time.time()
+                print("Dynamic Compressive-Gammachirp: Time {} (ms) / {} (ms). elapsed time = {} (sec)"\
+                    .format(round(nsmpl/fs*1000, 1), LenSnd/fs*1000, np.round(Tnow-Tstart, 1)))
 
+        """
+        End of Dynamic Compressive Gammachirp filtering
+        """
 
     return cGCout, pGCout, GCparam, GCresp

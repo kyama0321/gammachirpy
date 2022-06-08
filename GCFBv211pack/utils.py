@@ -3,6 +3,7 @@ import sys
 import numpy as np
 import matplotlib.pyplot as plt
 import wave as wave
+import time
 from scipy.interpolate import UnivariateSpline
 from scipy import signal
 from functools import lru_cache
@@ -1050,5 +1051,71 @@ def AsymCmpFrspV2(Frs=None, fs=48000, b=None, c=None, NfrqRsl=1024, NumFilt=4):
     cc = (c * np.ones((NumCh, 1)) * np.ones((1, NfrqRsl))) # in case when c is scalar
     AsymFunc = np.exp(cc * np.arctan2(fd, be))
 
-
     return ACFFrsp, freq, AsymFunc
+
+
+def ACFilterBank(ACFcoef=None, ACFstatus=None, SigIn=None, SwOrdr=0):
+
+    if ACFcoef == None or ACFstatus == None:
+        help(ACFilterBank)
+        sys.exit()
+
+    if SigIn == None and len(ACFstatus) != 0:
+        NumCh, Lbz, NumFilt = np.shape(ACFcoef.bz)
+        NumCh, Lap, NumFIlt = np.shape(ACFcoef.ap)
+
+        if Lbz != 3 or Lap !=3:
+            print("No gaurantee for usual IIR filters except for AsymCmpFilter.\n"\
+                + "Please check MakeAsymCmpFiltersV2.")
+    
+        ACFstatus.NumCh = NumCh
+        ACFstatus.NumFilt = NumFilt
+        ACFstatus.Lbz = Lbz # size of MA
+        ACFstatus.Lap = Lap # size of AR
+        ACFstatus.SigInPrev = np.zeros(NumCh, Lbz)
+        ACFstatus.SigOutPrev = np.zeros(NumCh, Lap, NumFilt)
+        ACFstatus.Count = 0
+        print("ACFilterBank: Initialization of ACFstatus")
+        SigOut = []
+
+        return SigOut, ACFstatus
+
+    NumChSig, LenSig = np.shape(SigIn)
+    if LenSig != 1:
+        print("Input signal sould be NumCh*1 vector (1 sample time-slice)", file=sys.stderr)
+        sys.exit(1)
+    if NumChSig != ACFstatus.NumCh:
+        print("NumChSig ({}) != ACFstatus.NumCh ({})".format(NumChSig, ACFstatus.NumCh))
+
+    # time stamp
+    if hasattr(ACFcoef, 'verbose'):
+        if ACFcoef.verbose == 1: # verbose when ACFcoef.verbose is specified to 1
+            Tdisp = 50 # ms
+            Tcnt = ACFstatus.Count/(np.fix(ACFcoef.fs/1000)) # ms
+
+            if ACFstatus.Count == 0:
+                print("ACFilterBank: Start processing")
+                Tic = time.time()
+
+            elif np.mod(Tcnt, Tdisp) == 0:
+                Toc = time.time()
+                print("ACFilterBank: Processed {} (ms). elapsed Time = {} (sec)"\
+                    .format(Tcnt, np.round(Tic-Toc, 1)))
+    
+    ACFstatus.Count = ACFstatus.Cout + 1
+    
+    """
+    Processing
+    """
+    ACFstatus.SigInPrev = np.concatenate([ACFstatus.SigInPrev[:, 1:ACFstatus.Lbz], SigIn])
+
+    
+
+
+        
+
+
+
+
+    return SigOut, ACFstatus
+

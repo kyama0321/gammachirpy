@@ -90,7 +90,7 @@ def GCFBv211(SndIn, GCparam, *args):
         fratVal = GCparam.frat[0,0] + GCparam.frat[0,1] * GCresp.Ef \
             + (GCparam.frat[1,0] + GCparam.frat[1,1] * GCresp.Ef) * LvldB
         Fr2val = fratVal * GCresp.Fp1
-        GCresp.Fr2 = Fr2val
+        GCresp.Fr2 = Fr2val.copy()
         ACFcoefFastPrcs = utils.MakeAsymCmpFiltersV2(fs, Fr2val, GCresp.b2val, GCresp.c2val)
     else:
         # HP-AF for dynamic-GC level estimation path. 18 Dec 2012 Checked
@@ -123,10 +123,10 @@ def GCFBv211(SndIn, GCparam, *args):
         # Fast processing for fixed cGC
         if SwFastPrcs == 1 and GCparam.Ctrl == 'static': # Static
             StrGC = "Static (Fixed) Compressive-Gammachirp"
-            GCout1 = pGCout[nch, :]
+            GCout1 = pGCout[nch, :].copy()
             for Nfilt in range(4):
                 GCout1 = signal.lfilter(ACFcoefFastPrcs.bz[nch, :, Nfilt], ACFcoefFastPrcs.ap[nch, :, Nfilt], GCout1)
-            cGCoutLvlEst[nch, :] = GCout1
+            cGCoutLvlEst[nch, :] = GCout1.copy()
             GCresp.Fp2[nch], _ = utils.Fr1toFp2(GCparam.n, GCresp.b1val[nch], GCresp.c1val[nch], \
                                              GCresp.b2val[nch], GCresp.c2val[nch], \
                                              fratVal[nch], GCresp.Fr1[nch])
@@ -135,12 +135,12 @@ def GCFBv211(SndIn, GCparam, *args):
 
         else: # Level estimation pass for Dynamic.
             StrGC = "Passive-Gammachirp & Level estimation filter"
-            GCout1 = pGCout[nch, :]
+            GCout1 = pGCout[nch, :].copy()
             for Nfilt in range(4):
                 GCout1 = signal.lfilter(ACFcoefLvlEst.bz[nch, :, Nfilt], ACFcoefLvlEst.ap[nch, :, Nfilt], GCout1)
-            cGCoutLvlEst[nch, :] = GCout1
+            cGCoutLvlEst[nch, :] = GCout1.copy()
 
-        if nch == 1 or np.mod(nch+1, 20) == 0: # "rem" is not defined in the original code! 
+        if nch == 0 or np.mod(nch+1, 20) == 0: # "rem" is not defined in the original code! 
         # if nch == 0:
             Tnow = time.time()
             print(StrGC + " ch #{}".format(nch+1) + " / #{}.   ".format(NumCh) \
@@ -148,7 +148,7 @@ def GCFBv211(SndIn, GCparam, *args):
 
     # added level estimation circuit only, 25 Nov. 2013
     if GCparam.Ctrl == 'level':
-            cGCout = cGCoutLvlEst
+            cGCout = cGCoutLvlEst.copy()
             LvldB = []
 
     # Passive filter (static/level estimation) -->  jump to Gain Normalization
@@ -187,7 +187,7 @@ def GCFBv211(SndIn, GCparam, *args):
                 np.maximum(np.max(cGCoutLvlEst[GCparam.LvlEst.NchLvlEst.astype(int)-1, nsmpl], initial=0, axis=1), \
                     LvlLinPrev[:, 1]*GCparam.LvlEst.ExpDecayVal)
 
-            LvlLinPrev = LvlLin
+            LvlLinPrev = LvlLin.copy()
 
             LvlLinTtl = GCparam.LvlEst.Weight \
                 * GCparam.LvlEst.LvlLinRef * (LvlLin[:, 0] / GCparam.LvlEst.LvlLinRef)**GCparam.LvlEst.Pwr[0] \
@@ -196,10 +196,24 @@ def GCFBv211(SndIn, GCparam, *args):
                 
             LvldB[:, nsmpl] = 20 * np.log10(np.maximum(LvlLinTtl, GCparam.LvlEst.LvlLinMinLim)) + GCparam.LvlEst.RMStoSPLdB
 
+            """
+            Signal path
+            """
+            # Filtering High-Pass Asymmetric Comressive Filter
+            fratVal = GCparam.frat[0, 0] + GCparam.frac[:, 1]*GCresp.Ef[:] + \
+                (GCparam.frat[1, :] + GCparam.frat[1, 1] + GCresp.Ef[:]) * LvldB[:, nsmpl]
+            Fr2Val = GCresp.Fp1[:] * fratVal
+
+            if np.mod(nsmpl, GCparam.NumUpdateAsymCmp) == 0: # update periodically
+                ACFcoef = utils.MakeAsymCmpFiltersV2(fs, Fr2Val, GCresp.b2val, GCresp.c2val)
+
+            if nsmpl == 0:
+                _, ACFstatus = utils.ACFilterBank(ACFcoef, ACFstatus, pGCout[:, nsmpl])
 
 
 
-            if nsmpl == 1 or np.mod(nsmpl+1, nDisp) == 0:
+
+            if nsmpl == 0 or np.mod(nsmpl+1, nDisp) == 0:
                 Tnow = time.time()
                 print("Dynamic Compressive-Gammachirp: Time {} (ms) / {} (ms). elapsed time = {} (sec)"\
                     .format(round(nsmpl/fs*1000, 1), LenSnd/fs*1000, np.round(Tnow-Tstart, 1)))

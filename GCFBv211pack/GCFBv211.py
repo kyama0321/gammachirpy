@@ -194,24 +194,26 @@ def GCFBv211(SndIn, GCparam, *args):
                     + (1 - GCparam.LvlEst.Weight) \
                         * GCparam.LvlEst.LvlLinRef * (LvlLin[:, 1] / GCparam.LvlEst.LvlLinRef)**GCparam.LvlEst.Pwr[1]
                 
-            LvldB[:, nsmpl] = 20 * np.log10(np.maximum(LvlLinTtl, GCparam.LvlEst.LvlLinMinLim)) + GCparam.LvlEst.RMStoSPLdB
+            LvldB[:, [nsmpl]] = np.array([20 * np.log10(np.maximum(LvlLinTtl, GCparam.LvlEst.LvlLinMinLim)) + GCparam.LvlEst.RMStoSPLdB]).T
 
             """
             Signal path
             """
             # Filtering High-Pass Asymmetric Comressive Filter
-            fratVal = GCparam.frat[0, 0] + GCparam.frac[:, 1]*GCresp.Ef[:] + \
-                (GCparam.frat[1, :] + GCparam.frat[1, 1] + GCresp.Ef[:]) * LvldB[:, nsmpl]
+            fratVal = GCparam.frat[0, 0] + GCparam.frat[0, 1] * GCresp.Ef[:] + \
+                (GCparam.frat[1, 0] + GCparam.frat[1, 1] * GCresp.Ef[:]) * LvldB[:, [nsmpl]]
             Fr2Val = GCresp.Fp1[:] * fratVal
 
             if np.mod(nsmpl, GCparam.NumUpdateAsymCmp) == 0: # update periodically
                 ACFcoef = utils.MakeAsymCmpFiltersV2(fs, Fr2Val, GCresp.b2val, GCresp.c2val)
 
             if nsmpl == 0:
-                _, ACFstatus = utils.ACFilterBank(ACFcoef, ACFstatus, pGCout[:, nsmpl])
+                _, ACFstatus = utils.ACFilterBank(ACFcoef, []) # initialization
 
-
-
+            SigOut, ACFstatus = utils.ACFilterBank(ACFcoef, ACFstatus, pGCout[:, nsmpl])
+            cGCout[:, [nsmpl]] = SigOut.copy()
+            GCresp.Fr2[:, [nsmpl]] = Fr2Val.copy()
+            GCresp.fratVal[:, [nsmpl]] = fratVal.copy()
 
             if nsmpl == 0 or np.mod(nsmpl+1, nDisp) == 0:
                 Tnow = time.time()

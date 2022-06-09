@@ -175,23 +175,27 @@ def Mel2Freq(mel):
     return freq
 
 
-def Freq2ERB(cf):
+def Freq2ERB(cf=None, warning=0):
     """Convert linear frequency to ERB
 
     Args:
-        cf (array_like): center frequency in linaer-scale [Hz] 
+        cf (array_like): center frequency in linaer-scale [Hz]. Default is None.
+        warning (int): check frequency range. Default is 0.
 
     Returns:
         ERBrate (array_like): ERB_N rate [ERB_N] or [cam] 
         ERBwidth (array_like): ERB_N Bandwidth [Hz]
     """
-    # Warnig for frequency range
-    cfmin = 50
-    cfmax = 12000
-    if np.min(cf) < cfmin or np.max(cf) > cfmax:
-        print("Warning : Min or max frequency exceeds the proper ERB range: "
-            +"{} (Hz) <= Fc <= {} (Hz)".format(cfmin, cfmax), file=sys.stderr)
-        sys.exit(1)
+
+    if warning == 1:
+        # Warnig for frequency range
+        cfmin = 50
+        cfmax = 12000
+
+        if np.min(cf) < cfmin or np.max(cf) > cfmax:
+            print("Warning : Min or max frequency exceeds the proper ERB range: "
+                +"{} (Hz) <= Fc <= {} (Hz)".format(cfmin, cfmax), file=sys.stderr)
+            sys.exit(1)
 
     ERBrate = 21.4 * np.log10(4.37*cf/1000+1)
     ERBwidth = 24.7 * (4.37*cf/1000+1)
@@ -1053,14 +1057,28 @@ def AsymCmpFrspV2(Frs=None, fs=48000, b=None, c=None, NfrqRsl=1024, NumFilt=4):
 
     return ACFFrsp, freq, AsymFunc
 
+class classACFstatus:
+        NumCh = []
+        NumFilt = []
+        Lbz = []
+        Lap = []
+        SigInPrev = []
+        SigOutPrev = []
+        Count = []
 
-def ACFilterBank(ACFcoef=None, ACFstatus=None, SigIn=None, SwOrdr=0):
+def ACFilterBank(ACFcoef=None, ACFstatus=None, SigIn=[], SwOrdr=0):
 
     if ACFcoef == None or ACFstatus == None:
         help(ACFilterBank)
         sys.exit()
 
-    if SigIn == None and len(ACFstatus) != 0:
+    if len(SigIn) == 0 and len(ACFstatus) != 0:
+        help(ACFilterBank)
+        sys.exit()
+
+    if not hasattr(ACFstatus, 'NumCh'):
+        ACFstatus = classACFstatus()
+
         NumCh, Lbz, NumFilt = np.shape(ACFcoef.bz)
         NumCh, Lap, NumFIlt = np.shape(ACFcoef.ap)
 
@@ -1072,14 +1090,18 @@ def ACFilterBank(ACFcoef=None, ACFstatus=None, SigIn=None, SwOrdr=0):
         ACFstatus.NumFilt = NumFilt
         ACFstatus.Lbz = Lbz # size of MA
         ACFstatus.Lap = Lap # size of AR
-        ACFstatus.SigInPrev = np.zeros(NumCh, Lbz)
-        ACFstatus.SigOutPrev = np.zeros(NumCh, Lap, NumFilt)
+        ACFstatus.SigInPrev = np.zeros((NumCh, Lbz))
+        ACFstatus.SigOutPrev = np.zeros((NumCh, Lap, NumFilt))
         ACFstatus.Count = 0
         print("ACFilterBank: Initialization of ACFstatus")
         SigOut = []
 
         return SigOut, ACFstatus
 
+    
+    if isrow(SigIn):
+        SigIn = np.array([SigIn]).T
+    
     NumChSig, LenSig = np.shape(SigIn)
     if LenSig != 1:
         print("Input signal sould be NumCh*1 vector (1 sample time-slice)", file=sys.stderr)
@@ -1102,14 +1124,37 @@ def ACFilterBank(ACFcoef=None, ACFstatus=None, SigIn=None, SwOrdr=0):
                 print("ACFilterBank: Processed {} (ms). elapsed Time = {} (sec)"\
                     .format(Tcnt, np.round(Tic-Toc, 1)))
     
-    ACFstatus.Count = ACFstatus.Cout + 1
+    ACFstatus.Count = ACFstatus.Count+1
     
     """
     Processing
     """
-    ACFstatus.SigInPrev = np.concatenate([ACFstatus.SigInPrev[:, 1:ACFstatus.Lbz], SigIn])
+    ACFstatus.SigInPrev = np.concatenate([ACFstatus.SigInPrev[:, 1:ACFstatus.Lbz], SigIn], axis=1)
 
-    
+    x = ACFstatus.SigInPrev.copy()
+    NfiltList = np.arange(ACFstatus.NumFilt)
+
+    if SwOrdr == 0:
+        NfiltList = np.flip(NfiltList)
+
+    for Nfilt in NfiltList:
+
+        forward = ACFcoef.bz[:, ACFstatus.Lbz::-1, Nfilt] * x
+        feedback = ACFcoef.ap[:, ACFstatus.Lap:1:-1, Nfilt] * \
+            ACFstatus.SigOutPrev[:, 1:ACFstatus.Lap, Nfilt]
+
+        fwdSum = np.sum(forward, axis=1)
+        fbkSum = np.sum(feedback, axis=1)
+
+        y = np.array([(fwdSum - fbkSum) / ACFcoef.ap[:, 1, Nfilt]]).T
+        ACFstatus.SigOutPrev[:, :, Nfilt] = \
+            np.concatenate([ACFstatus.SigOutPrev[:, 1:ACFstatus.Lap, Nfilt], y], axis=1)
+        x = ACFstatus.SigOutPrev[:, :, Nfilt].copy()
+
+    SigOut = y
+
+    return SigOut, ACFstatus
+
 
 
         

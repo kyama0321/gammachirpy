@@ -788,11 +788,11 @@ def Fr1toFp2(n, b1, c1, b2, c2, frat, Fr1, SR=24000, Nfft=2048, SwPlot=0):
     return Fp2, Fr2
 
 
-def CmprsGCFrsp(Fr1=None, fs=48000, n=4, b1=1.81, c1=-2.96, frat=1, b2=2.01, c2=2.20, NfrqRsl=1024):
+def CmprsGCFrsp(Fr1, fs=48000, n=4, b1=1.81, c1=-2.96, frat=1, b2=2.01, c2=2.20, NfrqRsl=1024):
     """Frequency Response of Compressive GammaChirp
 
     Args:
-        Fr1 (array-like): Resonance Freqs. Defaults to None.
+        Fr1 (array-like): Resonance Freqs.
         fs (int, optional): Sampling Freq. Defaults to 48000.
         n (int, optional): Order of Gamma function, t**(n-1). Defaults to 4.
         b1 (float, optional): b1 for exp(-2*pi*b1*ERB(f)). Defaults to 1.81.
@@ -835,9 +835,6 @@ def CmprsGCFrsp(Fr1=None, fs=48000, n=4, b1=1.81, c1=-2.96, frat=1, b2=2.01, c2=
         NormFctFp2 = []
         freq = []
 
-    if Fr1 == None:
-        help(CmprsGCFrsp)
-        sys.exit()
     if isrow(Fr1):
         Fr1 = np.array([Fr1]).T
 
@@ -862,8 +859,8 @@ def CmprsGCFrsp(Fr1=None, fs=48000, n=4, b1=1.81, c1=-2.96, frat=1, b2=2.01, c2=
     ACFFrsp, freq, AsymFunc = AsymCmpFrspV2(Fr2, fs, b2, c2, NfrqRsl)
     cGCFrsp = pGCFrsp * AsymFunc # cGCFrsp = pGCFrsp * ACFFrsp
     
-    ValFp2 = np.max(cGCFrsp)
-    nchFp2 = np.argmax(cGCFrsp)
+    ValFp2 = np.max(cGCFrsp, axis=1)
+    nchFp2 = np.argmax(cGCFrsp, axis=1)
     if isrow(ValFp2):
         ValFp2 = np.array([ValFp2]).T
     
@@ -893,7 +890,7 @@ def CmprsGCFrsp(Fr1=None, fs=48000, n=4, b1=1.81, c1=-2.96, frat=1, b2=2.01, c2=
     return cGCresp
 
 
-def GammaChirpFrsp(Frs=None, SR=48000, OrderG=4, CoefERBw=1.019, CoefC=0.0, Phase=0.0, NfrqRsl=1024):
+def GammaChirpFrsp(Frs, SR=48000, OrderG=4, CoefERBw=1.019, CoefC=0.0, Phase=0.0, NfrqRsl=1024):
     """Frequency Response of GammaChirp
 
     Args:
@@ -912,10 +909,6 @@ def GammaChirpFrsp(Frs=None, SR=48000, OrderG=4, CoefERBw=1.019, CoefC=0.0, Phas
         GrpDlay (array_like): Group delay (NumCh*NfrqRsl matrix)
         PhsFrsp (array_like): Angle of freq. resp. (NumCh*NfrqRsl matrix)
     """
-
-    if Frs == None:
-        help(GammaChirpFrsp)
-        sys.exit()
 
     if isrow(Frs):
         Frs = np.array([Frs]).T
@@ -958,7 +951,7 @@ def GammaChirpFrsp(Frs=None, SR=48000, OrderG=4, CoefERBw=1.019, CoefC=0.0, Phas
     return AmpFrsp, freq, Fpeak, GrpDly, PhsFrsp
     
 
-def AsymCmpFrspV2(Frs=None, fs=48000, b=None, c=None, NfrqRsl=1024, NumFilt=4):
+def AsymCmpFrspV2(Frs, fs=48000, b=None, c=None, NfrqRsl=1024, NumFilt=4):
     """Amplitude spectrum of Asymmetric compensation IIR filter (ACF) for the gammachirp 
     corresponding to MakeAsymCmpFiltersV2
 
@@ -976,10 +969,6 @@ def AsymCmpFrspV2(Frs=None, fs=48000, b=None, c=None, NfrqRsl=1024, NumFilt=4):
         freq: freq. (1 * NfrqRsl)
         AsymFunc: Original asymmetric function (NumCh * NfrqRsl)
     """
-
-    if Frs == None:
-        help(AsymCmpFrspV2)
-        sys.exit()
 
     if isrow(Frs):
         Frs = np.array([Frs]).T
@@ -1023,8 +1012,8 @@ def AsymCmpFrspV2(Frs=None, fs=48000, b=None, c=None, NfrqRsl=1024, NumFilt=4):
         if SwCoef == 0:
             r = np.exp(-p1 * (p0/p4)**Nfilt * 2 * np.pi * b * ERBw / fs)
             delfr = (p0*p4)**Nfilt * p2 * c * b * ERBw
-            phi = 2*np.pi*max(Frs + delfr, 0)/fs
-            psi = 2*np.pi*max(Frs - delfr, 0)/fs
+            phi = 2*np.pi*np.maximum(Frs + delfr, 0)/fs
+            psi = 2*np.pi*np.maximum(Frs - delfr, 0)/fs
             fn = Frs
             ap = np.concatenate([np.ones((NumCh, 1)), -2*r*np.cos(phi), r**2], axis=1)
             bz = np.concatenate([np.ones((NumCh, 1)), -2*r*np.cos(psi), r**2], axis=1)
@@ -1034,18 +1023,18 @@ def AsymCmpFrspV2(Frs=None, fs=48000, b=None, c=None, NfrqRsl=1024, NumFilt=4):
 
         cs1 = np.cos(2*np.pi*freq2/fs)
         cs2 = np.cos(4*np.pi*freq2/fs)
-        bzz0 = (bz[:, 0]**2 + bz[:, 1]**2 + bz[:, 2]**2) * np.ones((1, NfrqRsl+1))
-        bzz1 = (2 * bz[:, 1] * (bz[:, 0] + bz[:, 2])) * np.ones((1, NfrqRsl+1))
-        bzz2 = (2 * bz[:, 0] * bz[:, 2]) * np.ones((1, NfrqRsl+1))
+        bzz0 = np.array([bz[:, 0]**2 + bz[:, 1]**2 + bz[:, 2]**2]).T * np.ones((1, NfrqRsl+1))
+        bzz1 = np.array([2 * bz[:, 1] * (bz[:, 0] + bz[:, 2])]).T * np.ones((1, NfrqRsl+1))
+        bzz2 = np.array([2 * bz[:, 0] * bz[:, 2]]).T * np.ones((1, NfrqRsl+1))
         hb = bzz0 + bzz1*cs1 + bzz2*cs2
 
-        app0 = (ap[:, 0]**2 + ap[:, 1]**2 + ap[:, 2]**2) * np.ones((1, NfrqRsl+1))
-        app1 = (2 * ap[:, 1] * (ap[:, 0] + ap[:, 2])) * np.ones((1, NfrqRsl+1))
-        app2 = (2 * ap[:, 0] * ap[:, 2]) * np.ones((1, NfrqRsl+1))
+        app0 = np.array([ap[:, 0]**2 + ap[:, 1]**2 + ap[:, 2]**2]).T * np.ones((1, NfrqRsl+1))
+        app1 = np.array([2 * ap[:, 1] * (ap[:, 0] + ap[:, 2])]).T * np.ones((1, NfrqRsl+1))
+        app2 = np.array([2 * ap[:, 0] * ap[:, 2]]).T * np.ones((1, NfrqRsl+1))
         ha = app0 + app1*cs1 + app2*cs2
 
         H = np.sqrt(hb/ha)
-        Hnorm = H[:, NfrqRsl] * np.ones((1, NfrqRsl)) # Normalizatoin by fn value
+        Hnorm = np.array([H[:, NfrqRsl]]).T * np.ones((1, NfrqRsl)) # Normalizatoin by fn value
 
         ACFFrsp = ACFFrsp * H[:,0:NfrqRsl] / Hnorm
 
@@ -1148,7 +1137,7 @@ def ACFilterBank(ACFcoef=None, ACFstatus=None, SigIn=[], SwOrdr=0):
 
         y = np.array([(fwdSum - fbkSum) / ACFcoef.ap[:, 1, Nfilt]]).T
         ACFstatus.SigOutPrev[:, :, Nfilt] = \
-            np.concatenate([ACFstatus.SigOutPrev[:, 1:ACFstatus.Lap, Nfilt], y], axis=1)
+            np.concatenate([ACFstatus.SigOutPrev[:, 1:ACFstatus.Lap, Nfilt], y.copy()], axis=1)
         x = ACFstatus.SigOutPrev[:, :, Nfilt].copy()
 
     SigOut = y

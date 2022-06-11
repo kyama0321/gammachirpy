@@ -224,4 +224,18 @@ def GCFBv211(SndIn, GCparam, *args):
         End of Dynamic Compressive Gammachirp filtering
         """
 
+        '''
+        Signal path Gain Normalization at Reference Level (GainRefdB) for static dynamic filters
+        '''
+
+        fratRef = GCparam.frat[0, 0] + GCparam.frat[0, 1] * GCresp.Ef[:] \
+            + (GCparam.frat[1, 0] + GCparam.frat[0, 0] * GCresp.Ef[:] * GCparam.GainRefdB)
+
+        cGCRef = utils.CmprsGCFrsp(GCresp.Fr1, fs, GCparam.n, GCresp.b1val, GCresp.c1val, fratRef, GCresp.b2val, GCresp.c2val)
+        GCresp.cGCRef = cGCRef
+        GCresp.LvldB = LvldB
+
+        GCresp.GainFactor = 10**(GCparam.GainCmpnstdB/20) * cGCRef.NormFctFp2
+        cGCout = (GCresp.GainFactor * np.ones((1, LenSnd))) * cGCout
+
     return cGCout, pGCout, GCparam, GCresp

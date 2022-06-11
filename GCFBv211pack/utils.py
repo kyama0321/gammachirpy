@@ -1055,11 +1055,32 @@ class classACFstatus:
         SigOutPrev = []
         Count = []
 
-def ACFilterBank(ACFcoef=None, ACFstatus=None, SigIn=[], SwOrdr=0):
 
-    if ACFcoef == None or ACFstatus == None:
-        help(ACFilterBank)
-        sys.exit()
+def ACFilterBank(ACFcoef, ACFstatus, SigIn=[], SwOrdr=0):
+    """IIR ACF time-slice filtering for time-varing filter
+
+    Args:
+        ACFcoef (structure): ACFcoef: coef from MakeAsymCmpFiltersV2
+            bz: MA coefficents (==b ~= zero) NumCh*Lbz*NumFilt
+            ap: AR coefficents (==a ~= pole) NumCh*Lap*NumFilt
+            fs : sampling rate  (also switch for verbose)
+                (The variables named 'a' and 'b' are not used to avoid the
+                confusion to the gammachirp parameters.)
+            verbose : Not specified) quiet   1) verbose
+        ACFstatus (structure):
+            NumCh: Number of channels (Set by initialization
+            Lbz: size of MA
+            Lap: size of AR
+            NumFilt: Length of filters
+            SigInPrev: Previous status of SigIn
+            SigOutPrev: Previous status of SigOut
+        SigIn (array_like, optional): Input signal. Defaults to [].
+        SwOrdr (int, optional): Switch filtering order. Defaults to 0.
+
+    Returns:
+        SigOut (array_like): Filtered signal (NumCh * 1)
+        ACFstatus: Current status
+    """    
 
     if len(SigIn) == 0 and len(ACFstatus) != 0:
         help(ACFilterBank)
@@ -1123,33 +1144,25 @@ def ACFilterBank(ACFcoef=None, ACFstatus=None, SigIn=[], SwOrdr=0):
     x = ACFstatus.SigInPrev.copy()
     NfiltList = np.arange(ACFstatus.NumFilt)
 
-    if SwOrdr == 0:
+    if SwOrdr == 1:
         NfiltList = np.flip(NfiltList)
 
     for Nfilt in NfiltList:
 
         forward = ACFcoef.bz[:, ACFstatus.Lbz::-1, Nfilt] * x
-        feedback = ACFcoef.ap[:, ACFstatus.Lap:1:-1, Nfilt] * \
+        feedback = ACFcoef.ap[:, ACFstatus.Lap:0:-1, Nfilt] * \
             ACFstatus.SigOutPrev[:, 1:ACFstatus.Lap, Nfilt]
 
         fwdSum = np.sum(forward, axis=1)
         fbkSum = np.sum(feedback, axis=1)
 
-        y = np.array([(fwdSum - fbkSum) / ACFcoef.ap[:, 1, Nfilt]]).T
+        y = np.array([(fwdSum - fbkSum) / ACFcoef.ap[:, 0, Nfilt]]).T
         ACFstatus.SigOutPrev[:, :, Nfilt] = \
             np.concatenate([ACFstatus.SigOutPrev[:, 1:ACFstatus.Lap, Nfilt], y.copy()], axis=1)
         x = ACFstatus.SigOutPrev[:, :, Nfilt].copy()
 
-    SigOut = y
+    SigOut = y.copy()
 
     return SigOut, ACFstatus
 
-
-
-        
-
-
-
-
-    return SigOut, ACFstatus
 

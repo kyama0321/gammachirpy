@@ -125,7 +125,7 @@ def GCFBv211(SndIn, GCparam, *args):
             GCout1 = pGCout[nch, :].copy()
             for Nfilt in range(4):
                 GCout1 = signal.lfilter(ACFcoefFastPrcs.bz[nch, :, Nfilt], ACFcoefFastPrcs.ap[nch, :, Nfilt], GCout1)
-            cGCoutLvlEst[nch, :] = GCout1.copy()
+            cGCout[nch, :] = GCout1.copy()
             GCresp.Fp2[nch], _ = utils.Fr1toFp2(GCparam.n, GCresp.b1val[nch], GCresp.c1val[nch], \
                                              GCresp.b2val[nch], GCresp.c2val[nch], \
                                              fratVal[nch], GCresp.Fr1[nch])

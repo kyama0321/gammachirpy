@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 import matplotlib.pyplot as plt
+import time
 import utils
 import GCFBv211 as gcfb_Main
 
@@ -22,12 +23,15 @@ Snd = np.array(([1]+[0]*int(Tp*fs/1000-1))*10)
 Tsnd = len(Snd)/fs
 print("Duration of sound = {} (ms)".format(Tsnd*1000))
 
-SigSPLllst = np.arange(40, 100, 20)
+SigSPLlist = np.arange(40, 100, 20)
 cnt = 0
-for SwDySt in range(1): # 0: only dynamic, 1: dynamic and static
 
-    for SwSPL in range(len(SigSPLllst)):
-        SigSPL = SigSPLllst[SwSPL]
+for SwDySt in range(2): # 1: only dynamic, 2: dynamic and static
+
+    fig, ax = plt.subplots()
+
+    for SwSPL in range(len(SigSPLlist)):
+        SigSPL = SigSPLlist[SwSPL]
         Snd, _ = utils.Eqlz2MeddisHCLevel(Snd, SigSPL)
 
         # GCFB
@@ -38,14 +42,24 @@ for SwDySt in range(1): # 0: only dynamic, 1: dynamic and static
         else: 
             GCparam.Ctrl = "static"
         
+        Tstart = time.time()
         cGCout, pGCout, GCparam, GCrest = gcfb_Main.GCFBv211(Snd, GCparam)
 
-        
+        Tend = time.time()
+        print("Elapsed time is {} (sec) = {} times RealTime."\
+            .format(np.round(Tend-Tstart, 4), np.round((Tend-Tstart)/Tsnd, 4)))
 
+        ax = plt.subplot(len(SigSPLlist), 1, SwSPL+1)
+        plt.imshow(np.maximum(cGCout, 0), aspect='auto', origin='lower', cmap='jet')
+        ax.set_title("GCFB control = {}; Signal Level = {} dB SPL"\
+            .format(GCparam.Ctrl, SigSPL))
+        ax.set_yticks([0, 20, 40, 60, 80, 100])
+        plt.tight_layout()
+        plt.pause(0.05)
 
+plt.show()
 
-
-#"""
+"""
 x = np.array(range(len(Snd)))/fs
 fig, ax = plt.subplots(figsize=(8,4))
 plt.plot(x, Snd)
@@ -53,4 +67,4 @@ ax.set_xlabel("Time [sec]")
 ax.set_ylabel("Amplitude")
 plt.ylim(-1.05, 1.05)
 plt.show()
-#"""
+"""

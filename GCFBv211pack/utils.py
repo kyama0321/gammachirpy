@@ -1158,10 +1158,10 @@ def ACFilterBank(ACFcoef, ACFstatus, SigIn=[], SwOrdr=0):
 
         y = np.array([(fwdSum - fbkSum) / ACFcoef.ap[:, 0, Nfilt]]).T
         ACFstatus.SigOutPrev[:, :, Nfilt] = \
-            np.concatenate([ACFstatus.SigOutPrev[:, 1:ACFstatus.Lap, Nfilt], y.copy()], axis=1)
+            np.concatenate([ACFstatus.SigOutPrev[:, 1:ACFstatus.Lap, Nfilt], y], axis=1)
         x = ACFstatus.SigOutPrev[:, :, Nfilt].copy()
 
-    SigOut = y.copy()
+    SigOut = y
 
     return SigOut, ACFstatus
 

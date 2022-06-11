@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from turtle import end_fill
 import numpy as np
 import sys
 import time
@@ -162,7 +161,7 @@ def GCFBv211(SndIn, GCparam, *args):
     if GCparam.Ctrl == 'dynamic':
 
         # Initial settings
-        nDisp = np.fix(LenSnd/10) # display 10 times per Snd
+        nDisp = int(np.fix(LenSnd/10)) # display 10 times per Snd
         cGCout = np.zeros((NumCh, LenSnd))
         GCresp.Fr2 = np.zeros((NumCh, LenSnd))
         GCresp.fratVal = np.zeros((NumCh, LenSnd))
@@ -181,8 +180,8 @@ def GCFBv211(SndIn, GCparam, *args):
             Level estimation circuit
             """
             LvlLin[0:NumCh, 0] = \
-                np.maximum(np.max(pGCout[GCparam.LvlEst.NchLvlEst.astype(int)-1, nsmpl], initial=0, axis=1),\
-                     LvlLinPrev[:, 0]*GCparam.LvlEst.ExpDecayVal)
+                np.maximum(np.max(pGCout[GCparam.LvlEst.NchLvlEst.astype(int)-1, nsmpl], initial=0, axis=1), \
+                    LvlLinPrev[:, 0]*GCparam.LvlEst.ExpDecayVal)
             LvlLin[0:NumCh, 1] = \
                 np.maximum(np.max(cGCoutLvlEst[GCparam.LvlEst.NchLvlEst.astype(int)-1, nsmpl], initial=0, axis=1), \
                     LvlLinPrev[:, 1]*GCparam.LvlEst.ExpDecayVal)
@@ -194,7 +193,8 @@ def GCFBv211(SndIn, GCparam, *args):
                     + (1 - GCparam.LvlEst.Weight) \
                         * GCparam.LvlEst.LvlLinRef * (LvlLin[:, 1] / GCparam.LvlEst.LvlLinRef)**GCparam.LvlEst.Pwr[1]
                 
-            LvldB[:, [nsmpl]] = np.array([20 * np.log10(np.maximum(LvlLinTtl, GCparam.LvlEst.LvlLinMinLim)) + GCparam.LvlEst.RMStoSPLdB]).T
+            LvldB[:, [nsmpl]] = np.array([20 * np.log10(np.maximum(LvlLinTtl, GCparam.LvlEst.LvlLinMinLim)) \
+                + GCparam.LvlEst.RMStoSPLdB]).T
 
             """
             Signal path
@@ -224,12 +224,12 @@ def GCFBv211(SndIn, GCparam, *args):
         End of Dynamic Compressive Gammachirp filtering
         """
 
-        '''
+        """
         Signal path Gain Normalization at Reference Level (GainRefdB) for static dynamic filters
-        '''
+        """
 
         fratRef = GCparam.frat[0, 0] + GCparam.frat[0, 1] * GCresp.Ef[:] \
-            + (GCparam.frat[1, 0] + GCparam.frat[0, 0] * GCresp.Ef[:] * GCparam.GainRefdB)
+            + (GCparam.frat[1, 0] + GCparam.frat[1, 1] * GCresp.Ef[:]) * GCparam.GainRefdB
 
         cGCRef = utils.CmprsGCFrsp(GCresp.Fr1, fs, GCparam.n, GCresp.b1val, GCresp.c1val, fratRef, GCresp.b2val, GCresp.c2val)
         GCresp.cGCRef = cGCRef

@@ -4,6 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import wave as wave
 import time
+import scipy
 from scipy.interpolate import UnivariateSpline
 from scipy import signal
 from functools import lru_cache
@@ -639,6 +640,26 @@ def isrow(x):
     return logical
     
 
+def iscolumn(x):
+    """returns True if x is a column vector, False otherwise.
+
+    Args:
+        x (array_like): verctors
+
+    Returns:
+        logical (bool): True/False
+    """
+    if np.size(np.shape(x)) == 2:
+        if np.shape(x)[1] == 1:
+            logical = True
+        else:
+            logical = False
+    else:
+        logical = False
+        
+    return logical
+
+
 def MakeAsymCmpFiltersV2(fs,Frs,b,c):
     """Computes the coefficients for a bank of Asymmetric Compensation Filters
     This is a modified version to fix the round off problem at low freqs
@@ -1166,3 +1187,75 @@ def ACFilterBank(ACFcoef, ACFstatus, SigIn=[], SwOrdr=0):
     return SigOut, ACFstatus
 
 
+def fftfilt(b, x):
+    """FFTFILT Overlap-add method for FIR filtering using FFT.
+
+    Args:
+        b (array_like): Impulse response of the filter
+        x (array_like): Input signal
+
+    Returns:
+        y (array_like): Output signal filtered
+    """    
+
+    if isrow(x):
+        xCol = np.array([x]).T
+    else:
+        xCol = x.copy()
+    nx, mx = np.shape(xCol)
+    
+    if isrow(b):
+        bCol = np.array([b]).T
+    else:
+        bCol = b.copy()
+    nb, mb = np.shape(bCol)
+
+    # figure out which nfft and L to use
+    if nb >= nx or nb > 2**20:
+        nfft = 2<<(nb + nx -1).bit_length()
+        L = nx
+    else:
+        fftflops = np.array([18, 59, 138, 303, 660, 1441, 3150, 6875, 14952, 32373,\
+            69762, 149647, 319644, 680105, 1441974, 3047619, 6422736, \
+            13500637, 28311786, 59244791, 59244791*2.09])
+        n = 2**np.arange(1,22)
+        nValid = n[n > nb-1]
+        fftflopsValid = np.extract([n > nb-1], fftflops)
+        # minimize (number of blocks) * (number of flops per fft)
+        L1 = nValid - (nb - 1)
+        ind = np.argmin(np.ceil(nx/L1)*fftflopsValid)
+        nfft = nValid[ind] # must have nfft > (nb-1)
+        L = L1[ind]
+    
+    B = np.fft.fft(bCol, n=nfft, axis=0)
+    if iscolumn(bCol):
+        B1 = B[:, 0]
+    else:
+        B1 = B
+    if iscolumn(xCol):
+        xCol1 = xCol[:, 0]
+    else:
+        xCol1 = xCol
+
+    y1 = np.zeros(np.shape(xCol), dtype=np.complex)
+    istart = 0
+    while istart <= nx:
+        iend = np.minimum(istart+L, nx)
+        if (iend - (istart-1)) == 0:
+            X = xCol1[istart[np.ones((nfft, 1))]] # need to fft a scalar
+        else:
+            X = np.fft.fft(xCol1[istart:iend], n=nfft, axis=0)
+        Y = np.fft.ifft(X*B1, n=nfft)
+        yend = np.minimum(nx, istart+nfft)
+        y1[istart:yend, 0] = y1[istart:yend, 0] + Y[0:(yend-istart)]
+        istart += L
+    
+    if not any(np.imag(b)) or not any(np.imag(x)):
+        y1 = np.real(y1)
+    
+    if isrow(x) and iscolumn(y1):
+        y = y1[:,0]
+    else:
+        y = y1
+
+    return y

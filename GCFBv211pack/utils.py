@@ -214,8 +214,8 @@ def ERB2Freq(ERBrate):
         cf (array_like): center frequency in linaer-scale [Hz] 
         ERBwidth (array_like): ERB_N Bandwidth [Hz]
     """
-    cf = (10**(ERBrate/21.4)-1) / 4.37 * 1000
-    ERBwidth = 24.7 * (4.37*cf/1000+1)
+    cf = (10**(ERBrate/21.4) - 1) / 4.37 * 1000
+    ERBwidth = 24.7 * (4.37*cf/1000 + 1)
 
     return cf, ERBwidth
 

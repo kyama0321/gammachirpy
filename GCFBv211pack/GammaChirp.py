@@ -3,6 +3,7 @@ import sys
 import numpy as np
 from scipy import signal
 import utils
+import matplotlib.pyplot as plt
 
 def GammaChirp(Frs, SR, OrderG=4, CoefERBw=1.019, CoefC=0, Phase=0, SwCarr='cos', SwNorm='no'):
     """Gammachirp : Theoretical auditory filter
@@ -24,6 +25,9 @@ def GammaChirp(Frs, SR, OrderG=4, CoefERBw=1.019, CoefC=0, Phase=0, SwCarr='cos'
         Fps (array_like): Peak frequency
         InstFreq (array_like): Instanteneous frequency
     """    
+
+    if len(SwCarr) == 0:
+        SwCarr = 'cos'
 
     NumCh = len(Frs)
     OrderG = OrderG * np.ones((NumCh, 1))
@@ -72,6 +76,6 @@ def GammaChirp(Frs, SR, OrderG=4, CoefERBw=1.019, CoefC=0, Phase=0, SwCarr='cos'
             freq, frsp = signal.freqz(GC[nch, 0: int(LenGC[nch])], 1, 2**utils.nextpow2(int(LenGC[nch])), fs=SR)
             fp, _ = utils.Fr2Fpeak(OrderG[nch], CoefERBw[nch], CoefC[nch], Frs[nch])
             npeak = np.argmin(np.abs(freq - fp))
-            GC[nch, :] = GC[nch, :] / abs(frsp[npeak])
+            GC[nch, :] = GC[nch, :] / np.abs(frsp[npeak])
 
     return GC, LenGC, Fps, InstFreq

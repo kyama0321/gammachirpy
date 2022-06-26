@@ -1196,6 +1196,9 @@ def fftfilt(b, x):
 
     Returns:
         y (array_like): Output signal filtered
+
+    Note: 
+        This code is based on the "fftfilt" fuction of Matlab.
     """    
 
     if isrow(x):
@@ -1245,7 +1248,7 @@ def fftfilt(b, x):
             X = xCol1[istart[np.ones((nfft, 1))]] # need to fft a scalar
         else:
             X = np.fft.fft(xCol1[istart:iend], n=nfft, axis=0)
-        Y = np.fft.ifft(X*B1, n=nfft)
+        Y = np.fft.ifft(X*B1, n=nfft, axis=0)
         yend = np.minimum(nx, istart+nfft)
         y1[istart:yend, 0] = y1[istart:yend, 0] + Y[0:(yend-istart)]
         istart += L

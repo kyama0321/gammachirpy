@@ -4,7 +4,7 @@ import sys
 import time
 from scipy import signal
 import utils
-import GCFBv211_SetParam as gcfb_set_param
+import gcfb_v211_set_param as gcfb_set_param
 import GammaChirp as gcfb
 
 
@@ -50,7 +50,7 @@ def gcfb_v211(snd_in, gc_param, *args):
         sys.exit(1)
     len_snd = len(snd_in)
     
-    gc_param, gc_resp = gcfb_set_param.SetParam(gc_param)
+    gc_param, gc_resp = gcfb_set_param.set_param(gc_param)
     fs = gc_param.fs
     num_ch = gc_param.NumCh
 

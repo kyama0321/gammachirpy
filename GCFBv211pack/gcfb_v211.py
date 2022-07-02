@@ -8,7 +8,7 @@ import GCFBv211_SetParam as gcfb_SetParam
 import GammaChirp as gcfb
 
 
-def GCFBv211(SndIn, GCparam, *args):
+def gcfb_v211(SndIn, GCparam, *args):
     """Dynamic Compressive Gammachirp Filterbank (dcGC-FB)
 
     Args:

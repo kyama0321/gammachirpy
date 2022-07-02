@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import time
 import utils
-import GCFBv211 as gcfb_main
+import gcfb_v211 as dcgcfb
 
 
 class GCparamDefault:
@@ -44,7 +44,7 @@ def main():
             
             # dcGC processing
             t_start = time.time()
-            cGCout, pGCout, GCparam, GCrest = gcfb_main.GCFBv211(snd_eq, GCparam)
+            cGCout, pGCout, GCparam, GCrest = dcgcfb.GCFBv211(snd_eq, GCparam)
             t_end = time.time()
             print(f"Elapsed time is {np.round(t_end-t_start, 4)} (sec) = \
                     {np.round((t_end-t_start)/t_snd, 4)} times RealTime.")

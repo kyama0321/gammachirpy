@@ -221,8 +221,8 @@ def gcfb_v211(snd_in, gc_param, *args):
 
             if nsmpl == 0 or np.mod(nsmpl+1, num_disp) == 0:
                 t_now = time.time()
-                print(f"Dynamic Compressive-Gammachirp: Time {round(nsmpl/fs*1000, 1)} (ms) /\
-                       {len_snd/fs*1000} (ms). elapsed time = {np.round(t_now-t_start, 1)} (sec)")
+                print(f"Dynamic Compressive-Gammachirp: Time {np.round(nsmpl/fs*1000, 1)} (ms) / "\
+                      + f"{np.round(len_snd/fs*1000, 1)} (ms). elapsed time = {np.round(t_now-t_start, 1)} (sec)")
 
         """
         End of Dynamic Compressive Gammachirp filtering

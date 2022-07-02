@@ -241,7 +241,7 @@ def Fr2Fpeak(n, b, c, fr):
 
 
 @lru_cache(maxsize=None)
-def OutMidCrctFilt(StrCrct, SR, SwPlot=0, SwFilter=0):
+def out_mid_crct_filt(StrCrct, SR, SwPlot=0, SwFilter=0):
     """Outer/middle ear compensation filter
 
     Args:
@@ -660,7 +660,7 @@ def iscolumn(x):
     return logical
 
 
-def MakeAsymCmpFiltersV2(fs,Frs,b,c):
+def make_asym_cmp_filters_v2(fs,Frs,b,c):
     """Computes the coefficients for a bank of Asymmetric Compensation Filters
     This is a modified version to fix the round off problem at low freqs
     Use this with ACFilterBank.m
@@ -1077,7 +1077,7 @@ class classACFstatus:
         Count = []
 
 
-def ACFilterBank(ACFcoef, ACFstatus, SigIn=[], SwOrdr=0):
+def acfilterbank(ACFcoef, ACFstatus, SigIn=[], SwOrdr=0):
     """IIR ACF time-slice filtering for time-varing filter
 
     Args:

@@ -22,7 +22,7 @@ def main():
     t_pulse = 10 # (ms) 100 Hz pulse train
     snd = np.array(([1]+[0]*int(t_pulse*fs/1000-1))*10)
     t_snd = len(snd)/fs
-    print("Duration of sound = {} (ms)".format(t_snd*1000))
+    print(f"Duration of sound = {t_snd*1000} (ms)")
 
     # signal levels
     list_dbspl = np.arange(40, 100, 20)

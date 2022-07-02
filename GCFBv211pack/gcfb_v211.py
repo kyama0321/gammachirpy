@@ -114,7 +114,8 @@ def gcfb_v211(snd_in, gc_param, *args):
     for nch in range(num_ch):
 
         # passive gammachirp
-        pgc, _, _, _ = gcfb.gammachirp(gc_resp.Fr1[nch], fs, gc_param.n, gc_resp.b1val[nch], gc_resp.c1val[nch], 0, '', 'peak')
+        pgc, _, _, _ = gcfb.gammachirp(gc_resp.Fr1[nch], fs, gc_param.n, \
+                                       gc_resp.b1val[nch], gc_resp.c1val[nch], 0, '', 'peak')
 
         # fast FFT-based filtering by the pgc
         pgc_out[nch, 0:len_snd] = utils.fftfilt(pgc[0,:], Snd) 
@@ -128,7 +129,7 @@ def gcfb_v211(snd_in, gc_param, *args):
                                          acf_coef_fast_prcs.ap[nch, :, n_filt], gc_out1)
 
             cgc_out[nch, :] = gc_out1.copy()
-            gc_resp.Fp2[nch], _ = utils.Fr1toFp2(gc_param.n, gc_resp.b1val[nch], gc_resp.c1val[nch], \
+            gc_resp.Fp2[nch], _ = utils.fr1_to_fp2(gc_param.n, gc_resp.b1val[nch], gc_resp.c1val[nch], \
                                                  gc_resp.b2val[nch], gc_resp.c2val[nch], \
                                                  fratVal[nch], gc_resp.Fr1[nch])
             if nch == num_ch:
@@ -234,8 +235,8 @@ def gcfb_v211(snd_in, gc_param, *args):
         fratRef = gc_param.frat[0, 0] + gc_param.frat[0, 1] * gc_resp.Ef[:] \
             + (gc_param.frat[1, 0] + gc_param.frat[1, 1] * gc_resp.Ef[:]) * gc_param.GainRefdB
 
-        cgc_ref = utils.CmprsGCFrsp(gc_resp.Fr1, fs, gc_param.n, gc_resp.b1val, \
-                                   gc_resp.c1val, fratRef, gc_resp.b2val, gc_resp.c2val)
+        cgc_ref = utils.cmprs_gc_frsp(gc_resp.Fr1, fs, gc_param.n, gc_resp.b1val, \
+                                      gc_resp.c1val, fratRef, gc_resp.b2val, gc_resp.c2val)
         gc_resp.cGCRef = cgc_ref
         gc_resp.LvldB = lvl_db
 

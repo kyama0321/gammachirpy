@@ -741,7 +741,7 @@ def make_asym_cmp_filters_v2(fs,Frs,b,c):
 
 
 
-def Fr1toFp2(n, b1, c1, b2, c2, frat, Fr1, SR=24000, Nfft=2048, SwPlot=0):
+def fr1_to_fp2(n, b1, c1, b2, c2, frat, Fr1, SR=24000, Nfft=2048, SwPlot=0):
     """Convert Fr1 (for passive GC; pGC) to Fp2 (for compressive GC; cGC)
 
     Args:
@@ -788,7 +788,7 @@ def Fr1toFp2(n, b1, c1, b2, c2, frat, Fr1, SR=24000, Nfft=2048, SwPlot=0):
     if SwPlot == 1: # Check
         fs = 48000
         NfrqRsl = 2048
-        cGCrsp = CmprsGCFrsp(Fr1, fs, n, b1, c1, frat, b2, c2, NfrqRsl)
+        cGCrsp = cmprs_gc_frsp(Fr1, fs, n, b1, c1, frat, b2, c2, NfrqRsl)
 
         nFr2 = np.zeros((len(Fp2cand), 1))
         for nn in range(len(Fp2cand)):
@@ -809,7 +809,7 @@ def Fr1toFp2(n, b1, c1, b2, c2, frat, Fr1, SR=24000, Nfft=2048, SwPlot=0):
     return Fp2, Fr2
 
 
-def CmprsGCFrsp(Fr1, fs=48000, n=4, b1=1.81, c1=-2.96, frat=1, b2=2.01, c2=2.20, NfrqRsl=1024):
+def cmprs_gc_frsp(Fr1, fs=48000, n=4, b1=1.81, c1=-2.96, frat=1, b2=2.01, c2=2.20, NfrqRsl=1024):
     """Frequency Response of Compressive GammaChirp
 
     Args:

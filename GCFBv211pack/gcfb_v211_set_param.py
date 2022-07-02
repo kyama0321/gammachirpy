@@ -41,7 +41,8 @@ def set_param(GCparam):
         GCparam (struct): Your preset gammachirp parameters
             .fs: Sampling rate (default: 48000)
             .NumCh: Number of Channels (default: 100)
-            .FRange: Frequency Range of GCFB (default: [100, 6000]) specifying asymtopic freq. of passive GC (Fr1)
+            .FRange: Frequency Range of GCFB (default: [100, 6000]) 
+                     specifying asymtopic freq. of passive GC (Fr1)
 
     Returns:
         GCparam (struct): GCparam values
@@ -95,7 +96,8 @@ def set_param(GCparam):
     if 'tim' in GCparam.Ctrl:
         GCparam.Ctrl = 'dynamic'
     if not 'sta' in GCparam.Ctrl and not 'dyn' in GCparam.Ctrl and not 'lev' in GCparam.Ctrl:
-        print("Specify GCparam.Ctrl:  'static', 'dynamic', or 'level(-estimation). (old version 'fixed'/'time-varying')", file=sys.stderr)
+        print("Specify GCparam.Ctrl:  'static', 'dynamic', or 'level(-estimation). \
+               (old version 'fixed'/'time-varying')", file=sys.stderr)
         sys.exit(1)
 
     if not hasattr(GCparam, 'GainCmpnstdB'):
@@ -181,7 +183,8 @@ def set_param(GCparam):
     # keep LvlEst params  3 Dec 2013
     ExpDecayVal = np.exp(-1/(GCparam.LvlEst.DecayHL*GCparam.fs/1000)*np.log(2)) # decay exp
     NchShift = np.round(GCparam.LvlEst.LctERB/GCresp.ERBspace1)
-    NchLvlEst = np.minimum(np.maximum(1, np.array([np.arange(GCparam.NumCh)+1]).T+NchShift), GCparam.NumCh) # shift in NumCh [1:NumCh]
+    NchLvlEst = np.minimum(np.maximum(1, np.array([np.arange(GCparam.NumCh)+1]).T+NchShift), \
+                           GCparam.NumCh) # shift in NumCh [1:NumCh]
     LvlLinMinLim = 10**(-GCparam.LvlEst.RMStoSPLdB/20) # minimum sould be SPL 0 dB
     LvlLinRef = 10**((GCparam.LvlEst.RefdB - GCparam.LvlEst.RMStoSPLdB)/20)
 

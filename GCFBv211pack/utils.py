@@ -67,7 +67,7 @@ def nextpow2(n):
     return p
 
 
-def Eqlz2MeddisHCLevel(Snd, OutLeveldB, *args):
+def eqlz2meddis_hc_level(Snd, OutLeveldB, *args):
     """ Equalizing Signal RMS Level to the Level for MeddisHairCell
 
     Args:

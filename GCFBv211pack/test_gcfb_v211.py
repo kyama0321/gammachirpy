@@ -33,7 +33,7 @@ def main():
         for sw_dbspl in range(len(list_dbspl)): # each dbspl
             # calibrate the signal level
             dbspl = list_dbspl[sw_dbspl]
-            snd_eq, _ = utils.Eqlz2MeddisHCLevel(snd, dbspl)
+            snd_eq, _ = utils.eqlz2meddis_hc_level(snd, dbspl)
 
             # Set paramteres for dcGC
             gc_param = GCparamDefault() # reset all

@@ -115,8 +115,8 @@ def GCFBv211(SndIn, GCparam, *args):
         # passive gammachirp
         pgc, _, _, _ = gcfb.GammaChirp(GCresp.Fr1[nch], fs, GCparam.n, GCresp.b1val[nch], GCresp.c1val[nch], 0, '', 'peak')
 
-        # pGCout[nch, :] = olafilt(pgc[0,:], Snd) # fast FFT-based filtering
-        pGCout[nch, 0:LenSnd] = utils.fftfilt(pgc[0,:], Snd) # fast FFT-based filtering
+        # fast FFT-based filtering by the pgc
+        pGCout[nch, 0:LenSnd] = utils.fftfilt(pgc[0,:], Snd) 
 
         # Fast processing for fixed cGC
         if SwFastPrcs == 1 and GCparam.Ctrl == 'static': # Static

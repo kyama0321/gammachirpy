@@ -171,7 +171,7 @@ def set_param(GCparam):
     GCresp.b1val = GCparam.b1[0]*OneVec + GCparam.b1[1]*GCresp.Ef
     GCresp.c1val = GCparam.c1[0]*OneVec + GCparam.c1[1]*GCresp.Ef
 
-    GCresp.Fp1, _ = utils.Fr2Fpeak(GCparam.n, GCresp.b1val, GCresp.c1val, GCresp.Fr1)
+    GCresp.Fp1, _ = utils.fr2fpeak(GCparam.n, GCresp.b1val, GCresp.c1val, GCresp.Fr1)
     GCresp.Fp2 = np.zeros(np.shape(GCresp.Fp1))
 
     GCresp.b2val = GCparam.b2[0, 0]*OneVec + GCparam.b2[0, 1]*GCresp.Ef

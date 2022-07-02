@@ -51,7 +51,7 @@ def gammachirp(frs, sr, order_g=4, coef_erbw=1.019, coef_c=0, phase=0, sw_carr='
     """
     gc = np.zeros((num_ch, int(max(len_gc))))
 
-    fps = utils.Fr2Fpeak(order_g, coef_erbw, coef_c, frs) # Peak freq.
+    fps = utils.fr2fpeak(order_g, coef_erbw, coef_c, frs) # Peak freq.
     inst_freq = np.zeros((num_ch, int(max(len_gc))))
 
     for nch in range(num_ch):
@@ -73,7 +73,7 @@ def gammachirp(frs, sr, order_g=4, coef_erbw=1.019, coef_c=0, phase=0, sw_carr='
 
         if sw_norm == 'peak': # peak gain normalization
             freq, frsp = signal.freqz(gc[nch, 0: int(len_gc[nch])], 1, 2**utils.nextpow2(int(len_gc[nch])), fs=sr)
-            fp, _ = utils.Fr2Fpeak(order_g[nch], coef_erbw[nch], coef_c[nch], frs[nch])
+            fp, _ = utils.fr2fpeak(order_g[nch], coef_erbw[nch], coef_c[nch], frs[nch])
             npeak = np.argmin(np.abs(freq - fp))
             gc[nch, :] = gc[nch, :] / np.abs(frsp[npeak])
 

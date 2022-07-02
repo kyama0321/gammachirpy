@@ -40,7 +40,7 @@ def gcfb_v211(SndIn, GCparam, *args):
 
     # Handling Input Parameters
     if len(args) > 0:
-        help(GCFBv211)
+        help(gcfb_v211)
         sys.exit()
 
     size = np.shape(SndIn)

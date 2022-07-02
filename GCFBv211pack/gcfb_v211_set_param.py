@@ -34,7 +34,7 @@ class LvlEst:
     LvlLinRef = []
 
 
-def SetParam(GCparam):
+def set_param(GCparam):
     """Setting Default Parameters for GCFBv2
 
     Args:

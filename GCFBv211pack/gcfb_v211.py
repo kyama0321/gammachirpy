@@ -4,7 +4,7 @@ import sys
 import time
 from scipy import signal
 import utils
-import GCFBv211_SetParam as gcfb_SetParam
+import GCFBv211_SetParam as gcfb_set_param
 import GammaChirp as gcfb
 
 
@@ -50,7 +50,7 @@ def gcfb_v211(snd_in, gc_param, *args):
         sys.exit(1)
     len_snd = len(snd_in)
     
-    gc_param, gc_resp = gcfb_SetParam.SetParam(gc_param)
+    gc_param, gc_resp = gcfb_set_param.SetParam(gc_param)
     fs = gc_param.fs
     num_ch = gc_param.NumCh
 
@@ -63,7 +63,7 @@ def gcfb_v211(snd_in, gc_param, *args):
         Snd = snd_in
     else:
         # if gc_param.OutMidCrct in ["ELC", "MAF", "MAP"]:
-        print("*** Outer/Middle Ear correction (minimum phase) : {} ***".format(gc_param.OutMidCrct))
+        print(f"*** Outer/Middle Ear correction (minimum phase) : {gc_param.OutMidCrct} ***")
         cmpn_out_mid, _ = utils.OutMidCrctFilt(gc_param.OutMidCrct, fs, 0, 2) # 2) minimum phase
         # 1kHz: -4 dB, 2kHz: -1 dB, 4kHz: +4 dB (ELC)
         # Now we use Minimum phase version of OutMidCrctFilt (modified 16 Apr. 2006).

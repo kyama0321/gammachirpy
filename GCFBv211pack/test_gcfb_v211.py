@@ -7,9 +7,9 @@ import gcfb_v211 as dcgc
 
 
 class GCparamDefault:
-    fs = 48000
-    NumCh = 100
-    FRange = np.array([100, 6000])
+    fs = 48000 # samping frequency
+    NumCh = 100 # number of channels
+    FRange = np.array([100, 6000]) # range of center frequency
     OutMidCrct = "No"
     # OutMidCrct = "ELC"
     # Ctrl = "dynamic" # used to be 'tyme-varying'

@@ -6,8 +6,6 @@ from scipy import signal
 import utils
 import GCFBv211_SetParam as gcfb_SetParam
 import GammaChirp as gcfb
-from thirdparty.overlapadd.olafilt import olafilt
-import matplotlib.pyplot as plt
 
 
 def GCFBv211(SndIn, GCparam, *args):

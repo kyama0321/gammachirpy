@@ -5,7 +5,8 @@ from scipy import signal
 import utils
 import matplotlib.pyplot as plt
 
-def GammaChirp(Frs, SR, OrderG=4, CoefERBw=1.019, CoefC=0, Phase=0, SwCarr='cos', SwNorm='no'):
+
+def gammachirp(Frs, SR, OrderG=4, CoefERBw=1.019, CoefC=0, Phase=0, SwCarr='cos', SwNorm='no'):
     """Gammachirp : Theoretical auditory filter
     gc(t) = t^(n-1) exp(-2 pi b ERB(Frs)) cos(2*pi*Frs*t + c ln t + phase)
 

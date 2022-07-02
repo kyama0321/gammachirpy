@@ -5,7 +5,7 @@ import time
 from scipy import signal
 import utils
 import gcfb_v211_set_param as gcfb_set_param
-import GammaChirp as gcfb
+import gammachirp as gcfb
 
 
 def gcfb_v211(snd_in, gc_param, *args):
@@ -114,7 +114,7 @@ def gcfb_v211(snd_in, gc_param, *args):
     for nch in range(num_ch):
 
         # passive gammachirp
-        pgc, _, _, _ = gcfb.GammaChirp(gc_resp.Fr1[nch], fs, gc_param.n, gc_resp.b1val[nch], gc_resp.c1val[nch], 0, '', 'peak')
+        pgc, _, _, _ = gcfb.gammachirp(gc_resp.Fr1[nch], fs, gc_param.n, gc_resp.b1val[nch], gc_resp.c1val[nch], 0, '', 'peak')
 
         # fast FFT-based filtering by the pgc
         pgc_out[nch, 0:len_snd] = utils.fftfilt(pgc[0,:], Snd) 

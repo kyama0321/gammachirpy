@@ -160,11 +160,11 @@ def set_param(GCparam):
     """
     GCresp
     """
-    Fr1, ERBrate1 = utils.EqualFreqScale('ERB', GCparam.NumCh, GCparam.FRange)
+    Fr1, ERBrate1 = utils.equal_freq_scale('ERB', GCparam.NumCh, GCparam.FRange)
     GCresp.Fr1 = np.array([Fr1]).T
     GCresp.ERBspace1 = np.mean(np.diff(ERBrate1))
-    ERBrate, ERBw = utils.Freq2ERB(GCresp.Fr1)
-    ERBrate1kHz, ERBw1kHz = utils.Freq2ERB(1000)
+    ERBrate, ERBw = utils.freq2erb(GCresp.Fr1)
+    ERBrate1kHz, ERBw1kHz = utils.freq2erb(1000)
     GCresp.Ef = ERBrate/ERBrate1kHz - 1
 
     OneVec = np.ones([GCparam.NumCh, 1])

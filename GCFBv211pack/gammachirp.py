@@ -34,9 +34,9 @@ def gammachirp(frs, sr, order_g=4, coef_erbw=1.019, coef_c=0, phase=0, sw_carr='
     coef_c = coef_c * np.ones((num_ch, 1))
     phase = phase * np.ones((num_ch, 1))
 
-    _, erbw = utils.Freq2ERB(frs)
+    _, erbw = utils.freq2erb(frs)
     len_gc_1khz = (40*max(order_g)/max(coef_erbw) + 200) * sr/16000
-    _, erbw_1khz = utils.Freq2ERB(1000)
+    _, erbw_1khz = utils.freq2erb(1000)
 
     if sw_carr == 'sin':
         phase = phase - np.pi/2*np.ones((1,num_ch))

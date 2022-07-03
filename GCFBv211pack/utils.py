@@ -96,7 +96,7 @@ def eqlz2meddis_hc_level(Snd, OutLeveldB, *args):
     return SndEqM, AmpdB
 
 
-def EqualFreqScale(NameScale, NumCh, RangeFreq):
+def equal_freq_scale(NameScale, NumCh, RangeFreq):
     """Calculation of Equal Frequency scale on ERB/Mel/Log/Linear scale
 
     Args:
@@ -117,16 +117,16 @@ def EqualFreqScale(NameScale, NumCh, RangeFreq):
         Frs = WFvals
 
     elif NameScale == 'mel':
-        RangeWF = Freq2FMel(RangeFreq)
+        RangeWF = freq2mel(RangeFreq)
         dWF = np.diff(RangeWF) / (NumCh-1)
         WFvals = np.linspace(RangeWF[0], RangeWF[1]+eps*1000, dWF)
-        Frs = Mel2Freq(WFvals)
+        Frs = mel2freq(WFvals)
 
     elif NameScale == 'ERB':
-        RangeWF, _ = Freq2ERB(RangeFreq)
+        RangeWF, _ = freq2erb(RangeFreq)
         dWF = np.diff(RangeWF) / (NumCh-1)
         WFvals = np.arange(RangeWF[0], RangeWF[1]+eps*1000, dWF)
-        Frs, _ = ERB2Freq(WFvals)
+        Frs, _ = erb2freq(WFvals)
 
     elif NameScale == 'log':
         if min(RangeFreq) < 50:
@@ -137,14 +137,14 @@ def EqualFreqScale(NameScale, NumCh, RangeFreq):
         WFvals = np.linspace(RangeWF[0], RangeWF[1]+eps*1000, dWF)
         Frs = 10**(WFvals)
     else:
-        help(EqualFreqScale)
+        help(equal_freq_scale)
         print("Specify NameScale correctly", file=sys.stderr)
         sys.exit(1)
     
     return Frs, WFvals
 
 
-def Freq2FMel(freq):
+def freq2mel(freq):
     """Convert mel to linear frequency
 
     Args:
@@ -160,7 +160,7 @@ def Freq2FMel(freq):
     return mel
 
 
-def Mel2Freq(mel):
+def mel2freq(mel):
     """Convert mel to linear frequency
 
     Args:
@@ -176,7 +176,7 @@ def Mel2Freq(mel):
     return freq
 
 
-def Freq2ERB(cf=None, warning=0):
+def freq2erb(cf=None, warning=0):
     """Convert linear frequency to ERB
 
     Args:
@@ -204,7 +204,7 @@ def Freq2ERB(cf=None, warning=0):
     return ERBrate, ERBwidth
 
 
-def ERB2Freq(ERBrate):
+def erb2freq(ERBrate):
     """Convert ERBrate to linear frequency
 
     Args:
@@ -234,7 +234,7 @@ def fr2fpeak(n, b, c, fr):
         ERBw (float): ERBwidth at fr
     """
 
-    _, ERBw = Freq2ERB(fr)
+    _, ERBw = freq2erb(fr)
     fpeak = fr + c*ERBw*b/n
 
     return fpeak, ERBw
@@ -700,7 +700,7 @@ def make_asym_cmp_filters_v2(fs,Frs,b,c):
         print("Frs should be a column vector Frs.", file=sys.stderr)
         sys.exit(1)
     
-    _, ERBw = Freq2ERB(Frs)
+    _, ERBw = freq2erb(Frs)
     ACFcoef.fs = fs
 
     # New coefficients. See [1]
@@ -761,10 +761,10 @@ def fr1_to_fp2(n, b1, c1, b2, c2, frat, Fr1, SR=24000, Nfft=2048, SwPlot=0):
         Fr2 (float): Center Frequency (for compressive GC)
     """
 
-    _, ERBw1 = Freq2ERB(Fr1)
+    _, ERBw1 = freq2erb(Fr1)
     Fp1, _ = fr2fpeak(n, b1, c1, Fr1)
     Fr2 = frat * Fp1
-    _, ERBw2 = Freq2ERB(Fr2)
+    _, ERBw2 = freq2erb(Fr2)
 
     Bw1 = b1 * ERBw1
     Bw2 = b2 * ERBw2
@@ -949,7 +949,7 @@ def GammaChirpFrsp(Frs, SR=48000, OrderG=4, CoefERBw=1.019, CoefC=0.0, Phase=0.0
         print("NfrqRsl < 256", file=sys.stderr)
         sys.exit(1)
 
-    ERBrate, ERBw = Freq2ERB(Frs)
+    ERBrate, ERBw = freq2erb(Frs)
     freq = np.arange(NfrqRsl) / NfrqRsl * SR / 2
     freq = np.array([freq]).T
 
@@ -1024,7 +1024,7 @@ def AsymCmpFrspV2(Frs, fs=48000, b=None, c=None, NfrqRsl=1024, NumFilt=4):
         ACFcoef = make_asym_cmp_filters_v2(fs, Frs, b, c)
 
     # filter coef.
-    _, ERBw = Freq2ERB(Frs)
+    _, ERBw = freq2erb(Frs)
     ACFFrsp = np.ones((NumCh, NfrqRsl))
     freq2 = np.concatenate([np.ones((NumCh,1))*freq, Frs], axis=1)
 

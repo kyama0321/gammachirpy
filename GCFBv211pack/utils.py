@@ -258,7 +258,7 @@ def out_mid_crct_filt(StrCrct, SR, SwPlot=0, SwFilter=0):
         StrFilt (string): Filter infomation
 
     Notes:
-        In the original Matlab code of OutMidCrctFilt.m, persistent variables 
+        In the original Matlab code of out_mid_crct_filt.m, persistent variables 
         are called by "persistent" function. The GammachirPy uses the "lru_cache"  
         instead of the persistent variables to call outputs if args are same 
         to previous one. 
@@ -278,12 +278,12 @@ def out_mid_crct_filt(StrCrct, SR, SwPlot=0, SwFilter=0):
     elif SwFilter == 2:
         StrFilt = "FIR minimum phase filter"
     else:
-        help(OutMidCrctFilt)
+        help(out_mid_crct_filt)
         print("Specify filter type", file=sys.stderr)
         sys.exit(1)        
 
     if not StrCrct in ['ELC', 'MAF', 'MAP', 'MidEar']:
-        help(OutMidCrctFilt)
+        help(out_mid_crct_filt)
         print("Specifiy correction: ELC/MAF/MAP/MidEar", file=sys.stderr)
         sys.exit(1)
 
@@ -310,7 +310,7 @@ def out_mid_crct_filt(StrCrct, SR, SwPlot=0, SwFilter=0):
     
     """ 
     Calculate the minimax optimal filter with a frequency response
-    instead of "FIRCoef = firpm(NCoef,freq/SR*2,crct)" in the original code OutMidCrctFilt.m
+    instead of "FIRCoef = firpm(NCoef,freq/SR*2,crct)" in the original code out_mid_crct_filt.m
     """
     x1 = np.array(np.arange(len(freq))).T * 2
     x2 = np.array(np.arange(len(freq)*2)).T
@@ -974,7 +974,7 @@ def GammaChirpFrsp(Frs, SR=48000, OrderG=4, CoefERBw=1.019, CoefC=0.0, Phase=0.0
 
 def AsymCmpFrspV2(Frs, fs=48000, b=None, c=None, NfrqRsl=1024, NumFilt=4):
     """Amplitude spectrum of Asymmetric compensation IIR filter (ACF) for the gammachirp 
-    corresponding to MakeAsymCmpFiltersV2
+    corresponding to make_asym_cmp_filters_v2
 
     Args:
         Frs (array_like, optional): Center freqs. Defaults to None.
@@ -1011,7 +1011,7 @@ def AsymCmpFrspV2(Frs, fs=48000, b=None, c=None, NfrqRsl=1024, NumFilt=4):
 
     # coef.
     SwCoef = 0 # self consistency
-    # SwCoef = 1 # reference to MakeAsymCmpFiltersV2
+    # SwCoef = 1 # reference to make_asym_cmp_filters_v2
 
     if SwCoef == 0:
         # New Coefficients. NumFilter = 4; See [1]
@@ -1021,7 +1021,7 @@ def AsymCmpFrspV2(Frs, fs=48000, b=None, c=None, NfrqRsl=1024, NumFilt=4):
         p3 = 0.2523 * (1 - 0.0244*b) * (1 + 0.0574*np.abs(c))
         p4 = 1.0724
     else:
-        ACFcoef = MakeAsymCmpFiltersV2(fs, Frs, b, c)
+        ACFcoef = make_asym_cmp_filters_v2(fs, Frs, b, c)
 
     # filter coef.
     _, ERBw = Freq2ERB(Frs)
@@ -1081,7 +1081,7 @@ def acfilterbank(ACFcoef, ACFstatus, SigIn=[], SwOrdr=0):
     """IIR ACF time-slice filtering for time-varing filter
 
     Args:
-        ACFcoef (structure): ACFcoef: coef from MakeAsymCmpFiltersV2
+        ACFcoef (structure): ACFcoef: coef from make_asym_cmp_filters_v2
             bz: MA coefficents (==b ~= zero) NumCh*Lbz*NumFilt
             ap: AR coefficents (==a ~= pole) NumCh*Lap*NumFilt
             fs : sampling rate  (also switch for verbose)
@@ -1104,7 +1104,7 @@ def acfilterbank(ACFcoef, ACFstatus, SigIn=[], SwOrdr=0):
     """    
 
     if len(SigIn) == 0 and len(ACFstatus) != 0:
-        help(ACFilterBank)
+        help(acfilterbank)
         sys.exit()
 
     if not hasattr(ACFstatus, 'NumCh'):
@@ -1115,7 +1115,7 @@ def acfilterbank(ACFcoef, ACFstatus, SigIn=[], SwOrdr=0):
 
         if Lbz != 3 or Lap !=3:
             print("No gaurantee for usual IIR filters except for AsymCmpFilter.\n"\
-                + "Please check MakeAsymCmpFiltersV2.")
+                + "Please check make_asym_cmp_filters_v2.")
     
         ACFstatus.NumCh = NumCh
         ACFstatus.NumFilt = NumFilt

@@ -46,8 +46,8 @@ def main():
             t_start = time.time()
             cgc_out, _, _, _ = dcgc.gcfb_v211(snd_eq, gc_param)
             t_end = time.time()
-            print(f"Elapsed time is {np.round(t_end-t_start, 4)} (sec) = \
-                    {np.round((t_end-t_start)/t_snd, 4)} times RealTime.")
+            print(f"Elapsed time is {np.round(t_end-t_start, 4)} (sec) = " \
+                  + f"{np.round((t_end-t_start)/t_snd, 4)} times RealTime.")
             
             # Plot
             ax = plt.subplot(len(list_dbspl), 1, sw_dbspl+1)

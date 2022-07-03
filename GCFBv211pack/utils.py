@@ -294,7 +294,7 @@ def out_mid_crct_filt(StrCrct, SR, SwPlot=0, SwFilter=0):
     Nint = 1024
     # Nint = 0 # No spline interpolation:  NG no convergence at remez
 
-    crctPwr, freq, _ = OutMidCrct(StrCrct, Nint, SR, 0)
+    crctPwr, freq, _ = out_mid_crct(StrCrct, Nint, SR, 0)
     crct = np.sqrt(crctPwr[:,0])
     freq = freq[:,0]
 
@@ -317,7 +317,7 @@ def out_mid_crct_filt(StrCrct, SR, SwPlot=0, SwFilter=0):
     freq_interp = np.interp(x2, x1, freq)
     FIRCoef = signal.remez(NCoef+1, freq_interp, crct, fs=SR) # len(freq_interp) must be twice of len(crct)
 
-    Win, _ = TaperWindow(len(FIRCoef),'HAN',LenCoef/10)
+    Win, _ = taper_window(len(FIRCoef),'HAN',LenCoef/10)
     FIRCoef = Win * FIRCoef
 
     """
@@ -353,7 +353,7 @@ def out_mid_crct_filt(StrCrct, SR, SwPlot=0, SwFilter=0):
 
 
 
-def OutMidCrct(StrCrct, NfrqRsl=0, fs=32000, SwPlot=1):
+def out_mid_crct(StrCrct, NfrqRsl=0, fs=32000, SwPlot=1):
     """Correction of ELC, MAF, MAP, MID. 
     It produces interpolated points for the ELC/MAF/MAP/MidEar correction.
 
@@ -491,7 +491,7 @@ def OutMidCrct(StrCrct, NfrqRsl=0, fs=32000, SwPlot=1):
     return CrctLinPwr, freq, FreqChardB_toBeCmpnstd
 
 
-def TaperWindow(LenWin, TypeTaper, LenTaper=None, RangeSigma=3, SwPlot=0):
+def taper_window(LenWin, TypeTaper, LenTaper=None, RangeSigma=3, SwPlot=0):
     """Taper Window Generator for signal onset/offset
 
     Args:
@@ -515,10 +515,10 @@ def TaperWindow(LenWin, TypeTaper, LenTaper=None, RangeSigma=3, SwPlot=0):
         LenTaper = int(np.fix(LenWin/2))
     
     elif LenTaper*2+1 >= LenWin:
-        print("Caution (TaperWindow) : No flat part. ")
+        print("Caution (taper_window) : No flat part. ")
         
         if not LenTaper == np.fix(LenWin/2):
-            print("Caution (TaperWindow) : LenTaper <-- fix(LenWin/2)")
+            print("Caution (taper_window) : LenTaper <-- fix(LenWin/2)")
             
         LenTaper = int(np.fix(LenWin/2))
 
@@ -664,7 +664,7 @@ def make_asym_cmp_filters_v2(fs,Frs,b,c):
     """Computes the coefficients for a bank of Asymmetric Compensation Filters
     This is a modified version to fix the round off problem at low freqs
     Use this with ACFilterBank.m
-    See also AsymCmpFrspV2 for frequency response
+    See also asym_cmp_frsp_v2 for frequency response
 
     Args:
         fs (int): Sampling frequency
@@ -874,10 +874,10 @@ def cmprs_gc_frsp(Fr1, fs=48000, n=4, b1=1.81, c1=-2.96, frat=1, b2=2.01, c2=2.2
     if isinstance(c2, (int, float)):
         c2 = c2 * np.ones((NumCh, 1))
 
-    pGCFrsp, freq, _, _, _ = GammaChirpFrsp(Fr1, fs, n, b1, c1, 0.0, NfrqRsl)
+    pGCFrsp, freq, _, _, _ = gammachirp_frsp(Fr1, fs, n, b1, c1, 0.0, NfrqRsl)
     Fp1, _ = fr2fpeak(n, b1, c1, Fr1)
     Fr2 = frat * Fp1
-    ACFFrsp, freq, AsymFunc = AsymCmpFrspV2(Fr2, fs, b2, c2, NfrqRsl)
+    ACFFrsp, freq, AsymFunc = asym_cmp_frsp_v2(Fr2, fs, b2, c2, NfrqRsl)
     cGCFrsp = pGCFrsp * AsymFunc # cGCFrsp = pGCFrsp * ACFFrsp
     
     ValFp2 = np.max(cGCFrsp, axis=1)
@@ -911,7 +911,7 @@ def cmprs_gc_frsp(Fr1, fs=48000, n=4, b1=1.81, c1=-2.96, frat=1, b2=2.01, c2=2.2
     return cGCresp
 
 
-def GammaChirpFrsp(Frs, SR=48000, OrderG=4, CoefERBw=1.019, CoefC=0.0, Phase=0.0, NfrqRsl=1024):
+def gammachirp_frsp(Frs, SR=48000, OrderG=4, CoefERBw=1.019, CoefC=0.0, Phase=0.0, NfrqRsl=1024):
     """Frequency Response of GammaChirp
 
     Args:
@@ -972,7 +972,7 @@ def GammaChirpFrsp(Frs, SR=48000, OrderG=4, CoefERBw=1.019, CoefC=0.0, Phase=0.0
     return AmpFrsp, freq, Fpeak, GrpDly, PhsFrsp
     
 
-def AsymCmpFrspV2(Frs, fs=48000, b=None, c=None, NfrqRsl=1024, NumFilt=4):
+def asym_cmp_frsp_v2(Frs, fs=48000, b=None, c=None, NfrqRsl=1024, NumFilt=4):
     """Amplitude spectrum of Asymmetric compensation IIR filter (ACF) for the gammachirp 
     corresponding to make_asym_cmp_filters_v2
 
@@ -1005,7 +1005,7 @@ def AsymCmpFrspV2(Frs, fs=48000, b=None, c=None, NfrqRsl=1024, NumFilt=4):
         freq = Frs
         NfrqRsl = len(freq)
     else:
-        help(AsymCmpFrspV2)
+        help(asym_cmp_frsp_v2)
         print("Specify NfrqRsl 0) for Frs or N>=64 for linear-freq scale", file=sys.stderr)
         sys.exit(1)
 
@@ -1219,8 +1219,8 @@ def fftfilt(b, x):
         L = nx
     else:
         fftflops = np.array([18, 59, 138, 303, 660, 1441, 3150, 6875, 14952, 32373,\
-            69762, 149647, 319644, 680105, 1441974, 3047619, 6422736, \
-            13500637, 28311786, 59244791, 59244791*2.09])
+                             69762, 149647, 319644, 680105, 1441974, 3047619, 6422736, \
+                             13500637, 28311786, 59244791, 59244791*2.09])
         n = 2**np.arange(1,22)
         nValid = n[n > nb-1]
         fftflopsValid = np.extract([n > nb-1], fftflops)

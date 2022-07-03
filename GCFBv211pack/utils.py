@@ -235,7 +235,6 @@ def fr2fpeak(n, b, c, fr):
         fpeak (float): peak frequency
         ERBw (float): ERBwidth at fr
     """
-
     _, erb_width = freq2erb(fr)
     fpeak = fr + c*erb_width*b/n
 
@@ -243,21 +242,21 @@ def fr2fpeak(n, b, c, fr):
 
 
 @lru_cache(maxsize=None)
-def out_mid_crct_filt(StrCrct, SR, SwPlot=0, SwFilter=0):
+def out_mid_crct_filt(str_crct, sr, sw_plot=0, sw_filter=0):
     """Outer/middle ear compensation filter
 
     Args:
-        StrCrct (string): String for Correction ELC/MAF/MAP
-        SR (int): Sampling rate
-        SwPlot (int): Switch of plot (0:OFF/1:ON) (default:0)
-        SwFilter (int): Switch of filter type
+        str_crct (string): String for Correction ELC/MAF/MAP
+        sr (int): Sampling rate
+        sw_plot (int): Switch of plot (0:OFF/1:ON) (default:0)
+        sw_filter (int): Switch of filter type
             0: FIR linear phase filter (default)
             1: FIR linear phase inverse filter filter
             2: FIR mimimum phase filter (length: half of linear phase filter)
 
     Returns:
-        FIRCoef (array_like): FIR filter coefficients
-        StrFilt (string): Filter infomation
+        fir_coef (array_like): FIR filter coefficients
+        str_filt (string): Filter infomation
 
     Notes:
         In the original Matlab code of out_mid_crct_filt.m, persistent variables 
@@ -268,23 +267,22 @@ def out_mid_crct_filt(StrCrct, SR, SwPlot=0, SwFilter=0):
     Reference:
         https://docs.python.org/3/library/functools.html
     """
-
-    if SR > 48000:
-        print("OutMidCrctFilt : Sampling rate of {} (Hz) (> 48000 (Hz) is not recommended)".format(SR))
+    if sr > 48000:
+        print("OutMidCrctFilt : Sampling rate of {} (Hz) (> 48000 (Hz) is not recommended)".format(sr))
         print("<-- ELC etc. is only defined below 16000 (Hz)")
 
-    if SwFilter == 0:
-        StrFilt = "FIR linear phase filter"
-    elif SwFilter == 1:
-        StrFilt = "FIR linear phase inverse filter"
-    elif SwFilter == 2:
-        StrFilt = "FIR minimum phase filter"
+    if sw_filter == 0:
+        str_filt = "FIR linear phase filter"
+    elif sw_filter == 1:
+        str_filt = "FIR linear phase inverse filter"
+    elif sw_filter == 2:
+        str_filt = "FIR minimum phase filter"
     else:
         help(out_mid_crct_filt)
         print("Specify filter type", file=sys.stderr)
         sys.exit(1)        
 
-    if not StrCrct in ['ELC', 'MAF', 'MAP', 'MidEar']:
+    if not str_crct in ['ELC', 'MAF', 'MAP', 'MidEar']:
         help(out_mid_crct_filt)
         print("Specifiy correction: ELC/MAF/MAP/MidEar", file=sys.stderr)
         sys.exit(1)
@@ -292,53 +290,53 @@ def out_mid_crct_filt(StrCrct, SR, SwPlot=0, SwFilter=0):
     """
     Generating filter at the first time
     """
-    print("*** OutMidCrctFilt: Generating {} {} ***".format(StrCrct, StrFilt))
-    Nint = 1024
-    # Nint = 0 # No spline interpolation:  NG no convergence at remez
+    print("*** OutMidCrctFilt: Generating {} {} ***".format(str_crct, str_filt))
+    n_int = 1024
+    # n_int = 0 # No spline interpolation:  NG no convergence at remez
 
-    crctPwr, freq, _ = out_mid_crct(StrCrct, Nint, SR, 0)
-    crct = np.sqrt(crctPwr[:,0])
+    crct_pwr, freq, _ = out_mid_crct(str_crct, n_int, sr, 0)
+    crct = np.sqrt(crct_pwr[:,0])
     freq = freq[:,0]
 
-    LenCoef = 200 # ( -45 dB) <- 300 (-55 dB)
-    NCoef = int(np.fix(LenCoef/16000*SR/2)*2) # even number only
+    len_coef = 200 # ( -45 dB) <- 300 (-55 dB)
+    n_coef= int(np.fix(len_coef/16000*sr/2)*2) # even number only
 
-    if SwFilter == 1:
-        crct = 1 / np.max(np.sqrt(crctPwr), 0.1) # Giving up less tan -20 dB : f>15000 Hz
+    if sw_filter == 1:
+        crct = 1 / np.max(np.sqrt(crct_pwr), 0.1) # Giving up less tan -20 dB : f>15000 Hz
                                                  # if requered, the response becomes worse
     
-    LenCoef = 200 # ( -45 dB) <- 300 (-55 dB)
-    NCoef = int(np.fix(LenCoef/16000*SR/2)*2) # even number only
+    len_coef = 200 # ( -45 dB) <- 300 (-55 dB)
+    n_coef= int(np.fix(len_coef/16000*sr/2)*2) # even number only
     
     """ 
     Calculate the minimax optimal filter with a frequency response
-    instead of "FIRCoef = firpm(NCoef,freq/SR*2,crct)" in the original code out_mid_crct_filt.m
+    instead of "FIRCoef = firpm(NCoef,freq/sr*2,crct)" in the original code out_mid_crct_filt.m
     """
     x1 = np.array(np.arange(len(freq))).T * 2
     x2 = np.array(np.arange(len(freq)*2)).T
     freq_interp = np.interp(x2, x1, freq)
-    FIRCoef = signal.remez(NCoef+1, freq_interp, crct, fs=SR) # len(freq_interp) must be twice of len(crct)
+    fir_coef = signal.remez(n_coef+1, freq_interp, crct, fs=sr) # len(freq_interp) must be twice of len(crct)
 
-    Win, _ = taper_window(len(FIRCoef),'HAN',LenCoef/10)
-    FIRCoef = Win * FIRCoef
+    win, _ = taper_window(len(fir_coef),'HAN',len_coef/10)
+    fir_coef = win * fir_coef
 
     """
     Minimum phase reconstruction
     """
-    if SwFilter == 2: 
-        _, x_mp = rceps(FIRCoef)
-        FIRCoef = x_mp[0:int(np.fix(len(x_mp)/2))]
+    if sw_filter == 2: 
+        _, x_mp = rceps(fir_coef)
+        fir_coef = x_mp[0:int(np.fix(len(x_mp)/2))]
 
     """
     Plot
     """
-    if SwPlot == 1:
+    if sw_plot == 1:
         Nrsl = 1024
-        freq2, frsp = signal.freqz(FIRCoef, 1, Nrsl, fs=SR)
+        freq2, frsp = signal.freqz(fir_coef, 1, Nrsl, fs=sr)
 
         fig = plt.figure()
         ax1 = fig.add_subplot(2, 1, 1)
-        plt.plot(FIRCoef)
+        plt.plot(fir_coef)
         ax1.set_xlabel('Sample')
         ax1.set_ylabel('Amplitude')
         ax1.set_xlim([0, 300])
@@ -351,16 +349,16 @@ def out_mid_crct_filt(StrCrct, SR, SwPlot=0, SwFilter=0):
         ax2.set_xlim([0, 25000])
         ax2.set_ylim([0, 1.8])
         
-    return FIRCoef, StrFilt
+    return fir_coef, str_filt
 
 
 
-def out_mid_crct(StrCrct, NfrqRsl=0, fs=32000, SwPlot=1):
+def out_mid_crct(str_crct, NfrqRsl=0, fs=32000, SwPlot=1):
     """Correction of ELC, MAF, MAP, MID. 
     It produces interpolated points for the ELC/MAF/MAP/MidEar correction.
 
     Args:
-        StrCrct (string): Correction ELC/MAF/MAP/MidEar
+        str_crct (string): Correction ELC/MAF/MAP/MidEar
         NfrqRsl (int): Number of data points, if zero, then direct out (default: 0)
         fs (int): Sampling frequency (default: 32000)
         SwPlot (int): Switch for plot (0/1, default:1)
@@ -373,12 +371,12 @@ def out_mid_crct(StrCrct, NfrqRsl=0, fs=32000, SwPlot=1):
             to be compensated for filterbank (defined By Glassberg and Moore.)
 
     Note: 
-        "ER4B" option in StrCrct was omitted because the option uses a special measurement data. 
+        "ER4B" option in str_crct was omitted because the option uses a special measurement data. 
     """
 
     # ER4B: Omitted 
     """  
-    if StrCrct == 'ER4B':
+    if str_crct == 'ER4B':
         CrctLinPwr, freq, FreqChardB_toBeCmpnstd = OutMidCrct_ER4B(NfrqRsl, fs, SwPlot)
         return CrctLinPwr, freq, FreqChardB_toBeCmpnstd
     """
@@ -425,23 +423,23 @@ def out_mid_crct(StrCrct, NfrqRsl=0, fs=32000, SwPlot=1):
 
     frqTbl = []
     TblFreqChar = []
-    if StrCrct == 'ELC':
+    if str_crct == 'ELC':
         frqTbl = np.array([f1]).T
         TblFreqChar = np.array([ELC]).T
         ValHalfFs = 130
-    elif StrCrct == 'MAF':
+    elif str_crct == 'MAF':
         frqTbl = np.array([f1]).T
         TblFreqChar = np.array([MAF]).T
         ValHalfFs = 130
-    elif StrCrct == 'MAF':
+    elif str_crct == 'MAF':
         frqTbl = np.array([f2]).T
         TblFreqChar = np.array([MAP]).T
         ValHalfFs = 180
-    elif StrCrct == 'MidEar':
+    elif str_crct == 'MidEar':
         frqTbl = np.array([f3]).T
         TblFreqChar = np.array([MID]).T
         ValHalfFs = 23
-    elif StrCrct == 'NO':
+    elif str_crct == 'NO':
         pass
     else:
         print("Specifiy correction: ELC/MAF/MAP/MidEar or NO correction", file=sys.stderr)
@@ -464,7 +462,7 @@ def out_mid_crct(StrCrct, NfrqRsl=0, fs=32000, SwPlot=1):
         FreqChardB_toBeCmpnstd = TblFreqChar
     else:
         freq = np.array([np.arange(NfrqRsl)/NfrqRsl * fs/2]).T
-        if StrCrct == 'NO':
+        if str_crct == 'NO':
             FreqChardB_toBeCmpnstd = np.zeros(freq.shape)
         else:
             str1 = 'Spline interpolated value in equal frequency spacing.'
@@ -476,7 +474,7 @@ def out_mid_crct(StrCrct, NfrqRsl=0, fs=32000, SwPlot=1):
             FreqChardB_toBeCmpnstd = np.array([FreqChardB_toBeCmpnstd]).T
     
     if SwPlot == 1:
-        str = "*** Frequency Characteristics (" + StrCrct + "): Its inverse will be corrected. ***"
+        str = "*** Frequency Characteristics (" + str_crct + "): Its inverse will be corrected. ***"
         print(str) 
         print("{}".format(str1))
         fig, ax = plt.subplots()

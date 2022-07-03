@@ -233,7 +233,7 @@ def fr2fpeak(n, b, c, fr):
 
     Returns:
         fpeak (float): peak frequency
-        ERBw (float): erbwidth at fr
+        erbw (float): erbwidth at fr
     """
     _, erb_width = freq2erb(fr)
     fpeak = fr + c*erb_width*b/n
@@ -977,100 +977,101 @@ def gammachirp_frsp(frs, sr=48000, order_g=4, coef_erbw=1.019, coef_c=0.0, phase
     return amp_frsp, freq, f_peak, grp_dly, phs_frsp
     
 
-def asym_cmp_frsp_v2(Frs, fs=48000, b=None, c=None, NfrqRsl=1024, NumFilt=4):
+def asym_cmp_frsp_v2(frs, fs=48000, b=None, c=None, n_frq_rsl=1024, num_filt=4):
     """Amplitude spectrum of Asymmetric compensation IIR filter (ACF) for the gammachirp 
     corresponding to make_asym_cmp_filters_v2
 
     Args:
-        Frs (array_like, optional): Center freqs. Defaults to None.
+        frs (array_like, optional): Center freqs. Defaults to None.
         fs (int, optional): Sampling freq. Defaults to 48000.
         b (array_like, optional): Bandwidth coefficient. Defaults to None.
         c (array_like, optional): Asymmetric paramters. Defaults to None.
-        NfrqRsl (int, optional): Freq. resolution for linear freq. scale for specify renponse at Frs
-                                (NfrqRsl>64). Defaults to 1024.
-        NumFilt (int, optional): Number of 2nd-order filters. Defaults to 4.
+        n_frq_rsl (int, optional): Freq. resolution for linear freq. scale for specify renponse at frs
+                                (n_frq_rsl>64). Defaults to 1024.
+        num_filt (int, optional): Number of 2nd-order filters. Defaults to 4.
 
     Returns:
-        ACFFrsp: Absolute values of frequency response of ACF (NumCh * NfrqRsl)
-        freq: freq. (1 * NfrqRsl)
-        AsymFunc: Original asymmetric function (NumCh * NfrqRsl)
+        acf_frsp: Absolute values of frequency response of ACF (num_ch * n_frq_rsl)
+        freq: freq. (1 * n_frq_rsl)
+        asym_func: Original asymmetric function (num_ch * n_frq_rsl)
     """
 
-    if isrow(Frs):
-        Frs = np.array([Frs]).T
+    if isrow(frs):
+        frs = np.array([frs]).T
     if isrow(b):
         b = np.array([b]).T
     if isrow(c):
         c = np.array([c]).T
-    NumCh = len(Frs)
+    num_ch = len(frs)
 
-    if NfrqRsl >= 64:
-        freq = np.arange(NfrqRsl) / NfrqRsl * fs/2
-    elif NfrqRsl == 0:
-        freq = Frs
-        NfrqRsl = len(freq)
+    if n_frq_rsl >= 64:
+        freq = np.arange(n_frq_rsl) / n_frq_rsl * fs/2
+    elif n_frq_rsl == 0:
+        freq = frs
+        n_frq_rsl = len(freq)
     else:
         help(asym_cmp_frsp_v2)
-        print("Specify NfrqRsl 0) for Frs or N>=64 for linear-freq scale", file=sys.stderr)
+        print("Specify n_frq_rsl 0) for frs or N>=64 for linear-freq scale", file=sys.stderr)
         sys.exit(1)
 
     # coef.
-    SwCoef = 0 # self consistency
-    # SwCoef = 1 # reference to make_asym_cmp_filters_v2
+    sw_coef = 0 # self consistency
+    # sw_coef = 1 # reference to make_asym_cmp_filters_v2
 
-    if SwCoef == 0:
-        # New Coefficients. NumFilter = 4; See [1]
+    if sw_coef == 0:
+        # New Coefficients. num_filt = 4; See [1]
         p0 = 2
         p1 = 1.7818 * (1 - 0.0791*b) * (1 - 0.1655*np.abs(c))
         p2 = 0.5689 * (1 - 0.1620*b) * (1 - 0.0857*np.abs(c))
         p3 = 0.2523 * (1 - 0.0244*b) * (1 + 0.0574*np.abs(c))
         p4 = 1.0724
     else:
-        ACFcoef = make_asym_cmp_filters_v2(fs, Frs, b, c)
+        ACFcoef = make_asym_cmp_filters_v2(fs, frs, b, c)
 
     # filter coef.
-    _, ERBw = freq2erb(Frs)
-    ACFFrsp = np.ones((NumCh, NfrqRsl))
-    freq2 = np.concatenate([np.ones((NumCh,1))*freq, Frs], axis=1)
+    _, erbw = freq2erb(frs)
+    acf_frsp = np.ones((num_ch, n_frq_rsl))
+    freq2 = np.concatenate([np.ones((num_ch,1))*freq, frs], axis=1)
 
-    for Nfilt in range(NumFilt):
+    for nfilt in range(num_filt):
 
-        if SwCoef == 0:
-            r = np.exp(-p1 * (p0/p4)**Nfilt * 2 * np.pi * b * ERBw / fs)
-            delfr = (p0*p4)**Nfilt * p2 * c * b * ERBw
-            phi = 2*np.pi*np.maximum(Frs + delfr, 0)/fs
-            psi = 2*np.pi*np.maximum(Frs - delfr, 0)/fs
-            fn = Frs
-            ap = np.concatenate([np.ones((NumCh, 1)), -2*r*np.cos(phi), r**2], axis=1)
-            bz = np.concatenate([np.ones((NumCh, 1)), -2*r*np.cos(psi), r**2], axis=1)
+        if sw_coef == 0:
+            r = np.exp(-p1 * (p0/p4)**nfilt * 2 * np.pi * b * erbw / fs)
+            delfr = (p0*p4)**nfilt * p2 * c * b * erbw
+            phi = 2*np.pi*np.maximum(frs + delfr, 0)/fs
+            psi = 2*np.pi*np.maximum(frs - delfr, 0)/fs
+            fn = frs
+            ap = np.concatenate([np.ones((num_ch, 1)), -2*r*np.cos(phi), r**2], axis=1)
+            bz = np.concatenate([np.ones((num_ch, 1)), -2*r*np.cos(psi), r**2], axis=1)
         else:
-            ap = ACFcoef.ap[:, :, Nfilt]
-            bz = ACFcoef.bz[:, :, Nfilt]
+            ap = ACFcoef.ap[:, :, nfilt]
+            bz = ACFcoef.bz[:, :, nfilt]
 
         cs1 = np.cos(2*np.pi*freq2/fs)
         cs2 = np.cos(4*np.pi*freq2/fs)
-        bzz0 = np.array([bz[:, 0]**2 + bz[:, 1]**2 + bz[:, 2]**2]).T * np.ones((1, NfrqRsl+1))
-        bzz1 = np.array([2 * bz[:, 1] * (bz[:, 0] + bz[:, 2])]).T * np.ones((1, NfrqRsl+1))
-        bzz2 = np.array([2 * bz[:, 0] * bz[:, 2]]).T * np.ones((1, NfrqRsl+1))
+        bzz0 = np.array([bz[:, 0]**2 + bz[:, 1]**2 + bz[:, 2]**2]).T * np.ones((1, n_frq_rsl+1))
+        bzz1 = np.array([2 * bz[:, 1] * (bz[:, 0] + bz[:, 2])]).T * np.ones((1, n_frq_rsl+1))
+        bzz2 = np.array([2 * bz[:, 0] * bz[:, 2]]).T * np.ones((1, n_frq_rsl+1))
         hb = bzz0 + bzz1*cs1 + bzz2*cs2
 
-        app0 = np.array([ap[:, 0]**2 + ap[:, 1]**2 + ap[:, 2]**2]).T * np.ones((1, NfrqRsl+1))
-        app1 = np.array([2 * ap[:, 1] * (ap[:, 0] + ap[:, 2])]).T * np.ones((1, NfrqRsl+1))
-        app2 = np.array([2 * ap[:, 0] * ap[:, 2]]).T * np.ones((1, NfrqRsl+1))
+        app0 = np.array([ap[:, 0]**2 + ap[:, 1]**2 + ap[:, 2]**2]).T * np.ones((1, n_frq_rsl+1))
+        app1 = np.array([2 * ap[:, 1] * (ap[:, 0] + ap[:, 2])]).T * np.ones((1, n_frq_rsl+1))
+        app2 = np.array([2 * ap[:, 0] * ap[:, 2]]).T * np.ones((1, n_frq_rsl+1))
         ha = app0 + app1*cs1 + app2*cs2
 
-        H = np.sqrt(hb/ha)
-        Hnorm = np.array([H[:, NfrqRsl]]).T * np.ones((1, NfrqRsl)) # Normalizatoin by fn value
+        h = np.sqrt(hb/ha)
+        h_norm = np.array([h[:, n_frq_rsl]]).T * np.ones((1, n_frq_rsl)) # Normalizatoin by fn value
 
-        ACFFrsp = ACFFrsp * H[:,0:NfrqRsl] / Hnorm
+        acf_frsp = acf_frsp * h[:,0:n_frq_rsl] / h_norm
 
     # original Asymmetric Function without shift centering
-    fd = np.ones((NumCh, 1))*freq - Frs*np.ones((1,NfrqRsl))
-    be = (b * ERBw) * np.ones((1, NfrqRsl))
-    cc = (c * np.ones((NumCh, 1)) * np.ones((1, NfrqRsl))) # in case when c is scalar
-    AsymFunc = np.exp(cc * np.arctan2(fd, be))
+    fd = np.ones((num_ch, 1))*freq - frs*np.ones((1, n_frq_rsl))
+    be = (b * erbw) * np.ones((1, n_frq_rsl))
+    cc = (c * np.ones((num_ch, 1)) * np.ones((1, n_frq_rsl))) # in case when c is scalar
+    asym_func = np.exp(cc * np.arctan2(fd, be))
 
-    return ACFFrsp, freq, AsymFunc
+    return acf_frsp, freq, asym_func
+
 
 class classACFstatus:
         NumCh = []

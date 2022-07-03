@@ -748,8 +748,8 @@ def make_asym_cmp_filters_v2(fs, frs, b, c):
 
 
 
-def fr1_to_fp2(n, b1, c1, b2, c2, frat, Fr1, SR=24000, Nfft=2048, SwPlot=0):
-    """Convert Fr1 (for passive GC; pGC) to Fp2 (for compressive GC; cGC)
+def fr1_to_fp2(n, b1, c1, b2, c2, frat, fr1, sr=24000, n_fft=2048, sw_plot=0):
+    """Convert fr1 (for passive GC; pGC) to fp2 (for compressive GC; cGC)
 
     Args:
         n (int): Parameter defining the envelope of the gamma distribution (for pGC)
@@ -758,62 +758,61 @@ def fr1_to_fp2(n, b1, c1, b2, c2, frat, Fr1, SR=24000, Nfft=2048, SwPlot=0):
         b2 (float): Parameter defining the envelope of the gamma distribution (for cGC)
         c2 (float): Chirp factor  (for cGC)
         frat (float): Frequency ratio, the main level-dependent variable
-        Fr1 (float): Center frequency (for pGC)
-        SR (int, optional): Sampling rate. Defaults to 24000.
-        Nfft (int, optional): Size of FFT. Defaults to 2048.
-        SwPlot (int, optional): Show plot of cGCFrsp and pGCFrsp. Defaults to 0.
+        fr1 (float): Center frequency (for pGC)
+        sr (int, optional): Sampling rate. Defaults to 24000.
+        n_fft (int, optional): Size of FFT. Defaults to 2048.
+        sw_plot (int, optional): Show plot of cGCFrsp and pGCFrsp. Defaults to 0.
 
     Returns:
-        Fp2 (float): Peak frequency (for compressive GC)
-        Fr2 (float): Center Frequency (for compressive GC)
+        fp2 (float): Peak frequency (for compressive GC)
+        fr2 (float): Center Frequency (for compressive GC)
     """
+    _, erbw1 = freq2erb(fr1)
+    fp1, _ = fr2fpeak(n, b1, c1, fr1)
+    fr2 = frat * fp1
+    _, erbw2 = freq2erb(fr2)
 
-    _, ERBw1 = freq2erb(Fr1)
-    Fp1, _ = fr2fpeak(n, b1, c1, Fr1)
-    Fr2 = frat * Fp1
-    _, ERBw2 = freq2erb(Fr2)
+    bw1 = b1 * erbw1
+    bw2 = b2 * erbw2
 
-    Bw1 = b1 * ERBw1
-    Bw2 = b2 * ERBw2
+    # coef1*fp2^3 + coef2*fp2^2 + coef3*fp2 + coef4 = 0 
+    coef1 = -n
+    coef2 = c1*bw1 + c2*bw2 + n*fr1 + 2*n*fr2
+    coef3 = -2*fr2*(c1*bw1+n*fr1) - n*((bw2)**2+fr2**2) - 2*c2*bw2*fr1
+    coef4 = c2*bw2*((bw1)**2+fr1**2) + (c1*bw1+n*fr1)*(bw2**2+fr2**2)
+    coefs = [coef1, coef2, coef3, coef4]
 
-    # Coef1*Fp2^3 + Coef2*Fp2^2 + Coef3*Fp2 + Coef4 = 0 
-    Coef1 = -n
-    Coef2 = c1*Bw1 + c2*Bw2 + n*Fr1 + 2*n*Fr2
-    Coef3 = -2*Fr2*(c1*Bw1+n*Fr1) - n*((Bw2)**2+Fr2**2) - 2*c2*Bw2*Fr1
-    Coef4 =  c2*Bw2*((Bw1)**2+Fr1**2) + (c1*Bw1+n*Fr1)*(Bw2**2+Fr2**2)
-    Coefs = [Coef1, Coef2, Coef3, Coef4]
-
-    p = np.roots(Coefs)
-    Fp2cand = p[np.imag(p)==0]
-    if len(Fp2cand) == 1:
-        Fp2 = Fp2cand
+    p = np.roots(coefs)
+    fp2cand = p[np.imag(p)==0]
+    if len(fp2cand) == 1:
+        fp2 = fp2cand
     else:
-        val, ncl = np.min(np.abs(Fp2cand - Fp1))
-        Fp2 = Fp2cand(ncl) # in usual cGC range, Fp2 is close to Fp1
+        val, ncl = np.min(np.abs(fp2cand - fp1))
+        fp2 = fp2cand(ncl) # in usual cGC range, fp2 is close to fp1
 
-    # SwPlot = 1
-    if SwPlot == 1: # Check
+    # sw_plot = 1
+    if sw_plot == 1: # Check
         fs = 48000
         n_frq_rsl = 2048
-        cGCrsp = cmprs_gc_frsp(Fr1, fs, n, b1, c1, frat, b2, c2, n_frq_rsl)
+        cgc_rsp = cmprs_gc_frsp(fr1, fs, n, b1, c1, frat, b2, c2, n_frq_rsl)
 
-        nFr2 = np.zeros((len(Fp2cand), 1))
-        for nn in range(len(Fp2cand)):
-            nFr2[nn] = np.argmin(abs(cGCrsp.freq - Fp2cand[nn]))
+        nfr2 = np.zeros((len(fp2cand), 1))
+        for nn in range(len(fp2cand)):
+            nfr2[nn] = np.argmin(abs(cgc_rsp.freq - fp2cand[nn]))
         
         fig, ax = plt.subplots()
-        plt_freq = np.array(cGCrsp.freq).T
-        plt_cGCFrsp = np.array(cGCrsp.cGCFrsp/np.max(cGCrsp.cGCFrsp)).T
-        plt_pGCFrsp = np.array(cGCrsp.pGCFrsp).T
+        plt_freq = np.array(cgc_rsp.freq).T
+        plt_cgc_frsp = np.array(cgc_rsp.cGCFrsp/np.max(cgc_rsp.cGCFrsp)).T
+        plt_pgc_frsp = np.array(cgc_rsp.pGCFrsp).T
 
-        ax.plot(plt_freq, plt_cGCFrsp, label="cGCFrsp") # compressive GC
-        ax.plot(plt_freq, plt_pGCFrsp, label="pGCFrsp") # passive GC
-        ax.set_xlim([0, np.max(Fp2cand)*2])
+        ax.plot(plt_freq, plt_cgc_frsp, label="cGCFrsp") # compressive GC
+        ax.plot(plt_freq, plt_pgc_frsp, label="pGCFrsp") # passive GC
+        ax.set_xlim([0, np.max(fp2cand)*2])
         ax.set_ylim([0, 1])
         ax.legend()
         plt.show()
 
-    return Fp2, Fr2
+    return fp2, fr2
 
 
 def cmprs_gc_frsp(Fr1, fs=48000, n=4, b1=1.81, c1=-2.96, frat=1, b2=2.01, c2=2.20, NfrqRsl=1024):

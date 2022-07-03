@@ -682,13 +682,13 @@ def make_asym_cmp_filters_v2(fs, frs, b, c):
     Returns:
         ACFcoef: 
         - fs (int): Sampling frequency
-        - bz (array_like): MA coefficients  (num_ch*3*NumFilt)
-        - ap (array_like): AR coefficients  (num_ch*3*NumFilt)
+        - bz (array_like): MA coefficients  (num_ch*3*num_filt)
+        - ap (array_like): AR coefficients  (num_ch*3*num_filt)
 
     Notes:
         [1] Ref for p1-p4: Unoki,M , Irino,T. , and Patterson, R.D. , "Improvement of an IIR asymmetric compensation gammachirp filter," Acost. Sci. & Tech. (ed. by the Acoustical Society of Japan ), 22 (6), pp. 426-430, Nov. 2001.
         [2] Conventional setting was removed.
-            fn = frs + Nfilt* p3 .*c .*b .*erbw/n;
+            fn = frs + nfilt* p3 .*c .*b .*erbw/n;
             This frequency fn is for normalizing GC(=GT*Hacf) filter to be unity at the peak, frequnecy. But now we use Hacf as a highpass filter as well. cGC = pGC *Hacf. In this case, this normalization is useless. 
             So, it was set as the gain at frs is unity.  (4. Jun 2004 )
         [3] Removed
@@ -1083,13 +1083,12 @@ class classACFstatus:
         Count = []
 
 
-def acfilterbank(ACFcoef, ACFstatus, SigIn=[], SwOrdr=0):
+def acfilterbank(ACFcoef, ACFstatus, sig_in=[], sw_ordr=0):
     """IIR ACF time-slice filtering for time-varing filter
 
     Args:
         ACFcoef (structure): ACFcoef: coef from make_asym_cmp_filters_v2
-            bz: MA coefficents (==b ~= zero) NumCh*Lbz*NumFilt
-            ap: AR coefficents (==a ~= pole) NumCh*Lap*NumFilt
+            ap: AR coefficents (==a ~= pole) num_ch*lap*num_filt
             fs : sampling rate  (also switch for verbose)
                 (The variables named 'a' and 'b' are not used to avoid the
                 confusion to the gammachirp parameters.)
@@ -1099,98 +1098,97 @@ def acfilterbank(ACFcoef, ACFstatus, SigIn=[], SwOrdr=0):
             Lbz: size of MA
             Lap: size of AR
             NumFilt: Length of filters
-            SigInPrev: Previous status of SigIn
+            SigInPrev: Previous status of sig_in
             SigOutPrev: Previous status of SigOut
-        SigIn (array_like, optional): Input signal. Defaults to [].
-        SwOrdr (int, optional): Switch filtering order. Defaults to 0.
+        sig_in (array_like, optional): Input signal. Defaults to [].
+        sw_ordr (int, optional): Switch filtering order. Defaults to 0.
 
     Returns:
-        SigOut (array_like): Filtered signal (NumCh * 1)
+        SigOut (array_like): Filtered signal (num_ch * 1)
         ACFstatus: Current status
     """    
 
-    if len(SigIn) == 0 and len(ACFstatus) != 0:
+    if len(sig_in) == 0 and len(ACFstatus) != 0:
         help(acfilterbank)
         sys.exit()
 
     if not hasattr(ACFstatus, 'NumCh'):
         ACFstatus = classACFstatus()
 
-        NumCh, Lbz, NumFilt = np.shape(ACFcoef.bz)
-        NumCh, Lap, NumFIlt = np.shape(ACFcoef.ap)
+        num_ch, lbz, num_filt = np.shape(ACFcoef.bz)
+        num_ch, lap, _ = np.shape(ACFcoef.ap)
 
-        if Lbz != 3 or Lap !=3:
+        if lbz != 3 or lap !=3:
             print("No gaurantee for usual IIR filters except for AsymCmpFilter.\n"\
                 + "Please check make_asym_cmp_filters_v2.")
     
-        ACFstatus.NumCh = NumCh
-        ACFstatus.NumFilt = NumFilt
-        ACFstatus.Lbz = Lbz # size of MA
-        ACFstatus.Lap = Lap # size of AR
-        ACFstatus.SigInPrev = np.zeros((NumCh, Lbz))
-        ACFstatus.SigOutPrev = np.zeros((NumCh, Lap, NumFilt))
+        ACFstatus.NumCh = num_ch
+        ACFstatus.NumFilt = num_filt
+        ACFstatus.Lbz = lbz # size of MA
+        ACFstatus.Lap = lap # size of AR
+        ACFstatus.SigInPrev = np.zeros((num_ch, lbz))
+        ACFstatus.SigOutPrev = np.zeros((num_ch, lap, num_filt))
         ACFstatus.Count = 0
         print("ACFilterBank: Initialization of ACFstatus")
-        SigOut = []
+        sig_out = []
 
-        return SigOut, ACFstatus
-
+        return sig_out, ACFstatus
     
-    if isrow(SigIn):
-        SigIn = np.array([SigIn]).T
+    if isrow(sig_in):
+        sig_in = np.array([sig_in]).T
     
-    NumChSig, LenSig = np.shape(SigIn)
-    if LenSig != 1:
-        print("Input signal sould be NumCh*1 vector (1 sample time-slice)", file=sys.stderr)
+    num_ch_sig, len_sig = np.shape(sig_in)
+    if len_sig != 1:
+        print("Input signal sould be num_ch*1 vector (1 sample time-slice)", file=sys.stderr)
         sys.exit(1)
-    if NumChSig != ACFstatus.NumCh:
-        print("NumChSig ({}) != ACFstatus.NumCh ({})".format(NumChSig, ACFstatus.NumCh))
+    if num_ch_sig != ACFstatus.NumCh:
+        print(f"num_ch_sig ({num_ch_sig}) != ACFstatus.NumCh ({ACFstatus.NumCh})")
 
     # time stamp
     if hasattr(ACFcoef, 'verbose'):
         if ACFcoef.verbose == 1: # verbose when ACFcoef.verbose is specified to 1
-            Tdisp = 50 # ms
-            Tcnt = ACFstatus.Count/(np.fix(ACFcoef.fs/1000)) # ms
+            t_disp = 50 # ms
+            t_cnt = ACFstatus.Count/(np.fix(ACFcoef.fs/1000)) # ms
 
             if ACFstatus.Count == 0:
                 print("ACFilterBank: Start processing")
-                Tic = time.time()
+                tic = time.time()
 
-            elif np.mod(Tcnt, Tdisp) == 0:
-                Toc = time.time()
+            elif np.mod(t_cnt, t_disp) == 0:
+                toc = time.time()
                 print("ACFilterBank: Processed {} (ms). elapsed Time = {} (sec)"\
-                    .format(Tcnt, np.round(Tic-Toc, 1)))
+                    .format(t_cnt, np.round(tic-toc, 1)))
     
     ACFstatus.Count = ACFstatus.Count+1
     
     """
     Processing
     """
-    ACFstatus.SigInPrev = np.concatenate([ACFstatus.SigInPrev[:, 1:ACFstatus.Lbz], SigIn], axis=1)
+    ACFstatus.SigInPrev = np.concatenate([ACFstatus.SigInPrev[:, 1:ACFstatus.Lbz], sig_in], axis=1)
 
     x = ACFstatus.SigInPrev.copy()
-    NfiltList = np.arange(ACFstatus.NumFilt)
+    nfilt_list = np.arange(ACFstatus.NumFilt)
 
-    if SwOrdr == 1:
-        NfiltList = np.flip(NfiltList)
+    if sw_ordr == 1:
+        nfilt_list = np.flip(nfilt_list)
 
-    for Nfilt in NfiltList:
+    for nfilt in nfilt_list:
 
-        forward = ACFcoef.bz[:, ACFstatus.Lbz::-1, Nfilt] * x
-        feedback = ACFcoef.ap[:, ACFstatus.Lap:0:-1, Nfilt] * \
-            ACFstatus.SigOutPrev[:, 1:ACFstatus.Lap, Nfilt]
+        forward = ACFcoef.bz[:, ACFstatus.Lbz::-1, nfilt] * x
+        feedback = ACFcoef.ap[:, ACFstatus.Lap:0:-1, nfilt] * \
+            ACFstatus.SigOutPrev[:, 1:ACFstatus.Lap, nfilt]
 
         fwdSum = np.sum(forward, axis=1)
         fbkSum = np.sum(feedback, axis=1)
 
-        y = np.array([(fwdSum - fbkSum) / ACFcoef.ap[:, 0, Nfilt]]).T
-        ACFstatus.SigOutPrev[:, :, Nfilt] = \
-            np.concatenate([ACFstatus.SigOutPrev[:, 1:ACFstatus.Lap, Nfilt], y], axis=1)
-        x = ACFstatus.SigOutPrev[:, :, Nfilt].copy()
+        y = np.array([(fwdSum - fbkSum) / ACFcoef.ap[:, 0, nfilt]]).T
+        ACFstatus.SigOutPrev[:, :, nfilt] = \
+            np.concatenate([ACFstatus.SigOutPrev[:, 1:ACFstatus.Lap, nfilt], y], axis=1)
+        x = ACFstatus.SigOutPrev[:, :, nfilt].copy()
 
-    SigOut = y
+    sig_out = y
 
-    return SigOut, ACFstatus
+    return sig_out, ACFstatus
 
 
 def fftfilt(b, x):
@@ -1208,56 +1206,56 @@ def fftfilt(b, x):
     """    
 
     if isrow(x):
-        xCol = np.array([x]).T
+        x_col = np.array([x]).T
     else:
-        xCol = x.copy()
-    nx, mx = np.shape(xCol)
+        x_col = x.copy()
+    nx, mx = np.shape(x_col)
     
     if isrow(b):
-        bCol = np.array([b]).T
+        b_col = np.array([b]).T
     else:
-        bCol = b.copy()
-    nb, mb = np.shape(bCol)
+        b_col = b.copy()
+    nb, mb = np.shape(b_col)
 
-    # figure out which nfft and L to use
+    # figure out which n_fft and lx to use
     if nb >= nx or nb > 2**20:
-        nfft = 2<<(nb + nx -1).bit_length()
-        L = nx
+        n_fft = 2<<(nb + nx -1).bit_length()
+        lx = nx
     else:
-        fftflops = np.array([18, 59, 138, 303, 660, 1441, 3150, 6875, 14952, 32373,\
+        fft_flops = np.array([18, 59, 138, 303, 660, 1441, 3150, 6875, 14952, 32373,\
                              69762, 149647, 319644, 680105, 1441974, 3047619, 6422736, \
                              13500637, 28311786, 59244791, 59244791*2.09])
         n = 2**np.arange(1,22)
-        nValid = n[n > nb-1]
-        fftflopsValid = np.extract([n > nb-1], fftflops)
+        n_valid = n[n > nb-1]
+        fft_flops_valid = np.extract([n > nb-1], fft_flops)
         # minimize (number of blocks) * (number of flops per fft)
-        L1 = nValid - (nb - 1)
-        ind = np.argmin(np.ceil(nx/L1)*fftflopsValid)
-        nfft = nValid[ind] # must have nfft > (nb-1)
-        L = L1[ind]
+        lx1 = n_valid - (nb - 1)
+        ind = np.argmin(np.ceil(nx/lx1)*fft_flops_valid)
+        n_fft = n_valid[ind] # must have n_fft > (nb-1)
+        lx = lx1[ind]
     
-    B = np.fft.fft(bCol, n=nfft, axis=0)
-    if iscolumn(bCol):
-        B1 = B[:, 0]
+    b_spec = np.fft.fft(b_col, n=n_fft, axis=0)
+    if iscolumn(b_col):
+        b_spec1 = b_spec[:, 0]
     else:
-        B1 = B
-    if iscolumn(xCol):
-        xCol1 = xCol[:, 0]
+        b_spec1 = b_spec
+    if iscolumn(x_col):
+        x_col1 = x_col[:, 0]
     else:
-        xCol1 = xCol
+        x_col1 = x_col
 
-    y1 = np.zeros(np.shape(xCol), dtype=np.complex)
+    y1 = np.zeros(np.shape(x_col), dtype=np.complex)
     istart = 0
     while istart <= nx:
-        iend = np.minimum(istart+L, nx)
+        iend = np.minimum(istart+lx, nx)
         if (iend - (istart-1)) == 0:
-            X = xCol1[istart[np.ones((nfft, 1))]] # need to fft a scalar
+            x_spec = x_col1[istart[np.ones((n_fft, 1))]] # need to fft a scalar
         else:
-            X = np.fft.fft(xCol1[istart:iend], n=nfft, axis=0)
-        Y = np.fft.ifft(X*B1, n=nfft, axis=0)
-        yend = np.minimum(nx, istart+nfft)
-        y1[istart:yend, 0] = y1[istart:yend, 0] + Y[0:(yend-istart)]
-        istart += L
+            x_spec = np.fft.fft(x_col1[istart:iend], n=n_fft, axis=0)
+        y_spec = np.fft.ifft(x_spec*b_spec1, n=n_fft, axis=0)
+        yend = np.minimum(nx, istart+n_fft)
+        y1[istart:yend, 0] = y1[istart:yend, 0] + y_spec[0:(yend-istart)]
+        istart += lx
     
     if not any(np.imag(b)) or not any(np.imag(x)):
         y1 = np.real(y1)

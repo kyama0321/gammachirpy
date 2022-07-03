@@ -667,7 +667,7 @@ def iscolumn(x):
     return logical
 
 
-def make_asym_cmp_filters_v2(fs,Frs,b,c):
+def make_asym_cmp_filters_v2(fs, frs, b, c):
     """Computes the coefficients for a bank of Asymmetric Compensation Filters
     This is a modified version to fix the round off problem at low freqs
     Use this with ACFilterBank.m
@@ -675,7 +675,7 @@ def make_asym_cmp_filters_v2(fs,Frs,b,c):
 
     Args:
         fs (int): Sampling frequency
-        Frs (array_like): array of the center frequencies, Frs
+        frs (array_like): array of the center frequencies, frs
         b (array_like): array or scalar of a bandwidth coefficient, b
         c (float): array or scalar of asymmetric parameters, c
 
@@ -688,9 +688,9 @@ def make_asym_cmp_filters_v2(fs,Frs,b,c):
     Notes:
         [1] Ref for p1-p4: Unoki,M , Irino,T. , and Patterson, R.D. , "Improvement of an IIR asymmetric compensation gammachirp filter," Acost. Sci. & Tech. (ed. by the Acoustical Society of Japan ), 22 (6), pp. 426-430, Nov. 2001.
         [2] Conventional setting was removed.
-            fn = Frs + Nfilt* p3 .*c .*b .*ERBw/n;
+            fn = frs + Nfilt* p3 .*c .*b .*ERBw/n;
             This frequency fn is for normalizing GC(=GT*Hacf) filter to be unity at the peak, frequnecy. But now we use Hacf as a highpass filter as well. cGC = pGC *Hacf. In this case, this normalization is useless. 
-            So, it was set as the gain at Frs is unity.  (4. Jun 2004 )
+            So, it was set as the gain at frs is unity.  (4. Jun 2004 )
         [3] Removed
             ACFcoef.fn(:,nff) = fn;
             n : scalar of order t^(n-1) % used only in normalization 
@@ -702,35 +702,35 @@ def make_asym_cmp_filters_v2(fs,Frs,b,c):
         bz = np.array([])
 
 
-    NumCh, LenFrs = np.shape(Frs)
-    if LenFrs > 1:
-        print("Frs should be a column vector Frs.", file=sys.stderr)
+    NumCh, len_frs = np.shape(frs)
+    if len_frs > 1:
+        print("frs should be a column vector frs.", file=sys.stderr)
         sys.exit(1)
     
-    _, ERBw = freq2erb(Frs)
+    _, erbw = freq2erb(frs)
     ACFcoef.fs = fs
 
     # New coefficients. See [1]
-    NumFilt = 4
+    num_filt = 4
     p0 = 2
     p1 = 1.7818 * (1-0.0791*b) * (1-0.1655*np.abs(c))
     p2 = 0.5689 * (1-0.1620*b) * (1-0.0857*np.abs(c))
     p3 = 0.2523 * (1-0.0244*b) * (1+0.0574*np.abs(c))
     p4 = 1.0724
 
-    if NumFilt > 4:
-        print("NumFilt > 4", file=sys.stderr)
+    if num_filt > 4:
+        print("num_filt > 4", file=sys.stderr)
         sys.exit(1) 
 
-    ACFcoef.ap = np.zeros((NumCh, 3, NumFilt))
-    ACFcoef.bz = np.zeros((NumCh, 3, NumFilt))
+    ACFcoef.ap = np.zeros((NumCh, 3, num_filt))
+    ACFcoef.bz = np.zeros((NumCh, 3, num_filt))
 
-    for Nfilt in range(NumFilt):
-        r  = np.exp(-p1*(p0/p4)**(Nfilt) * 2*np.pi*b*ERBw / fs)
-        delFrs = (p0*p4)**(Nfilt)*p2*c*b*ERBw;  
-        phi = 2*np.pi*(Frs+delFrs).clip(0)/fs
-        psi = 2*np.pi*(Frs-delFrs).clip(0)/fs
-        fn = Frs # see [2]
+    for nfilt in range(num_filt):
+        r  = np.exp(-p1*(p0/p4)**(nfilt) * 2*np.pi*b*erbw / fs)
+        del_frs = (p0*p4)**(nfilt)*p2*c*b*erbw;  
+        phi = 2*np.pi*(frs+del_frs).clip(0)/fs
+        psi = 2*np.pi*(frs-del_frs).clip(0)/fs
+        fn = frs # see [2]
 
         # second order filter
         ap = np.concatenate([np.ones(np.shape(r)), -2*r*np.cos(phi), r**2], axis=1)
@@ -741,8 +741,8 @@ def make_asym_cmp_filters_v2(fs,Frs,b,c):
         nrm = np.array([np.abs(np.sum(vwrs*ap, axis=1) / np.sum(vwrs*bz, axis=1))]).T
         bz = bz * (nrm*np.ones((1, 3)))
 
-        ACFcoef.ap[:,:,Nfilt] = ap
-        ACFcoef.bz[:,:,Nfilt] = bz
+        ACFcoef.ap[:,:,nfilt] = ap
+        ACFcoef.bz[:,:,nfilt] = bz
 
     return ACFcoef
 

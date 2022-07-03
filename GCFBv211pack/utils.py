@@ -233,7 +233,7 @@ def fr2fpeak(n, b, c, fr):
 
     Returns:
         fpeak (float): peak frequency
-        ERBw (float): ERBwidth at fr
+        ERBw (float): erbwidth at fr
     """
     _, erb_width = freq2erb(fr)
     fpeak = fr + c*erb_width*b/n
@@ -688,7 +688,7 @@ def make_asym_cmp_filters_v2(fs, frs, b, c):
     Notes:
         [1] Ref for p1-p4: Unoki,M , Irino,T. , and Patterson, R.D. , "Improvement of an IIR asymmetric compensation gammachirp filter," Acost. Sci. & Tech. (ed. by the Acoustical Society of Japan ), 22 (6), pp. 426-430, Nov. 2001.
         [2] Conventional setting was removed.
-            fn = frs + Nfilt* p3 .*c .*b .*ERBw/n;
+            fn = frs + Nfilt* p3 .*c .*b .*erbw/n;
             This frequency fn is for normalizing GC(=GT*Hacf) filter to be unity at the peak, frequnecy. But now we use Hacf as a highpass filter as well. cGC = pGC *Hacf. In this case, this normalization is useless. 
             So, it was set as the gain at frs is unity.  (4. Jun 2004 )
         [3] Removed
@@ -917,65 +917,64 @@ def cmprs_gc_frsp(fr1, fs=48000, n=4, b1=1.81, c1=-2.96, frat=1, b2=2.01, c2=2.2
     return cGCresp
 
 
-def gammachirp_frsp(Frs, SR=48000, OrderG=4, CoefERBw=1.019, CoefC=0.0, Phase=0.0, NfrqRsl=1024):
+def gammachirp_frsp(frs, sr=48000, order_g=4, coef_erbw=1.019, coef_c=0.0, phase=0.0, n_frq_rsl=1024):
     """Frequency Response of GammaChirp
 
     Args:
-        Frs (array_like, optional): Resonance freq. Defaults to None.
-        SR (int, optional): Sampling freq. Defaults to 48000.
-        OrderG (int, optional): Order of Gamma function t**(OrderG-1). Defaults to 4.
-        CoefERBw (float, optional): Coeficient -> exp(-2*pi*CoefERBw*ERB(f)). Defaults to 1.019.
-        CoefC (int, optional): Coeficient -> exp(j*2*pi*Fr + CoefC*ln(t)). Defaults to 0.0.
-        Phase (int, optional): Coeficient -> exp(j*2*pi*Fr + CoefC*ln(t)). Defaults to 0.9.
-        NfrqRsl (int, optional): Freq. resolution. Defaults to 1024.
+        frs (array_like, optional): Resonance freq. Defaults to None.
+        sr (int, optional): Sampling freq. Defaults to 48000.
+        order_g (int, optional): Order of Gamma function t**(order_g-1). Defaults to 4.
+        coef_erbw (float, optional): Coeficient -> exp(-2*pi*coef_erbw*ERB(f)). Defaults to 1.019.
+        coef_c (int, optional): Coeficient -> exp(j*2*pi*Fr + coef_c*ln(t)). Defaults to 0.0.
+        phase (int, optional): Coeficient -> exp(j*2*pi*Fr + coef_c*ln(t)). Defaults to 0.9.
+        n_frq_rsl (int, optional): Freq. resolution. Defaults to 1024.
 
     Returns:
-        AmpFrsp (array_like): Absolute of freq. resp. (NumCh*NfrqRsl matrix)
-        freq (array_like): Frequency (1*NfrqRsl)
-        Fpeak (array_like): Peak frequency (NumCh * 1)
-        GrpDlay (array_like): Group delay (NumCh*NfrqRsl matrix)
-        PhsFrsp (array_like): Angle of freq. resp. (NumCh*NfrqRsl matrix)
+        amp_frsp (array_like): Absolute of freq. resp. (num_ch*n_frq_rsl matrix)
+        freq (array_like): Frequency (1*n_frq_rsl)
+        f_peak (array_like): Peak frequency (num_ch * 1)
+        grp_dly (array_like): Group delay (num_ch*n_frq_rsl matrix)
+        phs_frsp (array_like): Angle of freq. resp. (num_ch*n_frq_rsl matrix)
     """
+    if isrow(frs):
+        frs = np.array([frs]).T
 
-    if isrow(Frs):
-        Frs = np.array([Frs]).T
+    num_ch = len(frs)
 
-    NumCh = len(Frs)
+    if isinstance(order_g, (int, float)) or len(order_g) == 1:
+        order_g = order_g * np.ones((num_ch, 1))
+    if isinstance(coef_erbw, (int, float)) or len(coef_erbw) == 1:
+        coef_erbw = coef_erbw * np.ones((num_ch, 1))
+    if isinstance(coef_c, (int, float)) or len(coef_c) == 1:
+        coef_c = coef_c * np.ones((num_ch, 1))
+    if isinstance(phase, (int, float)) or len(phase) == 1:
+        phase = phase * np.ones((num_ch, 1))
 
-    if isinstance(OrderG, (int, float)) or len(OrderG) == 1:
-        OrderG = OrderG * np.ones((NumCh, 1))
-    if isinstance(CoefERBw, (int, float)) or len(CoefERBw) == 1:
-        CoefERBw = CoefERBw * np.ones((NumCh, 1))
-    if isinstance(CoefC, (int, float)) or len(CoefC) == 1:
-        CoefC = CoefC * np.ones((NumCh, 1))
-    if isinstance(Phase, (int, float)) or len(Phase) == 1:
-        Phase = Phase * np.ones((NumCh, 1))
-
-    if NfrqRsl < 256:
-        print("NfrqRsl < 256", file=sys.stderr)
+    if n_frq_rsl < 256:
+        print("n_frq_rsl < 256", file=sys.stderr)
         sys.exit(1)
 
-    ERBrate, ERBw = freq2erb(Frs)
-    freq = np.arange(NfrqRsl) / NfrqRsl * SR / 2
+    _, erbw = freq2erb(frs)
+    freq = np.arange(n_frq_rsl) / n_frq_rsl * sr / 2
     freq = np.array([freq]).T
 
-    one1 = np.ones((1, NfrqRsl))
-    bh = (CoefERBw * ERBw) * one1
-    fd = (np.ones((NumCh, 1)) * freq[:,0]) - Frs * one1
-    cn = (CoefC / OrderG) * one1
-    n = OrderG * one1
-    c = CoefC * one1
-    Phase = Phase * one1
+    one1 = np.ones((1, n_frq_rsl))
+    bh = (coef_erbw * erbw) * one1
+    fd = (np.ones((num_ch, 1)) * freq[:,0]) - frs * one1
+    cn = (coef_c / order_g) * one1
+    n = order_g * one1
+    c = coef_c * one1
+    phase = phase * one1
 
-    # Analytic form (normalized at Fpeak)
-    AmpFrsp = ((1+cn**2) / (1+(fd/bh)**2))**(n/2) \
+    # Analytic form (normalized at f_peak)
+    amp_frsp = ((1+cn**2) / (1+(fd/bh)**2))**(n/2) \
                 * np.exp(c * (np.arctan(fd/bh)-np.arctan(cn)))
     
-    Fpeak = Frs + CoefERBw * ERBw * CoefC / OrderG
-    GrpDly = 1/(2*np.pi) * (n*bh + c*fd) / (bh**2 + fd**2)
-    PhsFrsp = -n * np.arctan(fd/bh) - c / 2*np.log((2*np.pi*bh)**2 + (2*np.pi*fd)**2) + Phase
+    f_peak = frs + coef_erbw * erbw * coef_c / order_g
+    grp_dly = 1/(2*np.pi) * (n*bh + c*fd) / (bh**2 + fd**2)
+    phs_frsp = -n * np.arctan(fd/bh) - c / 2*np.log((2*np.pi*bh)**2 + (2*np.pi*fd)**2) + phase
 
-    return AmpFrsp, freq, Fpeak, GrpDly, PhsFrsp
+    return amp_frsp, freq, f_peak, grp_dly, phs_frsp
     
 
 def asym_cmp_frsp_v2(Frs, fs=48000, b=None, c=None, NfrqRsl=1024, NumFilt=4):

@@ -1206,56 +1206,56 @@ def fftfilt(b, x):
     """    
 
     if isrow(x):
-        xCol = np.array([x]).T
+        x_col = np.array([x]).T
     else:
-        xCol = x.copy()
-    nx, mx = np.shape(xCol)
+        x_col = x.copy()
+    nx, mx = np.shape(x_col)
     
     if isrow(b):
-        bCol = np.array([b]).T
+        b_col = np.array([b]).T
     else:
-        bCol = b.copy()
-    nb, mb = np.shape(bCol)
+        b_col = b.copy()
+    nb, mb = np.shape(b_col)
 
-    # figure out which nfft and L to use
+    # figure out which n_fft and lx to use
     if nb >= nx or nb > 2**20:
-        nfft = 2<<(nb + nx -1).bit_length()
-        L = nx
+        n_fft = 2<<(nb + nx -1).bit_length()
+        lx = nx
     else:
-        fftflops = np.array([18, 59, 138, 303, 660, 1441, 3150, 6875, 14952, 32373,\
+        fft_flops = np.array([18, 59, 138, 303, 660, 1441, 3150, 6875, 14952, 32373,\
                              69762, 149647, 319644, 680105, 1441974, 3047619, 6422736, \
                              13500637, 28311786, 59244791, 59244791*2.09])
         n = 2**np.arange(1,22)
-        nValid = n[n > nb-1]
-        fftflopsValid = np.extract([n > nb-1], fftflops)
+        n_valid = n[n > nb-1]
+        fft_flops_valid = np.extract([n > nb-1], fft_flops)
         # minimize (number of blocks) * (number of flops per fft)
-        L1 = nValid - (nb - 1)
-        ind = np.argmin(np.ceil(nx/L1)*fftflopsValid)
-        nfft = nValid[ind] # must have nfft > (nb-1)
-        L = L1[ind]
+        lx1 = n_valid - (nb - 1)
+        ind = np.argmin(np.ceil(nx/lx1)*fft_flops_valid)
+        n_fft = n_valid[ind] # must have n_fft > (nb-1)
+        lx = lx1[ind]
     
-    B = np.fft.fft(bCol, n=nfft, axis=0)
-    if iscolumn(bCol):
-        B1 = B[:, 0]
+    b_spec = np.fft.fft(b_col, n=n_fft, axis=0)
+    if iscolumn(b_col):
+        b_spec1 = b_spec[:, 0]
     else:
-        B1 = B
-    if iscolumn(xCol):
-        xCol1 = xCol[:, 0]
+        b_spec1 = b_spec
+    if iscolumn(x_col):
+        x_col1 = x_col[:, 0]
     else:
-        xCol1 = xCol
+        x_col1 = x_col
 
-    y1 = np.zeros(np.shape(xCol), dtype=np.complex)
+    y1 = np.zeros(np.shape(x_col), dtype=np.complex)
     istart = 0
     while istart <= nx:
-        iend = np.minimum(istart+L, nx)
+        iend = np.minimum(istart+lx, nx)
         if (iend - (istart-1)) == 0:
-            X = xCol1[istart[np.ones((nfft, 1))]] # need to fft a scalar
+            x_spec = x_col1[istart[np.ones((n_fft, 1))]] # need to fft a scalar
         else:
-            X = np.fft.fft(xCol1[istart:iend], n=nfft, axis=0)
-        Y = np.fft.ifft(X*B1, n=nfft, axis=0)
-        yend = np.minimum(nx, istart+nfft)
-        y1[istart:yend, 0] = y1[istart:yend, 0] + Y[0:(yend-istart)]
-        istart += L
+            x_spec = np.fft.fft(x_col1[istart:iend], n=n_fft, axis=0)
+        y_spec = np.fft.ifft(x_spec*b_spec1, n=n_fft, axis=0)
+        yend = np.minimum(nx, istart+n_fft)
+        y1[istart:yend, 0] = y1[istart:yend, 0] + y_spec[0:(yend-istart)]
+        istart += lx
     
     if not any(np.imag(b)) or not any(np.imag(x)):
         y1 = np.real(y1)

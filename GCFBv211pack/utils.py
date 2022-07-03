@@ -761,7 +761,7 @@ def fr1_to_fp2(n, b1, c1, b2, c2, frat, fr1, sr=24000, n_fft=2048, sw_plot=0):
         fr1 (float): Center frequency (for pGC)
         sr (int, optional): Sampling rate. Defaults to 24000.
         n_fft (int, optional): Size of FFT. Defaults to 2048.
-        sw_plot (int, optional): Show plot of cGCFrsp and pGCFrsp. Defaults to 0.
+        sw_plot (int, optional): Show plot of cgc_frsp and pGC_frsp. Defaults to 0.
 
     Returns:
         fp2 (float): Peak frequency (for compressive GC)
@@ -815,28 +815,28 @@ def fr1_to_fp2(n, b1, c1, b2, c2, frat, fr1, sr=24000, n_fft=2048, sw_plot=0):
     return fp2, fr2
 
 
-def cmprs_gc_frsp(Fr1, fs=48000, n=4, b1=1.81, c1=-2.96, frat=1, b2=2.01, c2=2.20, NfrqRsl=1024):
+def cmprs_gc_frsp(fr1, fs=48000, n=4, b1=1.81, c1=-2.96, frat=1, b2=2.01, c2=2.20, n_frq_rsl=1024):
     """Frequency Response of Compressive GammaChirp
 
     Args:
-        Fr1 (array-like): Resonance Freqs.
+        fr1 (array-like): Resonance Freqs.
         fs (int, optional): Sampling Freq. Defaults to 48000.
         n (int, optional): Order of Gamma function, t**(n-1). Defaults to 4.
-        b1 (float, optional): b1 for exp(-2*pi*b1*ERB(f)). Defaults to 1.81.
-        c1 (float, optional): c1 for exp(j*2*pi*Fr + c1*ln(t)). Defaults to -2.96.
-        frat (int, optional): Frequency ratio. Fr2 = frat*Fp1. Defaults to 1.
+        b1 (float, optional): b1 for exp(-2*pi*b1*erb(f)). Defaults to 1.81.
+        c1 (float, optional): c1 for exp(j*2*pi*fr + c1*ln(t)). Defaults to -2.96.
+        frat (int, optional): Frequency ratio. fr2 = frat*fp1. Defaults to 1.
         b2 (float, optional): _description_. Defaults to 2.01.
         c2 (float, optional): _description_. Defaults to 2.20.
-        NfrqRsl (int, optional): _description_. Defaults to 1024.
+        n_frq_rsl (int, optional): _description_. Defaults to 1024.
 
     Returns:
         cGCresp: Struct of cGC response
-            pGCFrsp (array-like): Passive GC freq. resp. (NumCh*NfrqRsl matrix)
-            cGCFrsp (array-like): Comressive GC freq. resp. (NumCh*NfrqRsl matrix)
-            cGCNrmFrsp (array-like): Normalized cGCFrsp (NumCh*NfrqRsl matrix)
+            pGCFrsp (array-like): Passive GC freq. resp. (num_ch*n_frq_rsl matrix)
+            cGCFrsp (array-like): Comressive GC freq. resp. (num_ch*n_frq_rsl matrix)
+            cGCNrmFrsp (array-like): Normalized cGCFrsp (num_ch*n_frq_rsl matrix)
             ACFrsp: Asym (array-like). Compensation Filter freq. resp.
             AsymFunc (array-like): Asym Func
-            freq (array-like): Frequency (1*NfrqRsl)
+            freq (array-like): Frequency (1*n_frq_rsl)
             Fp2 (array-like): Peak freq.
             ValFp2 (array-like): Peak Value
     """
@@ -862,57 +862,57 @@ def cmprs_gc_frsp(Fr1, fs=48000, n=4, b1=1.81, c1=-2.96, frat=1, b2=2.01, c2=2.2
         NormFctFp2 = []
         freq = []
 
-    if isrow(Fr1):
-        Fr1 = np.array([Fr1]).T
+    if isrow(fr1):
+        fr1 = np.array([fr1]).T
 
-    NumCh = len(Fr1)
+    num_ch = len(fr1)
 
     if isinstance(n, (int, float)):
-        n = n * np.ones((NumCh, 1))
+        n = n * np.ones((num_ch, 1))
     if isinstance(b1, (int, float)):
-        b1 = b1 * np.ones((NumCh, 1))
+        b1 = b1 * np.ones((num_ch, 1))
     if isinstance(c1, (int, float)):
-        c1 = c1 * np.ones((NumCh, 1))
+        c1 = c1 * np.ones((num_ch, 1))
     if isinstance(frat, (int, float)):
-        frat = frat * np.ones((NumCh, 1))
+        frat = frat * np.ones((num_ch, 1))
     if isinstance(b2, (int, float)):
-        b2 = b2 * np.ones((NumCh, 1))
+        b2 = b2 * np.ones((num_ch, 1))
     if isinstance(c2, (int, float)):
-        c2 = c2 * np.ones((NumCh, 1))
+        c2 = c2 * np.ones((num_ch, 1))
 
-    pGCFrsp, freq, _, _, _ = gammachirp_frsp(Fr1, fs, n, b1, c1, 0.0, NfrqRsl)
-    Fp1, _ = fr2fpeak(n, b1, c1, Fr1)
-    Fr2 = frat * Fp1
-    ACFFrsp, freq, AsymFunc = asym_cmp_frsp_v2(Fr2, fs, b2, c2, NfrqRsl)
-    cGCFrsp = pGCFrsp * AsymFunc # cGCFrsp = pGCFrsp * ACFFrsp
+    pgc_frsp, freq, _, _, _ = gammachirp_frsp(fr1, fs, n, b1, c1, 0.0, n_frq_rsl)
+    fp1, _ = fr2fpeak(n, b1, c1, fr1)
+    fr2 = frat * fp1
+    acf_frsp, freq, asym_func = asym_cmp_frsp_v2(fr2, fs, b2, c2, n_frq_rsl)
+    cgc_frsp = pgc_frsp * asym_func # cgc_frsp = pgc_frsp * acf_frsp
     
-    ValFp2 = np.max(cGCFrsp, axis=1)
-    nchFp2 = np.argmax(cGCFrsp, axis=1)
-    if isrow(ValFp2):
-        ValFp2 = np.array([ValFp2]).T
+    val_fp2 = np.max(cgc_frsp, axis=1)
+    nchFp2 = np.argmax(cgc_frsp, axis=1)
+    if isrow(val_fp2):
+        val_fp2 = np.array([val_fp2]).T
     
-    NormFactFp2 = 1/ValFp2
+    norm_fact_fp2 = 1/val_fp2
 
-    # function cGCresp = CmprsGCFrsp(Fr1,fs,n,b1,c1,frat,b2,c2,NfrqRsl)
-    cGCresp.Fr1 = Fr1
+    # function cGCresp = CmprsGCFrsp(fr1,fs,n,b1,c1,frat,b2,c2,n_frq_rsl)
+    cGCresp.Fr1 = fr1
     cGCresp.n = n
     cGCresp.b1 = b1
     cGCresp.c1 = c1
     cGCresp.frat = frat
     cGCresp.b2 = b2
     cGCresp.c2 = c2
-    cGCresp.NfrqRsl = NfrqRsl
-    cGCresp.pGCFrsp = pGCFrsp
-    cGCresp.cGCFrsp = cGCFrsp
-    cGCresp.cGCNrmFrsp = cGCFrsp * (NormFactFp2 * np.ones((1,NfrqRsl)))
-    cGCresp.ACFFrsp = ACFFrsp
-    cGCresp.AsymFunc   = AsymFunc
-    cGCresp.Fp1        = Fp1
-    cGCresp.Fr2        = Fr2
-    cGCresp.Fp2        = freq[nchFp2]
-    cGCresp.ValFp2     = ValFp2
-    cGCresp.NormFctFp2 = NormFactFp2
-    cGCresp.freq       = [freq]
+    cGCresp.NfrqRsl = n_frq_rsl
+    cGCresp.pGCFrsp = pgc_frsp
+    cGCresp.cGCFrsp = cgc_frsp
+    cGCresp.cGCNrmFrsp = cgc_frsp * (norm_fact_fp2 * np.ones((1,n_frq_rsl)))
+    cGCresp.ACFFrsp = acf_frsp
+    cGCresp.AsymFunc = asym_func
+    cGCresp.Fp1 = fp1
+    cGCresp.Fr2 = fr2
+    cGCresp.Fp2 = freq[nchFp2]
+    cGCresp.ValFp2 = val_fp2
+    cGCresp.NormFctFp2 = norm_fact_fp2
+    cGCresp.freq = [freq]
 
     return cGCresp
 

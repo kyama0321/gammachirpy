@@ -682,8 +682,8 @@ def make_asym_cmp_filters_v2(fs, frs, b, c):
     Returns:
         ACFcoef: 
         - fs (int): Sampling frequency
-        - bz (array_like): MA coefficients  (NumCh*3*NumFilt)
-        - ap (array_like): AR coefficients  (NumCh*3*NumFilt)
+        - bz (array_like): MA coefficients  (num_ch*3*NumFilt)
+        - ap (array_like): AR coefficients  (num_ch*3*NumFilt)
 
     Notes:
         [1] Ref for p1-p4: Unoki,M , Irino,T. , and Patterson, R.D. , "Improvement of an IIR asymmetric compensation gammachirp filter," Acost. Sci. & Tech. (ed. by the Acoustical Society of Japan ), 22 (6), pp. 426-430, Nov. 2001.
@@ -702,7 +702,7 @@ def make_asym_cmp_filters_v2(fs, frs, b, c):
         bz = np.array([])
 
 
-    NumCh, len_frs = np.shape(frs)
+    num_ch, len_frs = np.shape(frs)
     if len_frs > 1:
         print("frs should be a column vector frs.", file=sys.stderr)
         sys.exit(1)
@@ -722,8 +722,8 @@ def make_asym_cmp_filters_v2(fs, frs, b, c):
         print("num_filt > 4", file=sys.stderr)
         sys.exit(1) 
 
-    ACFcoef.ap = np.zeros((NumCh, 3, num_filt))
-    ACFcoef.bz = np.zeros((NumCh, 3, num_filt))
+    ACFcoef.ap = np.zeros((num_ch, 3, num_filt))
+    ACFcoef.bz = np.zeros((num_ch, 3, num_filt))
 
     for nfilt in range(num_filt):
         r  = np.exp(-p1*(p0/p4)**(nfilt) * 2*np.pi*b*erbw / fs)

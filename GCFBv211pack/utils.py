@@ -331,8 +331,8 @@ def out_mid_crct_filt(str_crct, sr, sw_plot=0, sw_filter=0):
     Plot
     """
     if sw_plot == 1:
-        Nrsl = 1024
-        freq2, frsp = signal.freqz(fir_coef, 1, Nrsl, fs=sr)
+        N_rsl = 1024
+        freq2, frsp = signal.freqz(fir_coef, 1, N_rsl, fs=sr)
 
         fig = plt.figure()
         ax1 = fig.add_subplot(2, 1, 1)
@@ -353,32 +353,33 @@ def out_mid_crct_filt(str_crct, sr, sw_plot=0, sw_filter=0):
 
 
 
-def out_mid_crct(str_crct, NfrqRsl=0, fs=32000, SwPlot=1):
+def out_mid_crct(str_crct, n_frq_rsl=0, fs=32000, sw_plot=1):
     """Correction of ELC, MAF, MAP, MID. 
     It produces interpolated points for the ELC/MAF/MAP/MidEar correction.
 
     Args:
         str_crct (string): Correction ELC/MAF/MAP/MidEar
-        NfrqRsl (int): Number of data points, if zero, then direct out (default: 0)
+        n_frq_rsl (int): Number of data points, if zero, then direct out (default: 0)
         fs (int): Sampling frequency (default: 32000)
-        SwPlot (int): Switch for plot (0/1, default:1)
+        sw_plot (int): Switch for plot (0/1, default:1)
 
     Returns:
-        CrctLinPwr (array_like): Correction value in LINEAR POWER. 
-            This is defined as:  CrctLiPwr =10^(-FreqChardB_toBeCmpnstd/10)
+        crct_pwr_lin (array_like): Correction value in LINEAR POWER. 
+            This is defined as:  CrctLiPwr =10^(-freq_char_db_to_be_cmpnstd/10)
         freq (array_like): Corresponding Frequency at the data point
-        FreqChardB_toBeCmpnstd (array_like): Frequency char of ELC/MAP dB 
+        freq_char_db_to_be_cmpnstd (array_like): Frequency char of ELC/MAP dB 
             to be compensated for filterbank (defined By Glassberg and Moore.)
 
     Note: 
-        "ER4B" option in str_crct was omitted because the option uses a special measurement data. 
+        "ER4B" option in str_crct was omitted because the option uses a special 
+        measurement data. 
     """
 
-    # ER4B: Omitted 
-    """  
+     
+    """  ER4B: Omitted
     if str_crct == 'ER4B':
-        CrctLinPwr, freq, FreqChardB_toBeCmpnstd = OutMidCrct_ER4B(NfrqRsl, fs, SwPlot)
-        return CrctLinPwr, freq, FreqChardB_toBeCmpnstd
+        crct_pwr_lin, freq, freq_char_db_to_be_cmpnstd = OutMidCrct_ER4B(n_frq_rsl, fs, sw_plot)
+        return crct_pwr_lin, freq, freq_char_db_to_be_cmpnstd
     """
 
     """
@@ -391,13 +392,13 @@ def out_mid_crct(str_crct, NfrqRsl=0, fs=32000, SwPlot=1):
             2000, 2500, 2828, 3000, 3500, 4000, 4500, 5000, 5500, 6000,  # 31-40
             7000, 8000, 9000, 10000, 12748, 15000]   # 41-46
 
-    ELC = [ 31.8, 26.0, 21.7, 18.8, 17.2, 15.4, 14.0, 12.6, 11.6, 10.6, 
+    elc = [ 31.8, 26.0, 21.7, 18.8, 17.2, 15.4, 14.0, 12.6, 11.6, 10.6, 
             9.2, 8.2, 7.7, 6.7, 5.3, 4.6, 3.9, 2.9, 2.7, 2.3, 
             2.2, 2.3, 2.5, 2.7, 2.9, 3.4, 3.9, 3.9, 3.9, 2.7, 
             0.9, -1.3, -2.5, -3.2, -4.4, -4.1, -2.5, -0.5, 2.0, 5.0, 
             10.2, 15.0, 17.0, 15.5, 11.0, 22.0]
 
-    MAF = [ 73.4, 65.2, 57.9, 52.7, 48.0, 45.0, 41.9, 39.3, 36.8, 33.0, 
+    maf = [ 73.4, 65.2, 57.9, 52.7, 48.0, 45.0, 41.9, 39.3, 36.8, 33.0, 
             29.7, 27.1, 25.0, 22.0, 18.2, 16.0, 14.0, 11.4, 9.2, 8.0, 
             6.9,  6.2,  5.7,  5.1,  5.0,  5.0,  4.4,  4.3, 3.9, 2.7, 
             0.9, -1.3, -2.5, -3.2, -4.4, -4.1, -2.5, -0.5, 2.0, 5.0, 
@@ -406,7 +407,7 @@ def out_mid_crct(str_crct, NfrqRsl=0, fs=32000, SwPlot=1):
     f2  = [  125,  250,  500, 1000, 1500, 2000, 3000, 
             4000, 6000, 8000,10000,12000,14000,16000]
 
-    MAP = [ 30.0, 19.0, 12.0,  9.0, 11.0, 16.0, 16.0, 
+    map = [ 30.0, 19.0, 12.0,  9.0, 11.0, 16.0, 16.0, 
             14.0, 14.0,  9.9, 24.7, 32.7, 44.1, 63.7]
 
     # MidEar Correction (little modification at 17000:1000:20000)
@@ -415,70 +416,71 @@ def out_mid_crct(str_crct, NfrqRsl=0, fs=32000, SwPlot=1):
             1250, 1500, 1600,  2000,  2500,  3000,  3150,  4000,  5000,  6000, 
             6300, 8000, 9000, 10000, 11200, 12500, 14000, 15000, 16000,  20000]
 
-    MID =  [  50,  39.15, 31.4, 25.4, 20.9,  18, 16.1, 14.2, 12.5, 11.13,
+    mid =  [  50,  39.15, 31.4, 25.4, 20.9,  18, 16.1, 14.2, 12.5, 11.13,
             9.71,   8.42,  7.2,  6.1,  4.7, 3.7,  3.0,  2.7,  2.6,   2.6,
              2.7,    3.7,  4.6,  8.5, 10.8, 7.3,  6.7,  5.7,  5.7,   7.6,
              8.4,   11.3, 10.6,  9.9, 11.9, 13.9, 16.0, 17.3, 17.8,  20.0] 
 
 
-    frqTbl = []
-    TblFreqChar = []
+    frq_tbl = []
+    tbl_freq_char = []
     if str_crct == 'ELC':
-        frqTbl = np.array([f1]).T
-        TblFreqChar = np.array([ELC]).T
-        ValHalfFs = 130
+        frq_tbl = np.array([f1]).T
+        tbl_freq_char = np.array([elc]).T
+        val_half_fs = 130
     elif str_crct == 'MAF':
-        frqTbl = np.array([f1]).T
-        TblFreqChar = np.array([MAF]).T
-        ValHalfFs = 130
+        frq_tbl = np.array([f1]).T
+        tbl_freq_char = np.array([maf]).T
+        val_half_fs = 130
     elif str_crct == 'MAF':
-        frqTbl = np.array([f2]).T
-        TblFreqChar = np.array([MAP]).T
-        ValHalfFs = 180
+        frq_tbl = np.array([f2]).T
+        tbl_freq_char = np.array([map]).T
+        val_half_fs = 180
     elif str_crct == 'MidEar':
-        frqTbl = np.array([f3]).T
-        TblFreqChar = np.array([MID]).T
-        ValHalfFs = 23
+        frq_tbl = np.array([f3]).T
+        tbl_freq_char = np.array([mid]).T
+        val_half_fs = 23
     elif str_crct == 'NO':
         pass
     else:
-        print("Specifiy correction: ELC/MAF/MAP/MidEar or NO correction", file=sys.stderr)
+        print("Specifiy correction: ELC/MAF/MAP/MidEar or NO correction", \
+              file=sys.stderr)
         sys.exit(1)
 
     """
     Additional dummy data for high sampling frequency
     """
     if fs > 32000:
-        frqTbl = np.vstack([frqTbl, fs/2])
-        TblFreqChar = np.vstack([TblFreqChar, ValHalfFs])
-        frqTbl, indx = np.unique(frqTbl, return_index=True)
-        frqTbl = np.array([frqTbl]).T
-        TblFreqChar = TblFreqChar[indx]
+        frq_tbl = np.vstack([frq_tbl, fs/2])
+        tbl_freq_char = np.vstack([tbl_freq_char, val_half_fs])
+        frq_tbl, indx = np.unique(frq_tbl, return_index=True)
+        frq_tbl = np.array([frq_tbl]).T
+        tbl_freq_char = tbl_freq_char[indx]
 
     str1 = ''
-    if NfrqRsl <= 0:
+    if n_frq_rsl <= 0:
         str1 = 'No interpolation. Output: values in original table.'
-        freq = frqTbl
-        FreqChardB_toBeCmpnstd = TblFreqChar
+        freq = frq_tbl
+        freq_char_db_to_be_cmpnstd = tbl_freq_char
     else:
-        freq = np.array([np.arange(NfrqRsl)/NfrqRsl * fs/2]).T
+        freq = np.array([np.arange(n_frq_rsl)/n_frq_rsl * fs/2]).T
         if str_crct == 'NO':
-            FreqChardB_toBeCmpnstd = np.zeros(freq.shape)
+            freq_char_db_to_be_cmpnstd = np.zeros(freq.shape)
         else:
             str1 = 'Spline interpolated value in equal frequency spacing.'
             freq_1d = freq.T[0,:]
-            frqTbl_1d = frqTbl.T[0,:]
-            TblFreqChar_1d = TblFreqChar.T[0,:]
-            spl = UnivariateSpline(frqTbl_1d, TblFreqChar_1d, s=0)
-            FreqChardB_toBeCmpnstd = spl(freq_1d)
-            FreqChardB_toBeCmpnstd = np.array([FreqChardB_toBeCmpnstd]).T
+            frq_tbl_1d = frq_tbl.T[0,:]
+            tbl_freq_char_1d = tbl_freq_char.T[0,:]
+            spl = UnivariateSpline(frq_tbl_1d, tbl_freq_char_1d, s=0)
+            freq_char_db_to_be_cmpnstd = spl(freq_1d)
+            freq_char_db_to_be_cmpnstd = np.array([freq_char_db_to_be_cmpnstd]).T
     
-    if SwPlot == 1:
+    if sw_plot == 1:
         str = "*** Frequency Characteristics (" + str_crct + "): Its inverse will be corrected. ***"
         print(str) 
         print("{}".format(str1))
         fig, ax = plt.subplots()
-        plt.plot(frqTbl, TblFreqChar, 'b-',freq, FreqChardB_toBeCmpnstd, 'r--')
+        plt.plot(frq_tbl, tbl_freq_char, 'b-',freq, freq_char_db_to_be_cmpnstd, 'r--')
         plt.xlim(0, 25000)
         plt.ylim(-20,140)
         ax.set_title(str)
@@ -486,9 +488,9 @@ def out_mid_crct(str_crct, NfrqRsl=0, fs=32000, SwPlot=1):
         ax.set_ylabel('Level (dB)')
         plt.show()
 
-    CrctLinPwr = 10**(-FreqChardB_toBeCmpnstd/10) # in Linear Power. Checked 19 Apr 2016
+    crct_pwr_lin = 10**(-freq_char_db_to_be_cmpnstd/10) # in Linear Power. Checked 19 Apr 2016
 
-    return CrctLinPwr, freq, FreqChardB_toBeCmpnstd
+    return crct_pwr_lin, freq, freq_char_db_to_be_cmpnstd
 
 
 def taper_window(LenWin, TypeTaper, LenTaper=None, RangeSigma=3, SwPlot=0):
@@ -787,8 +789,8 @@ def fr1_to_fp2(n, b1, c1, b2, c2, frat, Fr1, SR=24000, Nfft=2048, SwPlot=0):
     # SwPlot = 1
     if SwPlot == 1: # Check
         fs = 48000
-        NfrqRsl = 2048
-        cGCrsp = cmprs_gc_frsp(Fr1, fs, n, b1, c1, frat, b2, c2, NfrqRsl)
+        n_frq_rsl = 2048
+        cGCrsp = cmprs_gc_frsp(Fr1, fs, n, b1, c1, frat, b2, c2, n_frq_rsl)
 
         nFr2 = np.zeros((len(Fp2cand), 1))
         for nn in range(len(Fp2cand)):

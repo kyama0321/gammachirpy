@@ -36,15 +36,15 @@ def main():
             snd_eq, _ = utils.eqlz2meddis_hc_level(snd, dbspl)
 
             # Set paramteres for dcGC
-            GCparam = GCparamDefault() # reset all
+            gc_param = GCparamDefault() # reset all
             if sw_ctrl == 0: 
-                GCparam.Ctrl = "dynamic"
+                gc_param.Ctrl = "dynamic"
             else: 
-                GCparam.Ctrl = "static"
+                gc_param.Ctrl = "static"
             
             # dcGC processing
             t_start = time.time()
-            cgc_out, _, _, _ = dcgc.gcfb_v211(snd_eq, GCparam)
+            cgc_out, _, _, _ = dcgc.gcfb_v211(snd_eq, gc_param)
             t_end = time.time()
             print(f"Elapsed time is {np.round(t_end-t_start, 4)} (sec) = " \
                   + f"{np.round((t_end-t_start)/t_snd, 4)} times RealTime.")
@@ -52,7 +52,7 @@ def main():
             # Plot
             ax = plt.subplot(len(list_dbspl), 1, sw_dbspl+1)
             plt.imshow(np.maximum(cgc_out, 0), aspect='auto', origin='lower', cmap='jet')
-            ax.set_title(f"GCFB control = {GCparam.Ctrl}; Signal Level = {dbspl} dB SPL")
+            ax.set_title(f"GCFB control = {gc_param.Ctrl}; Signal Level = {dbspl} dB SPL")
             ax.set_yticks([0, 20, 40, 60, 80, 100])
             plt.tight_layout()
             plt.pause(0.05)

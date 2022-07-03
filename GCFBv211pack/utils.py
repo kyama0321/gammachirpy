@@ -20,18 +20,18 @@ def audioread(filepath):
 
         Returns
         ----------
-        wavSnd: float
+        snd: float
             Sound signal as a float and normalized scale (-1 ~ +1) 
-        wavFs: 
+        fs: 
             Sampling frequency
     """
     wav = wave.open(filepath)
-    wavFs = wav.getframerate() # sampling frequency
-    wavSnd = wav.readframes(wav.getnframes())
-    wavSnd = np.frombuffer(wavSnd, dtype=np.int16) # int16 (-32768 ~ +32767)
+    fs = wav.getframerate() # sampling frequency
+    snd = wav.readframes(wav.getnframes())
+    snd = np.frombuffer(snd, dtype=np.int16) # int16 (-32768 ~ +32767)
     wav.close()
-    wavSnd = wavSnd/abs(np.iinfo(np.int16).min) # float (-1 ~ +1)
-    return wavSnd, wavFs
+    snd = snd/abs(np.iinfo(np.int16).min) # float (-1 ~ +1)
+    return snd, fs
 
 
 def rms(x):

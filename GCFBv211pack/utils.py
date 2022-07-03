@@ -310,7 +310,7 @@ def out_mid_crct_filt(str_crct, sr, sw_plot=0, sw_filter=0):
     
     """ 
     Calculate the minimax optimal filter with a frequency response
-    instead of "FIRCoef = firpm(NCoef,freq/sr*2,crct)" in the original code out_mid_crct_filt.m
+    instead of "fir_coef = firpm(n_coef,freq/sr*2,crct)" in the original code out_mid_crct_filt.m
     """
     x1 = np.array(np.arange(len(freq))).T * 2
     x2 = np.array(np.arange(len(freq)*2)).T
@@ -571,16 +571,16 @@ def rceps(x):
         x (array_like): input signal
 
     Returns:
-        xhat: real cepstrum
-        yhat: a unique minimum-phase sequence that has the reame real cepstrum as x
+        x_hat: real cepstrum
+        y_hat: a unique minimum-phase sequence that has the reame real cepstrum as x
 
     Note:
         This code is based on "rceps.m" in MATLAB and is under-construction. 
 
     Examples:
         x = [4 1 5]; % Non-minimum phase sequence
-        xhat = array([1.62251148, 0.3400368 , 0.3400368 ])
-        yhat = array([5.33205452, 3.49033278, 1.1776127 ])
+        x_hat = array([1.62251148, 0.3400368 , 0.3400368 ])
+        y_hat = array([5.33205452, 3.49033278, 1.1776127 ])
 
     References:
     - A.V. Oppenheim and R.W. Schafer, Digital Signal Processing, Prentice-Hall, 1975.
@@ -589,41 +589,44 @@ def rceps(x):
     """
 
     if isrow(x):
-        xT = np.array([x]).T
+        x_t = np.array([x]).T
     else:
-        xT = x
+        x_t = x
 
-    fftxabs = np.abs(np.fft.fft(xT, n=None, axis=0))
+    fft_x_abs = np.abs(np.fft.fft(x_t, n=None, axis=0))
 
-    xhatT = np.real(np.fft.ifft(np.log(fftxabs), n=None, axis=0))
+    x_hat_t = np.real(np.fft.ifft(np.log(fft_x_abs), n=None, axis=0))
 
-    # xhat
+    # x_hat
     if isrow(x):
         # transform the result to a row vector
-        xhat = xhatT[:,0]
+        x_hat = x_hat_t[:,0]
     else:
-        xhat = xhatT
+        x_hat = x_hat_t
 
-    # yhat
-    nRows = xhatT.shape[0]
-    nCols = xhatT.shape[1]
-    odd = nRows % 2
+    # y_hat
+    n_rows = x_hat_t.shape[0]
+    n_cols = x_hat_t.shape[1]
+    odd = n_rows % 2
     a1 = np.array([1])
-    a2 = 2*np.ones((int((nRows+odd)/2)-1, 1))
-    a3 = np.zeros((int((nRows+odd)/2)-1,1))
-    wn = np.kron(np.ones((1, nCols)), np.vstack((a1,a2,a3)))
+    a2 = 2*np.ones((int((n_rows+odd)/2)-1, 1))
+    a3 = np.zeros((int((n_rows+odd)/2)-1,1))
+    wn = np.kron(np.ones((1, n_cols)), np.vstack((a1, a2, a3)))
     """
-    Matlab can use zero and negative numbers for args of ones function, but the np.ones cannot. So, an internal array is removed. The original code is: 
-    wn = np.kron(np.ones((1, nCols)), np.array([[1], 2*np.ones((int((nRows+odd)/2)-1, 1)), np.ones(1-odd, 1), np.zeros((int((nRows+odd)/2)-1,1))]))
+    Matlab can use zero and negative numbers for args of ones function, 
+    but the np.ones cannot. So, an internal array is removed. 
+    The original code is: 
+    wn = np.kron(np.ones((1, n_cols)), np.array([[1], 2*np.ones((int((n_rows+odd)/2)-1, 1)), 
+         np.ones(1-odd, 1), np.zeros((int((n_rows+odd)/2)-1,1))]))
     """
-    yhatT = np.real(np.fft.ifft(np.exp(np.fft.fft((wn*xhatT),n=None, axis=0)), n=None, axis=0))
+    y_hat_t = np.real(np.fft.ifft(np.exp(np.fft.fft((wn*x_hat_t),n=None, axis=0)), n=None, axis=0))
     if isrow(x):
         # transform the result to a row vector
-        yhat = yhatT[:,0]
+        y_hat = y_hat_t[:,0]
     else:
-        yhat = yhatT
+        y_hat = y_hat_t
 
-    return xhat, yhat
+    return x_hat, y_hat
 
 
 def isrow(x):

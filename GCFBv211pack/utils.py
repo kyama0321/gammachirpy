@@ -493,73 +493,75 @@ def out_mid_crct(str_crct, n_frq_rsl=0, fs=32000, sw_plot=1):
     return crct_pwr_lin, freq, freq_char_db_to_be_cmpnstd
 
 
-def taper_window(LenWin, TypeTaper, LenTaper=None, RangeSigma=3, SwPlot=0):
+def taper_window(len_win, type_taper, len_taper=None, range_sigma=3, sw_plot=0):
     """Taper Window Generator for signal onset/offset
 
     Args:
-        LenWin (int): Length of window (number of points)
-        TypeTaper (string): Type of Taper (KeyWords of 3 letters)
+        len_win (int): Length of window (number of points)
+        type_taper (string): Type of Taper (KeyWords of 3 letters)
             - HAM: Hamming
             - HAN/COS: Hanning/Cosine
             - BLA: Blackman
             - GAU: Gaussian
             - (other): Linear
-        LenTaper (int, optional): Length of taper. Defaults to None.
-        RangeSigma (int, optional): Range in sigma. Defaults to 3.
-        SwPlot (int, optional): OFF/ON. Defaults to 0.
+        len_taper (int, optional): Length of taper. Defaults to None.
+        range_sigma (int, optional): Range in sigma. Defaults to 3.
+        sw_plot (int, optional): OFF/ON. Defaults to 0.
 
     Returns:
-        TaperWin (array_like): Taper window points (max: 1)
-        TypeTaper (string): Type of taper (full name)
+        taper_win (array_like): Taper window points (max: 1)
+        type_taper (string): Type of taper (full name)
     """
 
-    if LenTaper == None:
-        LenTaper = int(np.fix(LenWin/2))
+    if len_taper == None:
+        len_taper = int(np.fix(len_win/2))
     
-    elif LenTaper*2+1 >= LenWin:
+    elif len_taper*2+1 >= len_win:
         print("Caution (taper_window) : No flat part. ")
         
-        if not LenTaper == np.fix(LenWin/2):
-            print("Caution (taper_window) : LenTaper <-- fix(LenWin/2)")
+        if not len_taper == np.fix(len_win/2):
+            print("Caution (taper_window) : len_taper <-- fix(len_win/2)")
             
-        LenTaper = int(np.fix(LenWin/2))
+        len_taper = int(np.fix(len_win/2))
 
-    LenTaper= int(LenTaper)
+    len_taper= int(len_taper)
 
-    if TypeTaper == 'HAM':
-        Taper = np.hamming(LenTaper*2+1)
-        TypeTaper = 'Hamming'
+    if type_taper == 'HAM':
+        taper = np.hamming(len_taper*2+1)
+        type_taper = 'Hamming'
 
-    elif TypeTaper == 'HAN' or TypeTaper == 'COS':
-        Taper = np.hamming(LenTaper*2+1)
-        TypeTaper = 'Hanning/Cosine'
+    elif type_taper == 'HAN' or type_taper == 'COS':
+        taper = np.hamming(len_taper*2+1)
+        type_taper = 'Hanning/Cosine'
 
-    elif TypeTaper == 'BLA':
-        Taper = np.blackman(LenTaper*2+1)
-        TypeTaper = 'Blackman'
+    elif type_taper == 'BLA':
+        taper = np.blackman(len_taper*2+1)
+        type_taper = 'Blackman'
 
-    elif TypeTaper == 'GAU':
-        if len(RangeSigma) == 0:
-            RangeSigma = 3
-        nn = np.arange(-LenTaper, LenTaper, 1)
-        Taper = np.exp(-(RangeSigma/LenTaper)**2 / 2)
-        TypeTaper == 'Gauss'
+    elif type_taper == 'GAU':
+        if len(range_sigma) == 0:
+            range_sigma = 3
+        nn = np.arange(-len_taper, len_taper, 1)
+        taper = np.exp(-(range_sigma/len_taper)**2 / 2)
+        type_taper == 'Gauss'
 
     else:
-        Taper = np.array(list(np.arange(1,LenTaper+1,1)) + list([LenTaper+1]) + list(np.arange(LenTaper,1-1,-1))) / (LenTaper+1)
-        TypeTaper = 'Line'
+        taper = np.array(list(np.arange(1,len_taper+1,1)) + list([len_taper+1]) + \
+                         list(np.arange(len_taper,1-1,-1))) / (len_taper+1)
+        type_taper = 'Line'
 
-    LenTaper = int(np.fix(LenTaper))
-    TaperWin = list(Taper[0:LenTaper]) + list(np.ones(LenWin-LenTaper*2)) + list(Taper[(LenTaper+1):(LenTaper*2+1)])
+    len_taper = int(np.fix(len_taper))
+    taper_win = list(taper[0:len_taper]) + list(np.ones(len_win-len_taper*2)) + \
+               list(taper[(len_taper+1):(len_taper*2+1)])
 
-    if SwPlot == 1:
-        fig, ax = plt.subplots()
-        plt.plot(TaperWin)
+    if sw_plot == 1:
+        _, ax = plt.subplots()
+        plt.plot(taper_win)
         ax.set_xlabel('Points')
         ax.set_ylabel('Amplitude')
-        plt.title('TypeTaper: {}'.format(TypeTaper))
+        plt.title(f"TypeTaper: {type_taper}")
 
-    return TaperWin, TypeTaper
+    return taper_win, type_taper
 
 
 def rceps(x):

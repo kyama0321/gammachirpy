@@ -50,6 +50,7 @@ def rms(x):
     y = np.sqrt(np.mean(x * x))
     return y
 
+
 def nextpow2(n):
     """Find exponent of next higher power of 2
 
@@ -185,8 +186,8 @@ def freq2erb(cf=None, warning=0):
         warning (int): check frequency range. Default is 0.
 
     Returns:
-        ERBrate (array_like): ERB_N rate [ERB_N] or [cam] 
-        ERBwidth (array_like): ERB_N Bandwidth [Hz]
+        erb_rate (array_like): ERB_N rate [ERB_N] or [cam] 
+        erb_width (array_like): ERB_N Bandwidth [Hz]
     """
 
     if warning == 1:
@@ -199,26 +200,26 @@ def freq2erb(cf=None, warning=0):
                 +"{} (Hz) <= Fc <= {} (Hz)".format(cfmin, cfmax), file=sys.stderr)
             sys.exit(1)
 
-    ERBrate = 21.4 * np.log10(4.37*cf/1000+1)
-    ERBwidth = 24.7 * (4.37*cf/1000+1)
+    erb_rate = 21.4 * np.log10(4.37*cf/1000+1)
+    erb_width = 24.7 * (4.37*cf/1000+1)
 
-    return ERBrate, ERBwidth
+    return erb_rate, erb_width
 
 
-def erb2freq(ERBrate):
-    """Convert ERBrate to linear frequency
+def erb2freq(erb_rate):
+    """Convert erb_rate to linear frequency
 
     Args:
-        ERBrate (array_like): ERB_N rate [ERB_N] or [cam] 
+        erb_rate (array_like): ERB_N rate [ERB_N] or [cam] 
     
     Returns:
         cf (array_like): center frequency in linaer-scale [Hz] 
-        ERBwidth (array_like): ERB_N Bandwidth [Hz]
+        erb_width (array_like): ERB_N Bandwidth [Hz]
     """
-    cf = (10**(ERBrate/21.4) - 1) / 4.37 * 1000
-    ERBwidth = 24.7 * (4.37*cf/1000 + 1)
+    cf = (10**(erb_rate/21.4) - 1) / 4.37 * 1000
+    erb_width = 24.7 * (4.37*cf/1000 + 1)
 
-    return cf, ERBwidth
+    return cf, erb_width
 
 
 def fr2fpeak(n, b, c, fr):
@@ -235,10 +236,10 @@ def fr2fpeak(n, b, c, fr):
         ERBw (float): ERBwidth at fr
     """
 
-    _, ERBw = freq2erb(fr)
-    fpeak = fr + c*ERBw*b/n
+    _, erb_width = freq2erb(fr)
+    fpeak = fr + c*erb_width*b/n
 
-    return fpeak, ERBw
+    return fpeak, erb_width
 
 
 @lru_cache(maxsize=None)

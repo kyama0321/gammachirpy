@@ -1074,13 +1074,14 @@ def asym_cmp_frsp_v2(frs, fs=48000, b=None, c=None, n_frq_rsl=1024, num_filt=4):
 
 
 class classACFstatus:
-        NumCh = []
-        NumFilt = []
-        Lbz = []
-        Lap = []
-        SigInPrev = []
-        SigOutPrev = []
-        Count = []
+    def __init__(self):
+        self.NumCh = []
+        self.NumFilt = []
+        self.Lbz = []
+        self.Lap = []
+        self.SigInPrev = []
+        self.SigOutPrev = []
+        self.Count = []
 
 
 def acfilterbank(ACFcoef, ACFstatus, sig_in=[], sw_ordr=0):

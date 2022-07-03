@@ -98,52 +98,52 @@ def eqlz2meddis_hc_level(snd, out_level_db, *args):
     return snd_eq_meddis, amp_db
 
 
-def equal_freq_scale(NameScale, NumCh, RangeFreq):
+def equal_freq_scale(name_scale, num_ch, range_freq):
     """Calculation of Equal Frequency scale on ERB/Mel/Log/Linear scale
 
     Args:
-        NameScale (string): 'ERB', 'mel', 'log', 'linear'
-        NumCh (int): Number of channels
-        RangeFreq (array_like): Frequency Range
+        name_scale (string): 'ERB', 'mel', 'log', 'linear'
+        num_ch (int): Number of channels
+        range_freq (array_like): Frequency Range
 
     Returns:
-        Frs (array_like): Fr vector
-        WFval (array_like): Wraped freq. value
+        frs (array_like): Fr vector
+        wf_val (array_like): Wraped freq. value
     """
     eps = np.finfo(float).eps # epsilon
 
-    if NameScale == 'linear':
-        RangeWF = RangeFreq
-        dWF = np.diff(RangeWF) / (NumCh-1)
-        WFvals = np.linspace(RangeWF[0], RangeWF[1]+eps*1000, dWF)
-        Frs = WFvals
+    if name_scale == 'linear':
+        range_wf = range_freq
+        diff_wf = np.diff(range_wf) / (num_ch-1)
+        wf_val = np.linspace(range_wf[0], range_wf[1]+eps*1000, diff_wf)
+        frs = wf_val
 
-    elif NameScale == 'mel':
-        RangeWF = freq2mel(RangeFreq)
-        dWF = np.diff(RangeWF) / (NumCh-1)
-        WFvals = np.linspace(RangeWF[0], RangeWF[1]+eps*1000, dWF)
-        Frs = mel2freq(WFvals)
+    elif name_scale == 'mel':
+        range_wf = freq2mel(range_freq)
+        diff_wf = np.diff(range_wf) / (num_ch-1)
+        wf_val = np.linspace(range_wf[0], range_wf[1]+eps*1000, diff_wf)
+        frs = mel2freq(wf_val)
 
-    elif NameScale == 'ERB':
-        RangeWF, _ = freq2erb(RangeFreq)
-        dWF = np.diff(RangeWF) / (NumCh-1)
-        WFvals = np.arange(RangeWF[0], RangeWF[1]+eps*1000, dWF)
-        Frs, _ = erb2freq(WFvals)
+    elif name_scale == 'ERB':
+        range_wf, _ = freq2erb(range_freq)
+        diff_wf = np.diff(range_wf) / (num_ch-1)
+        wf_val = np.arange(range_wf[0], range_wf[1]+eps*1000, diff_wf)
+        frs, _ = erb2freq(wf_val)
 
-    elif NameScale == 'log':
-        if min(RangeFreq) < 50:
-            print("min(RangeFreq) < 50. Rplaced by 50.")
-            RangeFreq[0] = 50
-        RangeWF = np.log10(RangeFreq)
-        dWF = np.diff(RangeWF) / (NumCh-1)
-        WFvals = np.linspace(RangeWF[0], RangeWF[1]+eps*1000, dWF)
-        Frs = 10**(WFvals)
+    elif name_scale == 'log':
+        if min(range_freq) < 50:
+            print("min(range_freq) < 50. Rplaced by 50.")
+            range_freq[0] = 50
+        range_wf = np.log10(range_freq)
+        diff_wf = np.diff(range_wf) / (num_ch-1)
+        wf_val = np.linspace(range_wf[0], range_wf[1]+eps*1000, diff_wf)
+        frs = 10**(wf_val)
     else:
         help(equal_freq_scale)
-        print("Specify NameScale correctly", file=sys.stderr)
+        print("Specify name_scale correctly", file=sys.stderr)
         sys.exit(1)
     
-    return Frs, WFvals
+    return frs, wf_val
 
 
 def freq2mel(freq):

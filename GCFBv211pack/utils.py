@@ -682,13 +682,13 @@ def make_asym_cmp_filters_v2(fs, frs, b, c):
     Returns:
         ACFcoef: 
         - fs (int): Sampling frequency
-        - bz (array_like): MA coefficients  (num_ch*3*NumFilt)
-        - ap (array_like): AR coefficients  (num_ch*3*NumFilt)
+        - bz (array_like): MA coefficients  (num_ch*3*num_filt)
+        - ap (array_like): AR coefficients  (num_ch*3*num_filt)
 
     Notes:
         [1] Ref for p1-p4: Unoki,M , Irino,T. , and Patterson, R.D. , "Improvement of an IIR asymmetric compensation gammachirp filter," Acost. Sci. & Tech. (ed. by the Acoustical Society of Japan ), 22 (6), pp. 426-430, Nov. 2001.
         [2] Conventional setting was removed.
-            fn = frs + Nfilt* p3 .*c .*b .*erbw/n;
+            fn = frs + nfilt* p3 .*c .*b .*erbw/n;
             This frequency fn is for normalizing GC(=GT*Hacf) filter to be unity at the peak, frequnecy. But now we use Hacf as a highpass filter as well. cGC = pGC *Hacf. In this case, this normalization is useless. 
             So, it was set as the gain at frs is unity.  (4. Jun 2004 )
         [3] Removed
@@ -1083,13 +1083,12 @@ class classACFstatus:
         Count = []
 
 
-def acfilterbank(ACFcoef, ACFstatus, SigIn=[], SwOrdr=0):
+def acfilterbank(ACFcoef, ACFstatus, sig_in=[], sw_ordr=0):
     """IIR ACF time-slice filtering for time-varing filter
 
     Args:
         ACFcoef (structure): ACFcoef: coef from make_asym_cmp_filters_v2
-            bz: MA coefficents (==b ~= zero) NumCh*Lbz*NumFilt
-            ap: AR coefficents (==a ~= pole) NumCh*Lap*NumFilt
+            ap: AR coefficents (==a ~= pole) num_ch*lap*num_filt
             fs : sampling rate  (also switch for verbose)
                 (The variables named 'a' and 'b' are not used to avoid the
                 confusion to the gammachirp parameters.)
@@ -1099,98 +1098,97 @@ def acfilterbank(ACFcoef, ACFstatus, SigIn=[], SwOrdr=0):
             Lbz: size of MA
             Lap: size of AR
             NumFilt: Length of filters
-            SigInPrev: Previous status of SigIn
+            SigInPrev: Previous status of sig_in
             SigOutPrev: Previous status of SigOut
-        SigIn (array_like, optional): Input signal. Defaults to [].
-        SwOrdr (int, optional): Switch filtering order. Defaults to 0.
+        sig_in (array_like, optional): Input signal. Defaults to [].
+        sw_ordr (int, optional): Switch filtering order. Defaults to 0.
 
     Returns:
-        SigOut (array_like): Filtered signal (NumCh * 1)
+        SigOut (array_like): Filtered signal (num_ch * 1)
         ACFstatus: Current status
     """    
 
-    if len(SigIn) == 0 and len(ACFstatus) != 0:
+    if len(sig_in) == 0 and len(ACFstatus) != 0:
         help(acfilterbank)
         sys.exit()
 
     if not hasattr(ACFstatus, 'NumCh'):
         ACFstatus = classACFstatus()
 
-        NumCh, Lbz, NumFilt = np.shape(ACFcoef.bz)
-        NumCh, Lap, NumFIlt = np.shape(ACFcoef.ap)
+        num_ch, lbz, num_filt = np.shape(ACFcoef.bz)
+        num_ch, lap, _ = np.shape(ACFcoef.ap)
 
-        if Lbz != 3 or Lap !=3:
+        if lbz != 3 or lap !=3:
             print("No gaurantee for usual IIR filters except for AsymCmpFilter.\n"\
                 + "Please check make_asym_cmp_filters_v2.")
     
-        ACFstatus.NumCh = NumCh
-        ACFstatus.NumFilt = NumFilt
-        ACFstatus.Lbz = Lbz # size of MA
-        ACFstatus.Lap = Lap # size of AR
-        ACFstatus.SigInPrev = np.zeros((NumCh, Lbz))
-        ACFstatus.SigOutPrev = np.zeros((NumCh, Lap, NumFilt))
+        ACFstatus.NumCh = num_ch
+        ACFstatus.NumFilt = num_filt
+        ACFstatus.Lbz = lbz # size of MA
+        ACFstatus.Lap = lap # size of AR
+        ACFstatus.SigInPrev = np.zeros((num_ch, lbz))
+        ACFstatus.SigOutPrev = np.zeros((num_ch, lap, num_filt))
         ACFstatus.Count = 0
         print("ACFilterBank: Initialization of ACFstatus")
-        SigOut = []
+        sig_out = []
 
-        return SigOut, ACFstatus
-
+        return sig_out, ACFstatus
     
-    if isrow(SigIn):
-        SigIn = np.array([SigIn]).T
+    if isrow(sig_in):
+        sig_in = np.array([sig_in]).T
     
-    NumChSig, LenSig = np.shape(SigIn)
-    if LenSig != 1:
-        print("Input signal sould be NumCh*1 vector (1 sample time-slice)", file=sys.stderr)
+    num_ch_sig, len_sig = np.shape(sig_in)
+    if len_sig != 1:
+        print("Input signal sould be num_ch*1 vector (1 sample time-slice)", file=sys.stderr)
         sys.exit(1)
-    if NumChSig != ACFstatus.NumCh:
-        print("NumChSig ({}) != ACFstatus.NumCh ({})".format(NumChSig, ACFstatus.NumCh))
+    if num_ch_sig != ACFstatus.NumCh:
+        print(f"num_ch_sig ({num_ch_sig}) != ACFstatus.NumCh ({ACFstatus.NumCh})")
 
     # time stamp
     if hasattr(ACFcoef, 'verbose'):
         if ACFcoef.verbose == 1: # verbose when ACFcoef.verbose is specified to 1
-            Tdisp = 50 # ms
-            Tcnt = ACFstatus.Count/(np.fix(ACFcoef.fs/1000)) # ms
+            t_disp = 50 # ms
+            t_cnt = ACFstatus.Count/(np.fix(ACFcoef.fs/1000)) # ms
 
             if ACFstatus.Count == 0:
                 print("ACFilterBank: Start processing")
-                Tic = time.time()
+                tic = time.time()
 
-            elif np.mod(Tcnt, Tdisp) == 0:
-                Toc = time.time()
+            elif np.mod(t_cnt, t_disp) == 0:
+                toc = time.time()
                 print("ACFilterBank: Processed {} (ms). elapsed Time = {} (sec)"\
-                    .format(Tcnt, np.round(Tic-Toc, 1)))
+                    .format(t_cnt, np.round(tic-toc, 1)))
     
     ACFstatus.Count = ACFstatus.Count+1
     
     """
     Processing
     """
-    ACFstatus.SigInPrev = np.concatenate([ACFstatus.SigInPrev[:, 1:ACFstatus.Lbz], SigIn], axis=1)
+    ACFstatus.SigInPrev = np.concatenate([ACFstatus.SigInPrev[:, 1:ACFstatus.Lbz], sig_in], axis=1)
 
     x = ACFstatus.SigInPrev.copy()
-    NfiltList = np.arange(ACFstatus.NumFilt)
+    nfilt_list = np.arange(ACFstatus.NumFilt)
 
-    if SwOrdr == 1:
-        NfiltList = np.flip(NfiltList)
+    if sw_ordr == 1:
+        nfilt_list = np.flip(nfilt_list)
 
-    for Nfilt in NfiltList:
+    for nfilt in nfilt_list:
 
-        forward = ACFcoef.bz[:, ACFstatus.Lbz::-1, Nfilt] * x
-        feedback = ACFcoef.ap[:, ACFstatus.Lap:0:-1, Nfilt] * \
-            ACFstatus.SigOutPrev[:, 1:ACFstatus.Lap, Nfilt]
+        forward = ACFcoef.bz[:, ACFstatus.Lbz::-1, nfilt] * x
+        feedback = ACFcoef.ap[:, ACFstatus.Lap:0:-1, nfilt] * \
+            ACFstatus.SigOutPrev[:, 1:ACFstatus.Lap, nfilt]
 
         fwdSum = np.sum(forward, axis=1)
         fbkSum = np.sum(feedback, axis=1)
 
-        y = np.array([(fwdSum - fbkSum) / ACFcoef.ap[:, 0, Nfilt]]).T
-        ACFstatus.SigOutPrev[:, :, Nfilt] = \
-            np.concatenate([ACFstatus.SigOutPrev[:, 1:ACFstatus.Lap, Nfilt], y], axis=1)
-        x = ACFstatus.SigOutPrev[:, :, Nfilt].copy()
+        y = np.array([(fwdSum - fbkSum) / ACFcoef.ap[:, 0, nfilt]]).T
+        ACFstatus.SigOutPrev[:, :, nfilt] = \
+            np.concatenate([ACFstatus.SigOutPrev[:, 1:ACFstatus.Lap, nfilt], y], axis=1)
+        x = ACFstatus.SigOutPrev[:, :, nfilt].copy()
 
-    SigOut = y
+    sig_out = y
 
-    return SigOut, ACFstatus
+    return sig_out, ACFstatus
 
 
 def fftfilt(b, x):

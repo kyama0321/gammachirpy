@@ -67,16 +67,16 @@ def nextpow2(n):
     return p
 
 
-def eqlz2meddis_hc_level(Snd, OutLeveldB, *args):
+def eqlz2meddis_hc_level(snd, out_level_db, *args):
     """ Equalizing Signal RMS Level to the Level for MeddisHairCell
 
     Args:
-        Snd (float): Input sound
-        OutLeveldB (float): Output level (No default value,  RMS level)
+        snd (float): Input sound
+        out_level_db (float): Output level (No default value,  RMS level)
 
     Returns:
-        SndEqM (float): Equalized Sound (rms value of 1 is 30 dB SPL)
-        AmpdB (array_like): 3 values in dB, [OutputLevel_dB, CompensationValue_dB, SourceLevel_dB]
+        snd_eq_meddis (float): Equalized Sound (rms value of 1 is 30 dB SPL)
+        amp_db (array_like): 3 values in dB, [out_level_dB, compensation_value_dB, source_level_dB]
 
     Matlab examples:
         rms(s(t)) == sqrt(mean(s.^2)) == 1   --> 30 dB SPL
@@ -86,14 +86,16 @@ def eqlz2meddis_hc_level(Snd, OutLeveldB, *args):
     Reference:
         Meddis (1986), JASA, 79(3),pp.702-711.
     """
-    SourceLevel = np.sqrt(np.mean(Snd**2)) * 10**(30/20) # level in terms of Meddis Level
+    source_level = np.sqrt(np.mean(snd**2)) * 10**(30/20) # level in terms of Meddis HC Level
 
-    Amp = (10**(OutLeveldB/20))/SourceLevel
-    SndEqM = Amp * Snd
+    # amplifiy the source snd based on the Meddis HC lavel
+    amp = (10**(out_level_db/20))/source_level
+    snd_eq_meddis = amp * snd
 
-    AmpdB = [OutLeveldB, 20*np.log10(Amp), 20*np.log10(SourceLevel)]
+    # summarize information
+    amp_db = [out_level_db, 20*np.log10(amp), 20*np.log10(source_level)]
 
-    return SndEqM, AmpdB
+    return snd_eq_meddis, amp_db
 
 
 def equal_freq_scale(NameScale, NumCh, RangeFreq):

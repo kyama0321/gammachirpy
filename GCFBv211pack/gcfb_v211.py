@@ -53,13 +53,13 @@ class GCresp:
         self.fr2 = []
         self.erb_space1 = []
         self.ef = []
-        self.b1val = []
-        self.c1val = []
+        self.b1_val = []
+        self.c1_val = []
         self.fp1 = []
         self.fp2 = []
-        self.b2val = []
-        self.c1val = []
-        self.fratVal = []
+        self.b2_val = []
+        self.c1_val = []
+        self.frat_val = []
 
 class LvlEst:
     def __init__(self):
@@ -156,11 +156,11 @@ def gcfb_v211(snd_in, gc_param, *args):
         for HP-AF
         """
         lvl_db = gc_param.level_db_scgcfb
-        fratVal = gc_param.frat[0,0] + gc_param.frat[0,1] * gc_resp.ef \
+        frat_val = gc_param.frat[0,0] + gc_param.frat[0,1] * gc_resp.ef \
             + (gc_param.frat[1,0] + gc_param.frat[1,1] * gc_resp.ef) * lvl_db
-        fr2val = fratVal * gc_resp.fp1
-        gc_resp.fr2 = fr2val.copy()
-        acf_coef_fast_prcs = make_asym_cmp_filters_v2(fs, fr2val, gc_resp.b2val, gc_resp.c2val)
+        fr2_val = frat_val * gc_resp.fp1
+        gc_resp.fr2 = fr2_val.copy()
+        acf_coef_fast_prcs = make_asym_cmp_filters_v2(fs, fr2_val, gc_resp.b2_val, gc_resp.c2_val)
     else:
         # HP-AF for dynamic-GC level estimation path. 18 Dec 2012 Checked
         fr2lvl_est = gc_param.lvl_est.frat * gc_resp.fp1
@@ -186,7 +186,7 @@ def gcfb_v211(snd_in, gc_param, *args):
 
         # passive gammachirp
         pgc, _, _, _ = gcfb.gammachirp(gc_resp.fr1[nch], fs, gc_param.n, \
-                                       gc_resp.b1val[nch], gc_resp.c1val[nch], 0, '', 'peak')
+                                       gc_resp.b1_val[nch], gc_resp.c1_val[nch], 0, '', 'peak')
 
         # fast FFT-based filtering by the pgc
         pgc_out[nch, 0:len_snd] = utils.fftfilt(pgc[0,:], Snd) 
@@ -200,9 +200,9 @@ def gcfb_v211(snd_in, gc_param, *args):
                                          acf_coef_fast_prcs.ap[nch, :, n_filt], gc_out1)
 
             cgc_out[nch, :] = gc_out1.copy()
-            gc_resp.fp2[nch], _ = fr1_to_fp2(gc_param.n, gc_resp.b1val[nch], gc_resp.c1val[nch], \
-                                                 gc_resp.b2val[nch], gc_resp.c2val[nch], \
-                                                 fratVal[nch], gc_resp.fr1[nch])
+            gc_resp.fp2[nch], _ = fr1_to_fp2(gc_param.n, gc_resp.b1_val[nch], gc_resp.c1_val[nch], \
+                                                 gc_resp.b2_val[nch], gc_resp.c2_val[nch], \
+                                                 frat_val[nch], gc_resp.fr1[nch])
             if nch == num_ch:
                 gc_resp.fp2 = gc_resp.fp2
 
@@ -237,7 +237,7 @@ def gcfb_v211(snd_in, gc_param, *args):
         num_disp = int(np.fix(len_snd/10)) # display 10 times per Snd
         cgc_out = np.zeros((num_ch, len_snd))
         gc_resp.fr2 = np.zeros((num_ch, len_snd))
-        gc_resp.fratVal = np.zeros((num_ch, len_snd))
+        gc_resp.frat_val = np.zeros((num_ch, len_snd))
         gc_resp.fp2 = []
         lvl_db = np.zeros((num_ch, len_snd))
         lvl_lin = np.zeros((num_ch, 2))
@@ -273,20 +273,20 @@ def gcfb_v211(snd_in, gc_param, *args):
             Signal path
             """
             # Filtering High-Pass Asymmetric Comressive Filter
-            fratVal = gc_param.frat[0, 0] + gc_param.frat[0, 1] * gc_resp.ef[:] + \
+            frat_val = gc_param.frat[0, 0] + gc_param.frat[0, 1] * gc_resp.ef[:] + \
                 (gc_param.frat[1, 0] + gc_param.frat[1, 1] * gc_resp.ef[:]) * lvl_db[:, [nsmpl]]
-            fr2val = gc_resp.fp1[:] * fratVal
+            fr2_val = gc_resp.fp1[:] * frat_val
 
             if np.mod(nsmpl, gc_param.num_update_asym_cmp) == 0: # update periodically
-                acf_coef = make_asym_cmp_filters_v2(fs, fr2val, gc_resp.b2val, gc_resp.c2val)
+                acf_coef = make_asym_cmp_filters_v2(fs, fr2_val, gc_resp.b2_val, gc_resp.c2_val)
 
             if nsmpl == 0:
                 _, acf_status = acfilterbank(acf_coef, []) # initialization
 
             sig_out, acf_status = acfilterbank(acf_coef, acf_status, pgc_out[:, nsmpl])
             cgc_out[:, [nsmpl]] = sig_out.copy()
-            gc_resp.fr2[:, [nsmpl]] = fr2val.copy()
-            gc_resp.fratVal[:, [nsmpl]] = fratVal.copy()
+            gc_resp.fr2[:, [nsmpl]] = fr2_val.copy()
+            gc_resp.frat_val[:, [nsmpl]] = frat_val.copy()
 
             if nsmpl == 0 or np.mod(nsmpl+1, num_disp) == 0:
                 t_now = time.time()
@@ -302,8 +302,8 @@ def gcfb_v211(snd_in, gc_param, *args):
         fratRef = gc_param.frat[0, 0] + gc_param.frat[0, 1] * gc_resp.ef[:] \
             + (gc_param.frat[1, 0] + gc_param.frat[1, 1] * gc_resp.ef[:]) * gc_param.gain_ref_db
 
-        cgc_ref = cmprs_gc_frsp(gc_resp.fr1, fs, gc_param.n, gc_resp.b1val, \
-                                      gc_resp.c1val, fratRef, gc_resp.b2val, gc_resp.c2val)
+        cgc_ref = cmprs_gc_frsp(gc_resp.fr1, fs, gc_param.n, gc_resp.b1_val, \
+                                      gc_resp.c1_val, fratRef, gc_resp.b2_val, gc_resp.c2_val)
         gc_resp.cgc_ref = cgc_ref
         gc_resp.lvl_db = lvl_db
 
@@ -449,14 +449,14 @@ def set_param(gc_param):
     gc_resp.ef = erb_rate/erb_rate_1kHz - 1
 
     one_vec = np.ones([gc_param.num_ch, 1])
-    gc_resp.b1val = gc_param.b1[0]*one_vec + gc_param.b1[1]*gc_resp.ef
-    gc_resp.c1val = gc_param.c1[0]*one_vec + gc_param.c1[1]*gc_resp.ef
+    gc_resp.b1_val = gc_param.b1[0]*one_vec + gc_param.b1[1]*gc_resp.ef
+    gc_resp.c1_val = gc_param.c1[0]*one_vec + gc_param.c1[1]*gc_resp.ef
 
-    gc_resp.fp1, _ = utils.fr2fpeak(gc_param.n, gc_resp.b1val, gc_resp.c1val, gc_resp.fr1)
+    gc_resp.fp1, _ = utils.fr2fpeak(gc_param.n, gc_resp.b1_val, gc_resp.c1_val, gc_resp.fr1)
     gc_resp.fp2 = np.zeros(np.shape(gc_resp.fp1))
 
-    gc_resp.b2val = gc_param.b2[0, 0]*one_vec + gc_param.b2[0, 1]*gc_resp.ef
-    gc_resp.c2val = gc_param.c2[0, 0]*one_vec + gc_param.c2[0, 1]*gc_resp.ef
+    gc_resp.b2_val = gc_param.b2[0, 0]*one_vec + gc_param.b2[0, 1]*gc_resp.ef
+    gc_resp.c2_val = gc_param.c2[0, 0]*one_vec + gc_param.c2[0, 1]*gc_resp.ef
     
     """
     Set Params estimation circuit

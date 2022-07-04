@@ -188,7 +188,6 @@ def freq2erb(cf=None, warning=0):
         erb_rate (array_like): ERB_N rate [ERB_N] or [cam] 
         erb_width (array_like): ERB_N Bandwidth [Hz]
     """
-
     if warning == 1:
         # Warnig for frequency range
         cfmin = 50
@@ -372,9 +371,7 @@ def out_mid_crct(str_crct, n_frq_rsl=0, fs=32000, sw_plot=1):
     Note: 
         "ER4B" option in str_crct was omitted because the option uses a special 
         measurement data. 
-    """
-
-     
+    """ 
     """  ER4B: Omitted
     if str_crct == 'ER4B':
         crct_pwr_lin, freq, freq_char_db_to_be_cmpnstd = OutMidCrct_ER4B(n_frq_rsl, fs, sw_plot)
@@ -384,7 +381,6 @@ def out_mid_crct(str_crct, n_frq_rsl=0, fs=32000, sw_plot=1):
     """
     Conventional ELC/MAF/MAP/MidEar
     """
-
     f1 = [	20,   25,  30,     35,  40,    45,  50,   55,   60,   70,  # 1-10
             80,   90,  100,   125,  150,   177, 200,  250,  300,  350,  # 11-20
             400,  450, 500,   550,  600,   700, 800,  900,  1000, 1500,  # 21-30
@@ -511,7 +507,6 @@ def taper_window(len_win, type_taper, len_taper=None, range_sigma=3, sw_plot=0):
         taper_win (array_like): Taper window points (max: 1)
         type_taper (string): Type of taper (full name)
     """
-
     if len_taper == None:
         len_taper = int(np.fix(len_win/2))
     
@@ -586,7 +581,6 @@ def rceps(x):
     - Programs for Digital Signal Processing, IEEE Press, John Wiley & Sons, 1979, algorithm 7.2.
     - https://mathworks.com/help/signal/ref/rceps.html
     """
-
     if isrow(x):
         x_t = np.array([x]).T
     else:
@@ -637,7 +631,6 @@ def isrow(x):
     Returns:
         logical (bool): True/False
     """
-
     if np.size(np.shape(x)) == 1:
         logical = True
     else:
@@ -679,7 +672,6 @@ def fftfilt(b, x):
     Note: 
         This code is based on the "fftfilt" fuction of Matlab.
     """    
-
     if isrow(x):
         x_col = np.array([x]).T
     else:

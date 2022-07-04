@@ -329,8 +329,8 @@ def out_mid_crct_filt(str_crct, sr, sw_plot=0, sw_filter=0):
     Plot
     """
     if sw_plot == 1:
-        N_rsl = 1024
-        freq2, frsp = signal.freqz(fir_coef, 1, N_rsl, fs=sr)
+        n_rsl = 1024
+        freq2, frsp = signal.freqz(fir_coef, 1, n_rsl, fs=sr)
 
         fig = plt.figure()
         ax1 = fig.add_subplot(2, 1, 1)

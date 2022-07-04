@@ -10,12 +10,12 @@ import gcfb_v211 as dcgc
 class GCparamDefault:
     def __init__(self):
         self.fs = 48000 # samping frequency
-        self.NumCh = 100 # number of channels
-        self.FRange = np.array([100, 6000]) # range of center frequency
-        self.OutMidCrct = "No"
-        # OutMidCrct = "ELC"
-        # Ctrl = "dynamic" # used to be 'tyme-varying'
-        # Ctrl = "static" # or 'fixed'
+        self.num_ch = 100 # number of channels
+        self.f_range = np.array([100, 6000]) # range of center frequency
+        self.out_mid_crct = "No"
+        # self.out_mid_crrct = "ELC"
+        # self.ctrl = "dynamic" # used to be 'tyme-varying'
+        # self.ctrl = "static" # or 'fixed'
 
 
 def main():
@@ -40,9 +40,10 @@ def main():
             # Set paramteres for dcGC
             gc_param = GCparamDefault() # reset all
             if sw_ctrl == 0: 
-                gc_param.Ctrl = "dynamic"
+                ctrl = "dynamic"
             else: 
-                gc_param.Ctrl = "static"
+                ctrl = "static"
+            gc_param.ctrl = ctrl
             
             # dcGC processing
             t_start = time.time()
@@ -54,7 +55,7 @@ def main():
             # Plot
             ax = plt.subplot(len(list_dbspl), 1, sw_dbspl+1)
             plt.imshow(np.maximum(cgc_out, 0), aspect='auto', origin='lower', cmap='jet')
-            ax.set_title(f"GCFB control = {gc_param.Ctrl}; Signal Level = {dbspl} dB SPL")
+            ax.set_title(f"GCFB control = {ctrl}; Signal Level = {dbspl} dB SPL")
             ax.set_yticks([0, 20, 40, 60, 80, 100])
             plt.tight_layout()
             plt.pause(0.05)

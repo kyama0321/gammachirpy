@@ -11,13 +11,13 @@ import gammachirp as gcfb
 
 class ACFstatus:
     def __init__(self):
-        self.NumCh = []
-        self.NumFilt = []
-        self.Lbz = []
-        self.Lap = []
-        self.SigInPrev = []
-        self.SigOutPrev = []
-        self.Count = []
+        self.num_ch = []
+        self.num_filt = []
+        self.lbz = []
+        self.lap = []
+        self.sig_in_prev = []
+        self.sig_out_prev = []
+        self.count = []
 
 class ACFcoef:
     def __init__(self):
@@ -27,56 +27,56 @@ class ACFcoef:
 
 class cGCresp:
     def __init__(self):
-        self.Fr1 = []
+        self.fr1 = []
         self.n = []
         self.b1 = []
         self.c1 = []
         self.frat = []
         self.b2 = []
         self.c2 = []
-        self.NfrqRsl = []
-        self.pGCFrsp = []
-        self.cGCFrsp = []
-        self.cGCNrmFrsp = []
-        self.ACFFrsp = []
-        self.AsymFunc = []
-        self.Fp1 = []
-        self.Fr2 = []
-        self.Fp2 = []
-        self.ValFp2 = []
-        self.NormFctFp2 = []
+        self.n_frq_rsl = []
+        self.pgc_frsp = []
+        self.cgc_frsp = []
+        self.cgc_nrm_frsp = []
+        self.acf_frsp = []
+        self.asym_func = []
+        self.fp1 = []
+        self.fr2 = []
+        self.fp2 = []
+        self.val_fp2 = []
+        self.norm_fct_fp2 = []
         self.freq = []
 
 class GCresp:
     def __init__(self):
-        self.Fr1 = []
-        self.Fr2 = []
-        self.ERBspace1 = []
-        self.Ef = []
+        self.fr1 = []
+        self.fr2 = []
+        self.erb_space1 = []
+        self.ef = []
         self.b1val = []
         self.c1val = []
-        self.Fp1 = []
-        self.Fp2 = []
+        self.fp1 = []
+        self.fp2 = []
         self.b2val = []
         self.c1val = []
         self.fratVal = []
 
 class LvlEst:
     def __init__(self):
-        self.LctERB = []
-        self.DecayHL = []
+        self.lct_erb = []
+        self.decay_hl = []
         self.b2 = []
         self.c2 = []
         self.frat = []
-        self.RMStoSPLdB = []
-        self.Weight = []
-        self.RefdB = []
-        self.Pwr = []
-        self.ExpDecayVal = []
-        self.NchShift = []
-        self.NchLvlEst = []
-        self.LvlLinMinLim = []
-        self.LvlLinRef = []
+        self.rms2spldb = []
+        self.weight = []
+        self.ref_db = []
+        self.pwr = []
+        self.exp_decay_val = []
+        self.n_ch_shift = []
+        self.n_ch_lvl_est = []
+        self.lvl_lin_min_lim = []
+        self.lvl_lin_ref = []
 
 
 def gcfb_v211(snd_in, gc_param, *args):
@@ -86,9 +86,9 @@ def gcfb_v211(snd_in, gc_param, *args):
         snd_in (float): Input sound
         gc_param (struct): Parameters of dcGC-FB
             .fs: Sampling rate (default: 48000)
-            .NumCh: Number of Channels (default: 100)
-            .FRange: Frequency Range of GCFB (default: [100, 6000]) s
-                     pecifying asymtopic freq. of passive GC (Fr1)
+            .num_ch: Number of Channels (default: 100)
+            .f_range: Frequency Range of GCFB (default: [100, 6000]) s
+                     pecifying asymtopic freq. of passive GC (fr1)
 
     Returns:
         cgc_out: ompressive GammaChirp Filter Output
@@ -123,21 +123,21 @@ def gcfb_v211(snd_in, gc_param, *args):
     # Call default parametes
     gc_param, gc_resp = set_param(gc_param)
     fs = gc_param.fs
-    num_ch = gc_param.NumCh
+    num_ch = gc_param.num_ch
 
     """
     Outer-Mid Ear Compensation
-    for inverse filter, use Out utits.OutMidCrctFilt('ELC', fs, 0, 1)
+    for inverse filter, use Out utits.out_mid_crctFilt('ELC', fs, 0, 1)
     """
-    if gc_param.OutMidCrct == 'No':
+    if gc_param.out_mid_crct == 'No':
         print("*** No Outer/Middle Ear correction ***")
         Snd = snd_in
     else:
-        # if gc_param.OutMidCrct in ["ELC", "MAF", "MAP"]:
-        print(f"*** Outer/Middle Ear correction (minimum phase) : {gc_param.OutMidCrct} ***")
-        cmpn_out_mid, _ = utils.out_mid_crct_filt(gc_param.OutMidCrct, fs, 0, 2) # 2) minimum phase
+        # if gc_param.out_mid_crct in ["ELC", "MAF", "MAP"]:
+        print(f"*** Outer/Middle Ear correction (minimum phase) : {gc_param.out_mid_crct} ***")
+        cmpn_out_mid, _ = utils.out_mid_crct_filt(gc_param.out_mid_crct, fs, 0, 2) # 2) minimum phase
         # 1kHz: -4 dB, 2kHz: -1 dB, 4kHz: +4 dB (ELC)
-        # Now we use Minimum phase version of OutMidCrctFilt (modified 16 Apr. 2006).
+        # Now we use Minimum phase version of out_mid_crctFilt (modified 16 Apr. 2006).
         # No compensation is necessary.  16 Apr. 2006
 
     
@@ -150,23 +150,23 @@ def gcfb_v211(snd_in, gc_param, *args):
     if not sw_fast_prcs == 1:
         print("sw_fast_prcs should be 1.", file=sys.stderr)
         sys.exit(1)
-    if sw_fast_prcs == 1 and gc_param.Ctrl == "static":
-        # 'Fast processing for linear cGC gain at gc_param.LeveldBscGCFB'
+    if sw_fast_prcs == 1 and gc_param.ctrl == "static":
+        # 'Fast processing for linear cGC gain at gc_param.level_db_scgcfb'
         """
         for HP-AF
         """
-        lvl_db = gc_param.LeveldBscGCFB
-        fratVal = gc_param.frat[0,0] + gc_param.frat[0,1] * gc_resp.Ef \
-            + (gc_param.frat[1,0] + gc_param.frat[1,1] * gc_resp.Ef) * lvl_db
-        fr2val = fratVal * gc_resp.Fp1
-        gc_resp.Fr2 = fr2val.copy()
+        lvl_db = gc_param.level_db_scgcfb
+        fratVal = gc_param.frat[0,0] + gc_param.frat[0,1] * gc_resp.ef \
+            + (gc_param.frat[1,0] + gc_param.frat[1,1] * gc_resp.ef) * lvl_db
+        fr2val = fratVal * gc_resp.fp1
+        gc_resp.fr2 = fr2val.copy()
         acf_coef_fast_prcs = make_asym_cmp_filters_v2(fs, fr2val, gc_resp.b2val, gc_resp.c2val)
     else:
         # HP-AF for dynamic-GC level estimation path. 18 Dec 2012 Checked
-        fr2lvl_est = gc_param.LvlEst.frat * gc_resp.Fp1
-        # default gc_param.LvlEst.frat = 1.08 (GCFBv208_SetParam(gc_param))
+        fr2lvl_est = gc_param.lvl_est.frat * gc_resp.fp1
+        # default gc_param.lvl_est.frat = 1.08 (GCFBv208_SetParam(gc_param))
         # ---> Linear filter for level estimation
-        acf_coef_lvl_est = make_asym_cmp_filters_v2(fs,fr2lvl_est,gc_param.LvlEst.b2, gc_param.LvlEst.c2)
+        acf_coef_lvl_est = make_asym_cmp_filters_v2(fs,fr2lvl_est,gc_param.lvl_est.b2, gc_param.lvl_est.c2)
 
     """
     Start calculation
@@ -185,14 +185,14 @@ def gcfb_v211(snd_in, gc_param, *args):
     for nch in range(num_ch):
 
         # passive gammachirp
-        pgc, _, _, _ = gcfb.gammachirp(gc_resp.Fr1[nch], fs, gc_param.n, \
+        pgc, _, _, _ = gcfb.gammachirp(gc_resp.fr1[nch], fs, gc_param.n, \
                                        gc_resp.b1val[nch], gc_resp.c1val[nch], 0, '', 'peak')
 
         # fast FFT-based filtering by the pgc
         pgc_out[nch, 0:len_snd] = utils.fftfilt(pgc[0,:], Snd) 
 
         # Fast processing for fixed cGC
-        if sw_fast_prcs == 1 and gc_param.Ctrl == 'static': # Static
+        if sw_fast_prcs == 1 and gc_param.ctrl == 'static': # Static
             str_gc = "Static (Fixed) Compressive-Gammachirp"
             gc_out1 = pgc_out[nch, :].copy()
             for n_filt in range(4):
@@ -200,11 +200,11 @@ def gcfb_v211(snd_in, gc_param, *args):
                                          acf_coef_fast_prcs.ap[nch, :, n_filt], gc_out1)
 
             cgc_out[nch, :] = gc_out1.copy()
-            gc_resp.Fp2[nch], _ = fr1_to_fp2(gc_param.n, gc_resp.b1val[nch], gc_resp.c1val[nch], \
+            gc_resp.fp2[nch], _ = fr1_to_fp2(gc_param.n, gc_resp.b1val[nch], gc_resp.c1val[nch], \
                                                  gc_resp.b2val[nch], gc_resp.c2val[nch], \
-                                                 fratVal[nch], gc_resp.Fr1[nch])
+                                                 fratVal[nch], gc_resp.fr1[nch])
             if nch == num_ch:
-                gc_resp.Fp2 = gc_resp.Fp2
+                gc_resp.fp2 = gc_resp.fp2
 
         else: # Level estimation pass for Dynamic.
             str_gc = "Passive-Gammachirp & Level estimation filter"
@@ -221,7 +221,7 @@ def gcfb_v211(snd_in, gc_param, *args):
                   + f"elapsed time = {np.round(t_now-t_start, 1)} (sec)")
 
     # added level estimation circuit only, 25 Nov. 2013
-    if gc_param.Ctrl == 'level':
+    if gc_param.ctrl == 'level':
             cgc_out = cgc_out_lvl_est.copy()
             lvl_db = []
 
@@ -231,14 +231,14 @@ def gcfb_v211(snd_in, gc_param, *args):
     Dynamic Compressive Gammachirp filtering
     Sample-by-sample processing
     """
-    if gc_param.Ctrl == 'dynamic':
+    if gc_param.ctrl == 'dynamic':
 
         # Initial settings
         num_disp = int(np.fix(len_snd/10)) # display 10 times per Snd
         cgc_out = np.zeros((num_ch, len_snd))
-        gc_resp.Fr2 = np.zeros((num_ch, len_snd))
+        gc_resp.fr2 = np.zeros((num_ch, len_snd))
         gc_resp.fratVal = np.zeros((num_ch, len_snd))
-        gc_resp.Fp2 = []
+        gc_resp.fp2 = []
         lvl_db = np.zeros((num_ch, len_snd))
         lvl_lin = np.zeros((num_ch, 2))
         lvl_lin_prev = np.zeros((num_ch, 2))
@@ -253,31 +253,31 @@ def gcfb_v211(snd_in, gc_param, *args):
             Level estimation circuit
             """
             lvl_lin[0:num_ch, 0] = \
-                np.maximum(np.max(pgc_out[gc_param.LvlEst.NchLvlEst.astype(int)-1, nsmpl], initial=0, axis=1), \
-                    lvl_lin_prev[:, 0]*gc_param.LvlEst.ExpDecayVal)
+                np.maximum(np.max(pgc_out[gc_param.lvl_est.n_ch_lvl_est.astype(int)-1, nsmpl], initial=0, axis=1), \
+                    lvl_lin_prev[:, 0]*gc_param.lvl_est.exp_decay_val)
             lvl_lin[0:num_ch, 1] = \
-                np.maximum(np.max(cgc_out_lvl_est[gc_param.LvlEst.NchLvlEst.astype(int)-1, nsmpl], initial=0, axis=1), \
-                    lvl_lin_prev[:, 1]*gc_param.LvlEst.ExpDecayVal)
+                np.maximum(np.max(cgc_out_lvl_est[gc_param.lvl_est.n_ch_lvl_est.astype(int)-1, nsmpl], initial=0, axis=1), \
+                    lvl_lin_prev[:, 1]*gc_param.lvl_est.exp_decay_val)
 
             lvl_lin_prev = lvl_lin.copy()
 
-            lvl_lin_ttl = gc_param.LvlEst.Weight \
-                * gc_param.LvlEst.LvlLinRef * (lvl_lin[:, 0] / gc_param.LvlEst.LvlLinRef)**gc_param.LvlEst.Pwr[0] \
-                    + (1 - gc_param.LvlEst.Weight) \
-                        * gc_param.LvlEst.LvlLinRef * (lvl_lin[:, 1] / gc_param.LvlEst.LvlLinRef)**gc_param.LvlEst.Pwr[1]
+            lvl_lin_ttl = gc_param.lvl_est.weight \
+                * gc_param.lvl_est.lvl_lin_ref * (lvl_lin[:, 0] / gc_param.lvl_est.lvl_lin_ref)**gc_param.lvl_est.pwr[0] \
+                    + (1 - gc_param.lvl_est.weight) \
+                        * gc_param.lvl_est.lvl_lin_ref * (lvl_lin[:, 1] / gc_param.lvl_est.lvl_lin_ref)**gc_param.lvl_est.pwr[1]
                 
-            lvl_db[:, [nsmpl]] = np.array([20 * np.log10(np.maximum(lvl_lin_ttl, gc_param.LvlEst.LvlLinMinLim)) \
-                + gc_param.LvlEst.RMStoSPLdB]).T
+            lvl_db[:, [nsmpl]] = np.array([20 * np.log10(np.maximum(lvl_lin_ttl, gc_param.lvl_est.lvl_lin_min_lim)) \
+                + gc_param.lvl_est.rms2spldb]).T
 
             """
             Signal path
             """
             # Filtering High-Pass Asymmetric Comressive Filter
-            fratVal = gc_param.frat[0, 0] + gc_param.frat[0, 1] * gc_resp.Ef[:] + \
-                (gc_param.frat[1, 0] + gc_param.frat[1, 1] * gc_resp.Ef[:]) * lvl_db[:, [nsmpl]]
-            fr2val = gc_resp.Fp1[:] * fratVal
+            fratVal = gc_param.frat[0, 0] + gc_param.frat[0, 1] * gc_resp.ef[:] + \
+                (gc_param.frat[1, 0] + gc_param.frat[1, 1] * gc_resp.ef[:]) * lvl_db[:, [nsmpl]]
+            fr2val = gc_resp.fp1[:] * fratVal
 
-            if np.mod(nsmpl, gc_param.NumUpdateAsymCmp) == 0: # update periodically
+            if np.mod(nsmpl, gc_param.num_update_asym_cmp) == 0: # update periodically
                 acf_coef = make_asym_cmp_filters_v2(fs, fr2val, gc_resp.b2val, gc_resp.c2val)
 
             if nsmpl == 0:
@@ -285,7 +285,7 @@ def gcfb_v211(snd_in, gc_param, *args):
 
             sig_out, acf_status = acfilterbank(acf_coef, acf_status, pgc_out[:, nsmpl])
             cgc_out[:, [nsmpl]] = sig_out.copy()
-            gc_resp.Fr2[:, [nsmpl]] = fr2val.copy()
+            gc_resp.fr2[:, [nsmpl]] = fr2val.copy()
             gc_resp.fratVal[:, [nsmpl]] = fratVal.copy()
 
             if nsmpl == 0 or np.mod(nsmpl+1, num_disp) == 0:
@@ -297,17 +297,17 @@ def gcfb_v211(snd_in, gc_param, *args):
         End of Dynamic Compressive Gammachirp filtering
         """
         """
-        Signal path Gain Normalization at Reference Level (GainRefdB) for static dynamic filters
+        Signal path Gain Normalization at Reference Level (gain_ref_db) for static dynamic filters
         """
-        fratRef = gc_param.frat[0, 0] + gc_param.frat[0, 1] * gc_resp.Ef[:] \
-            + (gc_param.frat[1, 0] + gc_param.frat[1, 1] * gc_resp.Ef[:]) * gc_param.GainRefdB
+        fratRef = gc_param.frat[0, 0] + gc_param.frat[0, 1] * gc_resp.ef[:] \
+            + (gc_param.frat[1, 0] + gc_param.frat[1, 1] * gc_resp.ef[:]) * gc_param.gain_ref_db
 
-        cgc_ref = cmprs_gc_frsp(gc_resp.Fr1, fs, gc_param.n, gc_resp.b1val, \
+        cgc_ref = cmprs_gc_frsp(gc_resp.fr1, fs, gc_param.n, gc_resp.b1val, \
                                       gc_resp.c1val, fratRef, gc_resp.b2val, gc_resp.c2val)
-        gc_resp.cGCRef = cgc_ref
-        gc_resp.LvldB = lvl_db
+        gc_resp.cgc_ref = cgc_ref
+        gc_resp.lvl_db = lvl_db
 
-        gc_resp.GainFactor = 10**(gc_param.GainCmpnstdB/20) * cgc_ref.NormFctFp2
+        gc_resp.GainFactor = 10**(gc_param.gain_cmpnst_db/20) * cgc_ref.norm_fct_fp2
         cgc_out = (gc_resp.GainFactor * np.ones((1, len_snd))) * cgc_out
 
     return cgc_out, pgc_out, gc_param, gc_resp
@@ -319,9 +319,9 @@ def set_param(gc_param):
     Args:
         gc_param (struct): Your preset gammachirp parameters
             .fs: Sampling rate (default: 48000)
-            .NumCh: Number of Channels (default: 100)
-            .FRange: Frequency Range of GCFB (default: [100, 6000]) 
-                     specifying asymtopic freq. of passive GC (Fr1)
+            .num_ch: Number of Channels (default: 100)
+            .f_range: Frequency Range of GCFB (default: [100, 6000]) 
+                     specifying asymtopic freq. of passive GC (fr1)
 
     Returns:
         gc_param (struct): gc_param values
@@ -329,15 +329,15 @@ def set_param(gc_param):
     if not hasattr(gc_param, 'fs'):
         gc_param.fs = 48000
 
-    if not hasattr(gc_param, 'OutMidCrct'):
-        gc_param.OutMidCrct = 'ELC'
-        # if no OutMidCrct is not necessary, specify gc_param.OutMidCrct = 'no'
+    if not hasattr(gc_param, 'out_mid_crct'):
+        gc_param.out_mid_crct = 'ELC'
+        # if no out_mid_crct is not necessary, specify gc_param.out_mid_crct = 'no'
 
-    if not hasattr(gc_param, 'NumCh'):
-        gc_param.NumCh = 100
+    if not hasattr(gc_param, 'num_ch'):
+        gc_param.num_ch = 100
 
-    if not hasattr(gc_param, 'FRange'):
-        gc_param.FRange = np.array([100, 6000])
+    if not hasattr(gc_param, 'f_range'):
+        gc_param.f_range = np.array([100, 6000])
     
     # Gammachirp parameters
     if not hasattr(gc_param, 'n'):
@@ -365,116 +365,116 @@ def set_param(gc_param):
     if not hasattr(gc_param, 'c2'):
         gc_param.c2 = np.array([[2.20, 0], [0, 0]]) # no level-dependency; no freq-dependency (3 Jun 05)
 
-    if not hasattr(gc_param, 'Ctrl'):
-        gc_param.Ctrl = 'static'      
+    if not hasattr(gc_param, 'ctrl'):
+        gc_param.ctrl = 'static'      
 
-    if not hasattr(gc_param, 'Ctrl'):
-        gc_param.Ctrl = 'static'
-    if 'fix' in gc_param.Ctrl:
-        gc_param.Ctrl = 'static'
-    if 'tim' in gc_param.Ctrl:
-        gc_param.Ctrl = 'dynamic'
-    if not 'sta' in gc_param.Ctrl and not 'dyn' in gc_param.Ctrl and not 'lev' in gc_param.Ctrl:
-        print("Specify gc_param.Ctrl:  'static', 'dynamic', or 'level(-estimation). \
+    if not hasattr(gc_param, 'ctrl'):
+        gc_param.ctrl = 'static'
+    if 'fix' in gc_param.ctrl:
+        gc_param.ctrl = 'static'
+    if 'tim' in gc_param.ctrl:
+        gc_param.ctrl = 'dynamic'
+    if not 'sta' in gc_param.ctrl and not 'dyn' in gc_param.ctrl and not 'lev' in gc_param.ctrl:
+        print("Specify gc_param.ctrl:  'static', 'dynamic', or 'level(-estimation). \
                (old version 'fixed'/'time-varying')", file=sys.stderr)
         sys.exit(1)
 
-    if not hasattr(gc_param, 'GainCmpnstdB'):
-        gc_param.GainCmpnstdB = -1 # in dB. when LvlEst.c2==2.2, 1 July 2005
+    if not hasattr(gc_param, 'gain_cmpnst_db'):
+        gc_param.gain_cmpnst_db = -1 # in dB. when lvl_est.c2==2.2, 1 July 2005
 
     """
     Parameters for level estimation
     """
-    if hasattr(gc_param, 'PpgcRef') or hasattr(gc_param, 'LvlRefdB'):
-        print("The parameter 'gc_param.PpgcRef' is obsolete.")
-        print("The parameter 'gc_param.LvlRefdB' is obsolete.")
-        print("Please change it to 'gc_param.GainRefdB'", file=sys.stderr)
+    if hasattr(gc_param, 'p_pgc_ref') or hasattr(gc_param, 'lvl_ref_db'):
+        print("The parameter 'gc_param.p_pgc_ref' is obsolete.")
+        print("The parameter 'gc_param.lvl_ref_db' is obsolete.")
+        print("Please change it to 'gc_param.gain_ref_db'", file=sys.stderr)
         sys.exit(1)
     
-    if not hasattr(gc_param, 'GainRefdB'):
-        gc_param.GainRefdB = 50 # reference Ppgc level for gain normalization
+    if not hasattr(gc_param, 'gain_ref_db'):
+        gc_param.gain_ref_db = 50 # reference Ppgc level for gain normalization
 
-    if not hasattr(gc_param, 'LeveldBscGCFB'):
-        gc_param.LeveldBscGCFB = gc_param.GainRefdB # use it as default
+    if not hasattr(gc_param, 'level_db_scgcfb'):
+        gc_param.level_db_scgcfb = gc_param.gain_ref_db # use it as default
 
-    if not hasattr(gc_param, 'LvlEst'):
-        gc_param.LvlEst = LvlEst()
+    if not hasattr(gc_param, 'lvl_est'):
+        gc_param.lvl_est = LvlEst()
 
-    if len(gc_param.LvlEst.LctERB) == 0:
-        #gc_param.LvlEst.LctERB = 1.0
+    if len(gc_param.lvl_est.lct_erb) == 0:
+        #gc_param.lvl_est.lct_erb = 1.0
         # Location of Level Estimation pGC relative to the signal pGC in ERB
-        # see testGC_LctERB.py for fitting result. 10 Sept 2004
-        gc_param.LvlEst.LctERB = 1.5;   # 16 July 05
+        # see testGC_lct_erb.py for fitting result. 10 Sept 2004
+        gc_param.lvl_est.lct_erb = 1.5;   # 16 July 05
 
-    if len(gc_param.LvlEst.DecayHL) == 0:
-        gc_param.LvlEst.DecayHL = 0.5; # 18 July 2005
+    if len(gc_param.lvl_est.decay_hl) == 0:
+        gc_param.lvl_est.decay_hl = 0.5; # 18 July 2005
 
-    if len(gc_param.LvlEst.b2) == 0:
-        gc_param.LvlEst.b2 = gc_param.b2[0, 0]
+    if len(gc_param.lvl_est.b2) == 0:
+        gc_param.lvl_est.b2 = gc_param.b2[0, 0]
 
-    if len(gc_param.LvlEst.c2) == 0:
-        gc_param.LvlEst.c2 = gc_param.c2[0, 0]
+    if len(gc_param.lvl_est.c2) == 0:
+        gc_param.lvl_est.c2 = gc_param.c2[0, 0]
 
-    if len(gc_param.LvlEst.frat) == 0:
-        # gc_param.LvlEst.frat = 1.1 #  when b=2.01 & c=2.20
-        gc_param.LvlEst.frat = 1.08 # peak of cGC ~= 0 dB (b2=2.17 & c2=2.20)
+    if len(gc_param.lvl_est.frat) == 0:
+        # gc_param.lvl_est.frat = 1.1 #  when b=2.01 & c=2.20
+        gc_param.lvl_est.frat = 1.08 # peak of cGC ~= 0 dB (b2=2.17 & c2=2.20)
 
-    if len(gc_param.LvlEst.RMStoSPLdB) == 0:
-        gc_param.LvlEst.RMStoSPLdB = 30 # 1 rms == 30 dB SPL for Meddis IHC
+    if len(gc_param.lvl_est.rms2spldb) == 0:
+        gc_param.lvl_est.rms2spldb = 30 # 1 rms == 30 dB SPL for Meddis IHC
 
-    if len(gc_param.LvlEst.Weight) == 0:
-        gc_param.LvlEst.Weight = 0.5
+    if len(gc_param.lvl_est.weight) == 0:
+        gc_param.lvl_est.weight = 0.5
 
-    if len(gc_param.LvlEst.RefdB) == 0:
-        gc_param.LvlEst.RefdB = 50 # 50 dB SPL
+    if len(gc_param.lvl_est.ref_db) == 0:
+        gc_param.lvl_est.ref_db = 50 # 50 dB SPL
 
-    if len(gc_param.LvlEst.Pwr) == 0:
-        gc_param.LvlEst.Pwr = np.array([1.5, 0.5]) # Weight for pGC & cGC
+    if len(gc_param.lvl_est.pwr) == 0:
+        gc_param.lvl_est.pwr = np.array([1.5, 0.5]) # weight for pGC & cGC
 
     # new 19 Dec 2011
-    if not hasattr(gc_param, 'NumUpdateAsymCmp'):
-        # gc_param.NumUpdateAsymCmp = 3 # updte every 3 samples (== 3*GCFBv207)
-        gc_param.NumUpdateAsymCmp = 1 # samply-by-sample (==GCFBv207)
+    if not hasattr(gc_param, 'num_update_asym_cmp'):
+        # gc_param.num_update_asym_cmp = 3 # updte every 3 samples (== 3*GCFBv207)
+        gc_param.num_update_asym_cmp = 1 # samply-by-sample (==GCFBv207)
 
     """
     GCresp
     """
     gc_resp = GCresp()
     
-    Fr1, ERBrate1 = utils.equal_freq_scale('ERB', gc_param.NumCh, gc_param.FRange)
-    gc_resp.Fr1 = np.array([Fr1]).T
-    gc_resp.ERBspace1 = np.mean(np.diff(ERBrate1))
-    ERBrate, ERBw = utils.freq2erb(gc_resp.Fr1)
-    ERBrate1kHz, ERBw1kHz = utils.freq2erb(1000)
-    gc_resp.Ef = ERBrate/ERBrate1kHz - 1
+    fr1, erb_rate1 = utils.equal_freq_scale('ERB', gc_param.num_ch, gc_param.f_range)
+    gc_resp.fr1 = np.array([fr1]).T
+    gc_resp.erb_space1 = np.mean(np.diff(erb_rate1))
+    erb_rate, _ = utils.freq2erb(gc_resp.fr1)
+    erb_rate_1kHz, _ = utils.freq2erb(1000)
+    gc_resp.ef = erb_rate/erb_rate_1kHz - 1
 
-    OneVec = np.ones([gc_param.NumCh, 1])
-    gc_resp.b1val = gc_param.b1[0]*OneVec + gc_param.b1[1]*gc_resp.Ef
-    gc_resp.c1val = gc_param.c1[0]*OneVec + gc_param.c1[1]*gc_resp.Ef
+    one_vec = np.ones([gc_param.num_ch, 1])
+    gc_resp.b1val = gc_param.b1[0]*one_vec + gc_param.b1[1]*gc_resp.ef
+    gc_resp.c1val = gc_param.c1[0]*one_vec + gc_param.c1[1]*gc_resp.ef
 
-    gc_resp.Fp1, _ = utils.fr2fpeak(gc_param.n, gc_resp.b1val, gc_resp.c1val, gc_resp.Fr1)
-    gc_resp.Fp2 = np.zeros(np.shape(gc_resp.Fp1))
+    gc_resp.fp1, _ = utils.fr2fpeak(gc_param.n, gc_resp.b1val, gc_resp.c1val, gc_resp.fr1)
+    gc_resp.fp2 = np.zeros(np.shape(gc_resp.fp1))
 
-    gc_resp.b2val = gc_param.b2[0, 0]*OneVec + gc_param.b2[0, 1]*gc_resp.Ef
-    gc_resp.c2val = gc_param.c2[0, 0]*OneVec + gc_param.c2[0, 1]*gc_resp.Ef
+    gc_resp.b2val = gc_param.b2[0, 0]*one_vec + gc_param.b2[0, 1]*gc_resp.ef
+    gc_resp.c2val = gc_param.c2[0, 0]*one_vec + gc_param.c2[0, 1]*gc_resp.ef
     
     """
     Set Params estimation circuit
     """
-    # keep LvlEst params  3 Dec 2013
-    ExpDecayVal = np.exp(-1/(gc_param.LvlEst.DecayHL*gc_param.fs/1000)*np.log(2)) # decay exp
-    NchShift = np.round(gc_param.LvlEst.LctERB/gc_resp.ERBspace1)
-    NchLvlEst = np.minimum(np.maximum(1, np.array([np.arange(gc_param.NumCh)+1]).T+NchShift), \
-                           gc_param.NumCh) # shift in NumCh [1:NumCh]
-    LvlLinMinLim = 10**(-gc_param.LvlEst.RMStoSPLdB/20) # minimum sould be SPL 0 dB
-    LvlLinRef = 10**((gc_param.LvlEst.RefdB - gc_param.LvlEst.RMStoSPLdB)/20)
+    # keep lvl_est params  3 Dec 2013
+    exp_decay_val = np.exp(-1/(gc_param.lvl_est.decay_hl*gc_param.fs/1000)*np.log(2)) # decay exp
+    n_ch_shift = np.round(gc_param.lvl_est.lct_erb/gc_resp.erb_space1)
+    n_ch_lvl_est = np.minimum(np.maximum(1, np.array([np.arange(gc_param.num_ch)+1]).T+n_ch_shift), \
+                           gc_param.num_ch) # shift in num_ch [1:num_ch]
+    lvl_lin_min_lim = 10**(-gc_param.lvl_est.rms2spldb/20) # minimum sould be SPL 0 dB
+    lvl_lin_ref = 10**((gc_param.lvl_est.ref_db - gc_param.lvl_est.rms2spldb)/20)
 
-    gc_param.LvlEst.ExpDecayVal = ExpDecayVal
-    gc_param.LvlEst.ERBspace1 = gc_resp.ERBspace1
-    gc_param.LvlEst.NchShift = NchShift
-    gc_param.LvlEst.NchLvlEst = NchLvlEst
-    gc_param.LvlEst.LvlLinMinLim = LvlLinMinLim
-    gc_param.LvlEst.LvlLinRef = LvlLinRef
+    gc_param.lvl_est.exp_decay_val = exp_decay_val
+    gc_param.lvl_est.erb_space1 = gc_resp.erb_space1
+    gc_param.lvl_est.n_ch_shift = n_ch_shift
+    gc_param.lvl_est.n_ch_lvl_est = n_ch_lvl_est
+    gc_param.lvl_est.lvl_lin_min_lim = lvl_lin_min_lim
+    gc_param.lvl_est.lvl_lin_ref = lvl_lin_ref
 
     return gc_param, gc_resp
 
@@ -492,7 +492,7 @@ def make_asym_cmp_filters_v2(fs, frs, b, c):
         c (float): array or scalar of asymmetric parameters, c
 
     Returns:
-        ACFcoef: 
+        acf_coef: 
         - fs (int): Sampling frequency
         - bz (array_like): MA coefficients  (num_ch*3*num_filt)
         - ap (array_like): AR coefficients  (num_ch*3*num_filt)
@@ -504,7 +504,7 @@ def make_asym_cmp_filters_v2(fs, frs, b, c):
             This frequency fn is for normalizing GC(=GT*Hacf) filter to be unity at the peak, frequnecy. But now we use Hacf as a highpass filter as well. cGC = pGC *Hacf. In this case, this normalization is useless. 
             So, it was set as the gain at frs is unity.  (4. Jun 2004 )
         [3] Removed
-            ACFcoef.fn(:,nff) = fn;
+            acf_coef.fn(:,nff) = fn;
             n : scalar of order t^(n-1) % used only in normalization 
     """
     num_ch, len_frs = np.shape(frs)
@@ -609,11 +609,11 @@ def fr1_to_fp2(n, b1, c1, b2, c2, frat, fr1, sr=24000, n_fft=2048, sw_plot=0):
         
         fig, ax = plt.subplots()
         plt_freq = np.array(cgc_rsp.freq).T
-        plt_cgc_frsp = np.array(cgc_rsp.cGCFrsp/np.max(cgc_rsp.cGCFrsp)).T
-        plt_pgc_frsp = np.array(cgc_rsp.pGCFrsp).T
+        plt_cgc_frsp = np.array(cgc_rsp.cgc_frsp/np.max(cgc_rsp.cgc_frsp)).T
+        plt_pgc_frsp = np.array(cgc_rsp.pgc_frsp).T
 
-        ax.plot(plt_freq, plt_cgc_frsp, label="cGCFrsp") # compressive GC
-        ax.plot(plt_freq, plt_pgc_frsp, label="pGCFrsp") # passive GC
+        ax.plot(plt_freq, plt_cgc_frsp, label="cgc_frsp") # compressive GC
+        ax.plot(plt_freq, plt_pgc_frsp, label="pgc_frsp") # passive GC
         ax.set_xlim([0, np.max(fp2cand)*2])
         ax.set_ylim([0, 1])
         ax.legend()
@@ -638,14 +638,14 @@ def cmprs_gc_frsp(fr1, fs=48000, n=4, b1=1.81, c1=-2.96, frat=1, b2=2.01, c2=2.2
 
     Returns:
         cgc_resp: Struct of cGC response
-            pGCFrsp (array-like): Passive GC freq. resp. (num_ch*n_frq_rsl matrix)
-            cGCFrsp (array-like): Comressive GC freq. resp. (num_ch*n_frq_rsl matrix)
-            cGCNrmFrsp (array-like): Normalized cGCFrsp (num_ch*n_frq_rsl matrix)
+            pgc_frsp (array-like): Passive GC freq. resp. (num_ch*n_frq_rsl matrix)
+            cgc_frsp (array-like): Comressive GC freq. resp. (num_ch*n_frq_rsl matrix)
+            cgc_nrm_frsp (array-like): Normalized cgc_frsp (num_ch*n_frq_rsl matrix)
             ACFrsp: Asym (array-like). Compensation Filter freq. resp.
-            AsymFunc (array-like): Asym Func
+            asym_func (array-like): Asym Func
             freq (array-like): Frequency (1*n_frq_rsl)
-            Fp2 (array-like): Peak freq.
-            ValFp2 (array-like): Peak Value
+            fp2 (array-like): Peak freq.
+            val_fp2 (array-like): Peak Value
     """
     if utils.isrow(fr1):
         fr1 = np.array([fr1]).T
@@ -672,7 +672,7 @@ def cmprs_gc_frsp(fr1, fs=48000, n=4, b1=1.81, c1=-2.96, frat=1, b2=2.01, c2=2.2
     cgc_frsp = pgc_frsp * asym_func # cgc_frsp = pgc_frsp * acf_frsp
     
     val_fp2 = np.max(cgc_frsp, axis=1)
-    nchFp2 = np.argmax(cgc_frsp, axis=1)
+    nchfp2 = np.argmax(cgc_frsp, axis=1)
     if utils.isrow(val_fp2):
         val_fp2 = np.array([val_fp2]).T
     
@@ -680,24 +680,24 @@ def cmprs_gc_frsp(fr1, fs=48000, n=4, b1=1.81, c1=-2.96, frat=1, b2=2.01, c2=2.2
 
     # function cGCresp = CmprsGCFrsp(fr1,fs,n,b1,c1,frat,b2,c2,n_frq_rsl)
     cgc_resp = cGCresp()
-    cgc_resp.Fr1 = fr1
+    cgc_resp.fr1 = fr1
     cgc_resp.n = n
     cgc_resp.b1 = b1
     cgc_resp.c1 = c1
     cgc_resp.frat = frat
     cgc_resp.b2 = b2
     cgc_resp.c2 = c2
-    cgc_resp.NfrqRsl = n_frq_rsl
-    cgc_resp.pGCFrsp = pgc_frsp
-    cgc_resp.cGCFrsp = cgc_frsp
-    cgc_resp.cGCNrmFrsp = cgc_frsp * (norm_fact_fp2 * np.ones((1,n_frq_rsl)))
-    cgc_resp.ACFFrsp = acf_frsp
-    cgc_resp.AsymFunc = asym_func
-    cgc_resp.Fp1 = fp1
-    cgc_resp.Fr2 = fr2
-    cgc_resp.Fp2 = freq[nchFp2]
-    cgc_resp.ValFp2 = val_fp2
-    cgc_resp.NormFctFp2 = norm_fact_fp2
+    cgc_resp.n_frq_rsl = n_frq_rsl
+    cgc_resp.pgc_frsp = pgc_frsp
+    cgc_resp.cgc_frsp = cgc_frsp
+    cgc_resp.cgc_nrm_frsp = cgc_frsp * (norm_fact_fp2 * np.ones((1,n_frq_rsl)))
+    cgc_resp.acf_frsp = acf_frsp
+    cgc_resp.asym_func = asym_func
+    cgc_resp.fp1 = fp1
+    cgc_resp.fr2 = fr2
+    cgc_resp.fp2 = freq[nchfp2]
+    cgc_resp.val_fp2 = val_fp2
+    cgc_resp.norm_fct_fp2 = norm_fact_fp2
     cgc_resp.freq = [freq]
 
     return cgc_resp
@@ -751,7 +751,7 @@ def asym_cmp_frsp_v2(frs, fs=48000, b=None, c=None, n_frq_rsl=1024, num_filt=4):
         p3 = 0.2523 * (1 - 0.0244*b) * (1 + 0.0574*np.abs(c))
         p4 = 1.0724
     else:
-        ACFcoef = make_asym_cmp_filters_v2(fs, frs, b, c)
+        acf_coef = make_asym_cmp_filters_v2(fs, frs, b, c)
 
     # filter coef.
     _, erbw = utils.freq2erb(frs)
@@ -769,8 +769,8 @@ def asym_cmp_frsp_v2(frs, fs=48000, b=None, c=None, n_frq_rsl=1024, num_filt=4):
             ap = np.concatenate([np.ones((num_ch, 1)), -2*r*np.cos(phi), r**2], axis=1)
             bz = np.concatenate([np.ones((num_ch, 1)), -2*r*np.cos(psi), r**2], axis=1)
         else:
-            ap = ACFcoef.ap[:, :, nfilt]
-            bz = ACFcoef.bz[:, :, nfilt]
+            ap = acf_coef.ap[:, :, nfilt]
+            bz = acf_coef.bz[:, :, nfilt]
 
         cs1 = np.cos(2*np.pi*freq2/fs)
         cs2 = np.cos(4*np.pi*freq2/fs)
@@ -798,23 +798,23 @@ def asym_cmp_frsp_v2(frs, fs=48000, b=None, c=None, n_frq_rsl=1024, num_filt=4):
     return acf_frsp, freq, asym_func
 
 
-def acfilterbank(ACFcoef, acf_status, sig_in=[], sw_ordr=0):
+def acfilterbank(acf_coef, acf_status, sig_in=[], sw_ordr=0):
     """IIR ACF time-slice filtering for time-varing filter
 
     Args:
-        ACFcoef (structure): ACFcoef: coef from make_asym_cmp_filters_v2
+        acf_coef (structure): acf_coef: coef from make_asym_cmp_filters_v2
             ap: AR coefficents (==a ~= pole) num_ch*lap*num_filt
             fs : sampling rate  (also switch for verbose)
                 (The variables named 'a' and 'b' are not used to avoid the
                 confusion to the gammachirp parameters.)
             verbose : Not specified) quiet   1) verbose
         acf_status (structure):
-            NumCh: Number of channels (Set by initialization
-            Lbz: size of MA
-            Lap: size of AR
-            NumFilt: Length of filters
-            SigInPrev: Previous status of sig_in
-            SigOutPrev: Previous status of SigOut
+            num_ch: Number of channels (Set by initialization
+            lbz: size of MA
+            lap: size of AR
+            num_filt: Length of filters
+            sig_in_prev: Previous status of sig_in
+            sig_out_prev: Previous status of SigOut
         sig_in (array_like, optional): Input signal. Defaults to [].
         sw_ordr (int, optional): Switch filtering order. Defaults to 0.
 
@@ -826,23 +826,23 @@ def acfilterbank(ACFcoef, acf_status, sig_in=[], sw_ordr=0):
         help(acfilterbank)
         sys.exit()
 
-    if not hasattr(acf_status, 'NumCh'):
+    if not hasattr(acf_status, 'num_ch'):
         acf_status = ACFstatus()
 
-        num_ch, lbz, num_filt = np.shape(ACFcoef.bz)
-        num_ch, lap, _ = np.shape(ACFcoef.ap)
+        num_ch, lbz, num_filt = np.shape(acf_coef.bz)
+        num_ch, lap, _ = np.shape(acf_coef.ap)
 
         if lbz != 3 or lap !=3:
             print("No gaurantee for usual IIR filters except for AsymCmpFilter.\n"\
                 + "Please check make_asym_cmp_filters_v2.")
     
-        acf_status.NumCh = num_ch
-        acf_status.NumFilt = num_filt
-        acf_status.Lbz = lbz # size of MA
-        acf_status.Lap = lap # size of AR
-        acf_status.SigInPrev = np.zeros((num_ch, lbz))
-        acf_status.SigOutPrev = np.zeros((num_ch, lap, num_filt))
-        acf_status.Count = 0
+        acf_status.num_ch = num_ch
+        acf_status.num_filt = num_filt
+        acf_status.lbz = lbz # size of MA
+        acf_status.lap = lap # size of AR
+        acf_status.sig_in_prev = np.zeros((num_ch, lbz))
+        acf_status.sig_out_prev = np.zeros((num_ch, lap, num_filt))
+        acf_status.count = 0
         print("ACFilterBank: Initialization of acf_status")
         sig_out = []
 
@@ -855,16 +855,16 @@ def acfilterbank(ACFcoef, acf_status, sig_in=[], sw_ordr=0):
     if len_sig != 1:
         print("Input signal sould be num_ch*1 vector (1 sample time-slice)", file=sys.stderr)
         sys.exit(1)
-    if num_ch_sig != acf_status.NumCh:
-        print(f"num_ch_sig ({num_ch_sig}) != acf_status.NumCh ({acf_status.NumCh})")
+    if num_ch_sig != acf_status.num_ch:
+        print(f"num_ch_sig ({num_ch_sig}) != acf_status.num_ch ({acf_status.num_ch})")
 
     # time stamp
-    if hasattr(ACFcoef, 'verbose'):
-        if ACFcoef.verbose == 1: # verbose when ACFcoef.verbose is specified to 1
+    if hasattr(acf_coef, 'verbose'):
+        if acf_coef.verbose == 1: # verbose when acf_coef.verbose is specified to 1
             t_disp = 50 # ms
-            t_cnt = acf_status.Count/(np.fix(ACFcoef.fs/1000)) # ms
+            t_cnt = acf_status.count/(np.fix(acf_coef.fs/1000)) # ms
 
-            if acf_status.Count == 0:
+            if acf_status.count == 0:
                 print("ACFilterBank: Start processing")
                 tic = time.time()
 
@@ -873,32 +873,32 @@ def acfilterbank(ACFcoef, acf_status, sig_in=[], sw_ordr=0):
                 print(f"ACFilterBank: Processed {t_cnt} (ms)." \
                       + f"elapsed Time = {np.round(tic-toc, 1)} (sec)")
     
-    acf_status.Count = acf_status.Count+1
+    acf_status.count = acf_status.count+1
     
     """
     Processing
     """
-    acf_status.SigInPrev = np.concatenate([acf_status.SigInPrev[:, 1:acf_status.Lbz], sig_in], axis=1)
+    acf_status.sig_in_prev = np.concatenate([acf_status.sig_in_prev[:, 1:acf_status.lbz], sig_in], axis=1)
 
-    x = acf_status.SigInPrev.copy()
-    nfilt_list = np.arange(acf_status.NumFilt)
+    x = acf_status.sig_in_prev.copy()
+    nfilt_list = np.arange(acf_status.num_filt)
 
     if sw_ordr == 1:
         nfilt_list = np.flip(nfilt_list)
 
     for nfilt in nfilt_list:
 
-        forward = ACFcoef.bz[:, acf_status.Lbz::-1, nfilt] * x
-        feedback = ACFcoef.ap[:, acf_status.Lap:0:-1, nfilt] * \
-            acf_status.SigOutPrev[:, 1:acf_status.Lap, nfilt]
+        forward = acf_coef.bz[:, acf_status.lbz::-1, nfilt] * x
+        feedback = acf_coef.ap[:, acf_status.lap:0:-1, nfilt] * \
+            acf_status.sig_out_prev[:, 1:acf_status.lap, nfilt]
 
         fwdSum = np.sum(forward, axis=1)
         fbkSum = np.sum(feedback, axis=1)
 
-        y = np.array([(fwdSum - fbkSum) / ACFcoef.ap[:, 0, nfilt]]).T
-        acf_status.SigOutPrev[:, :, nfilt] = \
-            np.concatenate([acf_status.SigOutPrev[:, 1:acf_status.Lap, nfilt], y], axis=1)
-        x = acf_status.SigOutPrev[:, :, nfilt].copy()
+        y = np.array([(fwdSum - fbkSum) / acf_coef.ap[:, 0, nfilt]]).T
+        acf_status.sig_out_prev[:, :, nfilt] = \
+            np.concatenate([acf_status.sig_out_prev[:, 1:acf_status.lap, nfilt], y], axis=1)
+        x = acf_status.sig_out_prev[:, :, nfilt].copy()
 
     sig_out = y
 

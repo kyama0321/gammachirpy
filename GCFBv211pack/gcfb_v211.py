@@ -492,9 +492,9 @@ def make_asym_cmp_filters_v2(fs, frs, b, c):
 
     Returns:
         acf_coef: 
-        - fs (int): Sampling frequency
-        - bz (array_like): MA coefficients  (num_ch*3*num_filt)
-        - ap (array_like): AR coefficients  (num_ch*3*num_filt)
+            .fs (int): Sampling frequency
+            .bz (array_like): MA coefficients  (num_ch*3*num_filt)
+            .ap (array_like): AR coefficients  (num_ch*3*num_filt)
 
     Notes:
         [1] Ref for p1-p4: Unoki,M , Irino,T. , and Patterson, R.D. , "Improvement of an IIR asymmetric compensation gammachirp filter," Acost. Sci. & Tech. (ed. by the Acoustical Society of Japan ), 22 (6), pp. 426-430, Nov. 2001.
@@ -636,14 +636,14 @@ def cmprs_gc_frsp(fr1, fs=48000, n=4, b1=1.81, c1=-2.96, frat=1, b2=2.01, c2=2.2
 
     Returns:
         cgc_resp: Struct of cGC response
-            pgc_frsp (array-like): Passive GC freq. resp. (num_ch*n_frq_rsl matrix)
-            cgc_frsp (array-like): Comressive GC freq. resp. (num_ch*n_frq_rsl matrix)
-            cgc_nrm_frsp (array-like): Normalized cgc_frsp (num_ch*n_frq_rsl matrix)
-            ACFrsp: Asym (array-like). Compensation Filter freq. resp.
-            asym_func (array-like): Asym Func
-            freq (array-like): Frequency (1*n_frq_rsl)
-            fp2 (array-like): Peak freq.
-            val_fp2 (array-like): Peak Value
+            .pgc_frsp (array-like): Passive GC freq. resp. (num_ch*n_frq_rsl matrix)
+            .cgc_frsp (array-like): Comressive GC freq. resp. (num_ch*n_frq_rsl matrix)
+            .cgc_nrm_frsp (array-like): Normalized cgc_frsp (num_ch*n_frq_rsl matrix)
+            .acf_frsp: Asym (array-like). Compensation Filter freq. resp.
+            .asym_func (array-like): Asym Func
+            .freq (array-like): Frequency (1*n_frq_rsl)
+            .fp2 (array-like): Peak freq.
+            .val_fp2 (array-like): Peak Value
     """
     if utils.isrow(fr1):
         fr1 = np.array([fr1]).T
@@ -801,18 +801,18 @@ def acfilterbank(acf_coef, acf_status, sig_in=[], sw_ordr=0):
 
     Args:
         acf_coef (structure): acf_coef: coef from make_asym_cmp_filters_v2
-            ap: AR coefficents (==a ~= pole) num_ch*lap*num_filt
-            fs : sampling rate  (also switch for verbose)
+            .ap: AR coefficents (==a ~= pole) num_ch*lap*num_filt
+            .fs : sampling rate  (also switch for verbose)
                 (The variables named 'a' and 'b' are not used to avoid the
                 confusion to the gammachirp parameters.)
-            verbose : Not specified) quiet   1) verbose
+            .verbose : Not specified) quiet   1) verbose
         acf_status (structure):
-            num_ch: Number of channels (Set by initialization
-            lbz: size of MA
-            lap: size of AR
-            num_filt: Length of filters
-            sig_in_prev: Previous status of sig_in
-            sig_out_prev: Previous status of SigOut
+            .num_ch: Number of channels (Set by initialization
+            .lbz: size of MA
+            .lap: size of AR
+            .num_filt: Length of filters
+            .sig_in_prev: Previous status of sig_in
+            .sig_out_prev: Previous status of SigOut
         sig_in (array_like, optional): Input signal. Defaults to [].
         sw_ordr (int, optional): Switch filtering order. Defaults to 0.
 

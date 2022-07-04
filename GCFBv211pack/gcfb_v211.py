@@ -93,7 +93,7 @@ def gcfb_v211(snd_in, gc_param, *args):
     Returns:
         cgc_out: ompressive GammaChirp Filter Output
         pgc_out: Passive GammaChirp Filter Output
-        Ppgc: Power at the output of passive GC
+        p_pgc: Power at the output of passive GC
 
     Note: 
         1)  This version is completely different from GCFB v.1.04 (obsolete).
@@ -131,7 +131,7 @@ def gcfb_v211(snd_in, gc_param, *args):
     """
     if gc_param.out_mid_crct == 'No':
         print("*** No Outer/Middle Ear correction ***")
-        Snd = snd_in
+        snd = snd_in
     else:
         # if gc_param.out_mid_crct in ["ELC", "MAF", "MAP"]:
         print(f"*** Outer/Middle Ear correction (minimum phase) : {gc_param.out_mid_crct} ***")
@@ -176,7 +176,7 @@ def gcfb_v211(snd_in, gc_param, *args):
     t_start = time.time()
     cgc_out = np.zeros((num_ch, len_snd))
     pgc_out = np.zeros((num_ch, len_snd))
-    Ppgc = np.zeros((num_ch, len_snd))
+    p_pgc = np.zeros((num_ch, len_snd))
     cgc_out_lvl_est = np.zeros((num_ch, len_snd))
 
     print("--- Channel-by-channel processing ---")
@@ -188,7 +188,7 @@ def gcfb_v211(snd_in, gc_param, *args):
                                        gc_resp.b1_val[nch], gc_resp.c1_val[nch], 0, '', 'peak')
 
         # fast FFT-based filtering by the pgc
-        pgc_out[nch, 0:len_snd] = utils.fftfilt(pgc[0,:], Snd) 
+        pgc_out[nch, 0:len_snd] = utils.fftfilt(pgc[0,:], snd) 
 
         # Fast processing for fixed cGC
         if sw_fast_prcs == 1 and gc_param.ctrl == 'static': # Static
@@ -233,7 +233,7 @@ def gcfb_v211(snd_in, gc_param, *args):
     if gc_param.ctrl == 'dynamic':
 
         # Initial settings
-        num_disp = int(np.fix(len_snd/10)) # display 10 times per Snd
+        num_disp = int(np.fix(len_snd/10)) # display 10 times per snd
         cgc_out = np.zeros((num_ch, len_snd))
         gc_resp.fr2 = np.zeros((num_ch, len_snd))
         gc_resp.frat_val = np.zeros((num_ch, len_snd))
@@ -306,8 +306,8 @@ def gcfb_v211(snd_in, gc_param, *args):
         gc_resp.cgc_ref = cgc_ref
         gc_resp.lvl_db = lvl_db
 
-        gc_resp.GainFactor = 10**(gc_param.gain_cmpnst_db/20) * cgc_ref.norm_fct_fp2
-        cgc_out = (gc_resp.GainFactor * np.ones((1, len_snd))) * cgc_out
+        gc_resp.gain_factor = 10**(gc_param.gain_cmpnst_db/20) * cgc_ref.norm_fct_fp2
+        cgc_out = (gc_resp.gain_factor * np.ones((1, len_snd))) * cgc_out
 
     return cgc_out, pgc_out, gc_param, gc_resp
 
@@ -391,7 +391,7 @@ def set_param(gc_param):
         sys.exit(1)
     
     if not hasattr(gc_param, 'gain_ref_db'):
-        gc_param.gain_ref_db = 50 # reference Ppgc level for gain normalization
+        gc_param.gain_ref_db = 50 # reference p_pgc level for gain normalization
 
     if not hasattr(gc_param, 'level_db_scgcfb'):
         gc_param.level_db_scgcfb = gc_param.gain_ref_db # use it as default

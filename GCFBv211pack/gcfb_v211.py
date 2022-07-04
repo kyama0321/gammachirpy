@@ -140,7 +140,6 @@ def gcfb_v211(snd_in, gc_param, *args):
         # Now we use Minimum phase version of out_mid_crctFilt (modified 16 Apr. 2006).
         # No compensation is necessary.  16 Apr. 2006
 
-    
     """
     Gammachirp
     """
@@ -552,7 +551,6 @@ def make_asym_cmp_filters_v2(fs, frs, b, c):
         acf_coef.bz[:,:,nfilt] = bz
 
     return acf_coef
-
 
 
 def fr1_to_fp2(n, b1, c1, b2, c2, frat, fr1, sr=24000, n_fft=2048, sw_plot=0):

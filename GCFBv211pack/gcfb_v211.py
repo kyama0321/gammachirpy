@@ -57,7 +57,6 @@ def gcfb_v211(snd_in, gc_param, *args):
         Patterson,R.D., Unoki,M. and Irino,T. :  JASA, Vol.114,pp.1529-1542,2003.
         Irino,T. and and Patterson,R.D. : IEEE Trans.ASLP, Vol.14, Nov. 2006.
     """
-
     # Handling Input Parameters
     if len(args) > 0:
         help(gcfb_v211)
@@ -69,6 +68,7 @@ def gcfb_v211(snd_in, gc_param, *args):
         sys.exit(1)
     len_snd = len(snd_in)
     
+    # Call default parametes
     gc_param, gc_resp = gcfb_set_param.set_param(gc_param)
     fs = gc_param.fs
     num_ch = gc_param.NumCh
@@ -175,12 +175,10 @@ def gcfb_v211(snd_in, gc_param, *args):
 
     # Passive filter (static/level estimation) -->  jump to Gain Normalization
 
-
     """
     Dynamic Compressive Gammachirp filtering
     Sample-by-sample processing
     """
-
     if gc_param.Ctrl == 'dynamic':
 
         # Initial settings
@@ -246,11 +244,9 @@ def gcfb_v211(snd_in, gc_param, *args):
         """
         End of Dynamic Compressive Gammachirp filtering
         """
-
         """
         Signal path Gain Normalization at Reference Level (GainRefdB) for static dynamic filters
         """
-
         fratRef = gc_param.frat[0, 0] + gc_param.frat[0, 1] * gc_resp.Ef[:] \
             + (gc_param.frat[1, 0] + gc_param.frat[1, 1] * gc_resp.Ef[:]) * gc_param.GainRefdB
 
@@ -433,7 +429,6 @@ def cmprs_gc_frsp(fr1, fs=48000, n=4, b1=1.81, c1=-2.96, frat=1, b2=2.01, c2=2.2
             Fp2 (array-like): Peak freq.
             ValFp2 (array-like): Peak Value
     """
-    
     class cGCresp:
         Fr1 = []
         n = []
@@ -588,7 +583,6 @@ def asym_cmp_frsp_v2(frs, fs=48000, b=None, c=None, n_frq_rsl=1024, num_filt=4):
         freq: freq. (1 * n_frq_rsl)
         asym_func: Original asymmetric function (num_ch * n_frq_rsl)
     """
-
     if utils.isrow(frs):
         frs = np.array([frs]).T
     if utils.isrow(b):
@@ -690,7 +684,6 @@ def acfilterbank(ACFcoef, ACFstatus, sig_in=[], sw_ordr=0):
         SigOut (array_like): Filtered signal (num_ch * 1)
         ACFstatus: Current status
     """    
-
     if len(sig_in) == 0 and len(ACFstatus) != 0:
         help(acfilterbank)
         sys.exit()

@@ -6,7 +6,7 @@ from scipy import signal
 import matplotlib.pyplot as plt
 
 import utils
-import gammachirp as gcfb
+import gammachirp as gc
 
 
 class ACFstatus:
@@ -184,7 +184,7 @@ def gcfb_v211(snd_in, gc_param, *args):
     for nch in range(num_ch):
 
         # passive gammachirp
-        pgc, _, _, _ = gcfb.gammachirp(gc_resp.fr1[nch], fs, gc_param.n, \
+        pgc, _, _, _ = gc.gammachirp(gc_resp.fr1[nch], fs, gc_param.n, \
                                        gc_resp.b1_val[nch], gc_resp.c1_val[nch], 0, '', 'peak')
 
         # fast FFT-based filtering by the pgc
@@ -313,7 +313,7 @@ def gcfb_v211(snd_in, gc_param, *args):
 
 
 def set_param(gc_param):
-    """Setting Default Parameters for GCFBv2
+    """Setting Default Parameters for GCFBv211
 
     Args:
         gc_param (struct): Your preset gammachirp parameters
@@ -663,7 +663,7 @@ def cmprs_gc_frsp(fr1, fs=48000, n=4, b1=1.81, c1=-2.96, frat=1, b2=2.01, c2=2.2
     if isinstance(c2, (int, float)):
         c2 = c2 * np.ones((num_ch, 1))
 
-    pgc_frsp, freq, _, _, _ = gcfb.gammachirp_frsp(fr1, fs, n, b1, c1, 0.0, n_frq_rsl)
+    pgc_frsp, freq, _, _, _ = gc.gammachirp_frsp(fr1, fs, n, b1, c1, 0.0, n_frq_rsl)
     fp1, _ = utils.fr2fpeak(n, b1, c1, fr1)
     fr2 = frat * fp1
     acf_frsp, freq, asym_func = asym_cmp_frsp_v2(fr2, fs, b2, c2, n_frq_rsl)

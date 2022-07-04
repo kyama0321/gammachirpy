@@ -3,7 +3,6 @@ import sys
 import numpy as np
 import matplotlib.pyplot as plt
 import wave as wave
-import time
 from scipy.interpolate import UnivariateSpline
 from scipy import signal
 from functools import lru_cache

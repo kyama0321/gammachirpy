@@ -665,7 +665,7 @@ def cmprs_gc_frsp(fr1, fs=48000, n=4, b1=1.81, c1=-2.96, frat=1, b2=2.01, c2=2.2
     if isinstance(c2, (int, float)):
         c2 = c2 * np.ones((num_ch, 1))
 
-    pgc_frsp, freq, _, _, _ = gammachirp_frsp(fr1, fs, n, b1, c1, 0.0, n_frq_rsl)
+    pgc_frsp, freq, _, _, _ = gcfb.gammachirp_frsp(fr1, fs, n, b1, c1, 0.0, n_frq_rsl)
     fp1, _ = utils.fr2fpeak(n, b1, c1, fr1)
     fr2 = frat * fp1
     acf_frsp, freq, asym_func = asym_cmp_frsp_v2(fr2, fs, b2, c2, n_frq_rsl)
@@ -701,66 +701,6 @@ def cmprs_gc_frsp(fr1, fs=48000, n=4, b1=1.81, c1=-2.96, frat=1, b2=2.01, c2=2.2
     cgc_resp.freq = [freq]
 
     return cgc_resp
-
-
-def gammachirp_frsp(frs, sr=48000, order_g=4, coef_erbw=1.019, coef_c=0.0, phase=0.0, n_frq_rsl=1024):
-    """Frequency Response of GammaChirp
-
-    Args:
-        frs (array_like, optional): Resonance freq. Defaults to None.
-        sr (int, optional): Sampling freq. Defaults to 48000.
-        order_g (int, optional): Order of Gamma function t**(order_g-1). Defaults to 4.
-        coef_erbw (float, optional): Coeficient -> exp(-2*pi*coef_erbw*ERB(f)). Defaults to 1.019.
-        coef_c (int, optional): Coeficient -> exp(j*2*pi*Fr + coef_c*ln(t)). Defaults to 0.0.
-        phase (int, optional): Coeficient -> exp(j*2*pi*Fr + coef_c*ln(t)). Defaults to 0.9.
-        n_frq_rsl (int, optional): Freq. resolution. Defaults to 1024.
-
-    Returns:
-        amp_frsp (array_like): Absolute of freq. resp. (num_ch*n_frq_rsl matrix)
-        freq (array_like): Frequency (1*n_frq_rsl)
-        f_peak (array_like): Peak frequency (num_ch * 1)
-        grp_dly (array_like): Group delay (num_ch*n_frq_rsl matrix)
-        phs_frsp (array_like): Angle of freq. resp. (num_ch*n_frq_rsl matrix)
-    """
-    if utils.isrow(frs):
-        frs = np.array([frs]).T
-
-    num_ch = len(frs)
-
-    if isinstance(order_g, (int, float)) or len(order_g) == 1:
-        order_g = order_g * np.ones((num_ch, 1))
-    if isinstance(coef_erbw, (int, float)) or len(coef_erbw) == 1:
-        coef_erbw = coef_erbw * np.ones((num_ch, 1))
-    if isinstance(coef_c, (int, float)) or len(coef_c) == 1:
-        coef_c = coef_c * np.ones((num_ch, 1))
-    if isinstance(phase, (int, float)) or len(phase) == 1:
-        phase = phase * np.ones((num_ch, 1))
-
-    if n_frq_rsl < 256:
-        print("n_frq_rsl < 256", file=sys.stderr)
-        sys.exit(1)
-
-    _, erbw = utils.freq2erb(frs)
-    freq = np.arange(n_frq_rsl) / n_frq_rsl * sr / 2
-    freq = np.array([freq]).T
-
-    one1 = np.ones((1, n_frq_rsl))
-    bh = (coef_erbw * erbw) * one1
-    fd = (np.ones((num_ch, 1)) * freq[:,0]) - frs * one1
-    cn = (coef_c / order_g) * one1
-    n = order_g * one1
-    c = coef_c * one1
-    phase = phase * one1
-
-    # Analytic form (normalized at f_peak)
-    amp_frsp = ((1+cn**2) / (1+(fd/bh)**2))**(n/2) \
-                * np.exp(c * (np.arctan(fd/bh)-np.arctan(cn)))
-    
-    f_peak = frs + coef_erbw * erbw * coef_c / order_g
-    grp_dly = 1/(2*np.pi) * (n*bh + c*fd) / (bh**2 + fd**2)
-    phs_frsp = -n * np.arctan(fd/bh) - c / 2*np.log((2*np.pi*bh)**2 + (2*np.pi*fd)**2) + phase
-
-    return amp_frsp, freq, f_peak, grp_dly, phs_frsp
     
 
 def asym_cmp_frsp_v2(frs, fs=48000, b=None, c=None, n_frq_rsl=1024, num_filt=4):

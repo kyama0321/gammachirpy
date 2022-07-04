@@ -10,7 +10,7 @@ import gcfb_v211_set_param as gcfb_set_param
 import gammachirp as gcfb
 
 
-class classACFstatus:
+class ACFstatus:
     def __init__(self):
         self.NumCh = []
         self.NumFilt = []
@@ -25,6 +25,28 @@ class ACFcoef:
         self.fs = []
         self.ap = np.array([])
         self.bz = np.array([])
+
+class cGCresp:
+    def __init__(self):
+        self.Fr1 = []
+        self.n = []
+        self.b1 = []
+        self.c1 = []
+        self.frat = []
+        self.b2 = []
+        self.c2 = []
+        self.NfrqRsl = []
+        self.pGCFrsp = []
+        self.cGCFrsp = []
+        self.cGCNrmFrsp = []
+        self.ACFFrsp = []
+        self.AsymFunc = []
+        self.Fp1 = []
+        self.Fr2 = []
+        self.Fp2 = []
+        self.ValFp2 = []
+        self.NormFctFp2 = []
+        self.freq = []
 
 
 def gcfb_v211(snd_in, gc_param, *args):
@@ -419,7 +441,7 @@ def cmprs_gc_frsp(fr1, fs=48000, n=4, b1=1.81, c1=-2.96, frat=1, b2=2.01, c2=2.2
         n_frq_rsl (int, optional): _description_. Defaults to 1024.
 
     Returns:
-        cGCresp: Struct of cGC response
+        cgc_resp: Struct of cGC response
             pGCFrsp (array-like): Passive GC freq. resp. (num_ch*n_frq_rsl matrix)
             cGCFrsp (array-like): Comressive GC freq. resp. (num_ch*n_frq_rsl matrix)
             cGCNrmFrsp (array-like): Normalized cGCFrsp (num_ch*n_frq_rsl matrix)
@@ -429,27 +451,6 @@ def cmprs_gc_frsp(fr1, fs=48000, n=4, b1=1.81, c1=-2.96, frat=1, b2=2.01, c2=2.2
             Fp2 (array-like): Peak freq.
             ValFp2 (array-like): Peak Value
     """
-    class cGCresp:
-        Fr1 = []
-        n = []
-        b1 = []
-        c1 = []
-        frat = []
-        b2 = []
-        c2 = []
-        NfrqRsl = []
-        pGCFrsp = []
-        cGCFrsp = []
-        cGCNrmFrsp = []
-        ACFFrsp = []
-        AsymFunc = []
-        Fp1 = []
-        Fr2 = []
-        Fp2 = []
-        ValFp2 = []
-        NormFctFp2 = []
-        freq = []
-
     if utils.isrow(fr1):
         fr1 = np.array([fr1]).T
 
@@ -482,27 +483,28 @@ def cmprs_gc_frsp(fr1, fs=48000, n=4, b1=1.81, c1=-2.96, frat=1, b2=2.01, c2=2.2
     norm_fact_fp2 = 1/val_fp2
 
     # function cGCresp = CmprsGCFrsp(fr1,fs,n,b1,c1,frat,b2,c2,n_frq_rsl)
-    cGCresp.Fr1 = fr1
-    cGCresp.n = n
-    cGCresp.b1 = b1
-    cGCresp.c1 = c1
-    cGCresp.frat = frat
-    cGCresp.b2 = b2
-    cGCresp.c2 = c2
-    cGCresp.NfrqRsl = n_frq_rsl
-    cGCresp.pGCFrsp = pgc_frsp
-    cGCresp.cGCFrsp = cgc_frsp
-    cGCresp.cGCNrmFrsp = cgc_frsp * (norm_fact_fp2 * np.ones((1,n_frq_rsl)))
-    cGCresp.ACFFrsp = acf_frsp
-    cGCresp.AsymFunc = asym_func
-    cGCresp.Fp1 = fp1
-    cGCresp.Fr2 = fr2
-    cGCresp.Fp2 = freq[nchFp2]
-    cGCresp.ValFp2 = val_fp2
-    cGCresp.NormFctFp2 = norm_fact_fp2
-    cGCresp.freq = [freq]
+    cgc_resp = cGCresp()
+    cgc_resp.Fr1 = fr1
+    cgc_resp.n = n
+    cgc_resp.b1 = b1
+    cgc_resp.c1 = c1
+    cgc_resp.frat = frat
+    cgc_resp.b2 = b2
+    cgc_resp.c2 = c2
+    cgc_resp.NfrqRsl = n_frq_rsl
+    cgc_resp.pGCFrsp = pgc_frsp
+    cgc_resp.cGCFrsp = cgc_frsp
+    cgc_resp.cGCNrmFrsp = cgc_frsp * (norm_fact_fp2 * np.ones((1,n_frq_rsl)))
+    cgc_resp.ACFFrsp = acf_frsp
+    cgc_resp.AsymFunc = asym_func
+    cgc_resp.Fp1 = fp1
+    cgc_resp.Fr2 = fr2
+    cgc_resp.Fp2 = freq[nchFp2]
+    cgc_resp.ValFp2 = val_fp2
+    cgc_resp.NormFctFp2 = norm_fact_fp2
+    cgc_resp.freq = [freq]
 
-    return cGCresp
+    return cgc_resp
 
 
 def gammachirp_frsp(frs, sr=48000, order_g=4, coef_erbw=1.019, coef_c=0.0, phase=0.0, n_frq_rsl=1024):
@@ -660,7 +662,7 @@ def asym_cmp_frsp_v2(frs, fs=48000, b=None, c=None, n_frq_rsl=1024, num_filt=4):
     return acf_frsp, freq, asym_func
 
 
-def acfilterbank(ACFcoef, ACFstatus, sig_in=[], sw_ordr=0):
+def acfilterbank(ACFcoef, acf_status, sig_in=[], sw_ordr=0):
     """IIR ACF time-slice filtering for time-varing filter
 
     Args:
@@ -670,7 +672,7 @@ def acfilterbank(ACFcoef, ACFstatus, sig_in=[], sw_ordr=0):
                 (The variables named 'a' and 'b' are not used to avoid the
                 confusion to the gammachirp parameters.)
             verbose : Not specified) quiet   1) verbose
-        ACFstatus (structure):
+        acf_status (structure):
             NumCh: Number of channels (Set by initialization
             Lbz: size of MA
             Lap: size of AR
@@ -682,14 +684,14 @@ def acfilterbank(ACFcoef, ACFstatus, sig_in=[], sw_ordr=0):
 
     Returns:
         SigOut (array_like): Filtered signal (num_ch * 1)
-        ACFstatus: Current status
+        acf_status: Current status
     """    
-    if len(sig_in) == 0 and len(ACFstatus) != 0:
+    if len(sig_in) == 0 and len(acf_status) != 0:
         help(acfilterbank)
         sys.exit()
 
-    if not hasattr(ACFstatus, 'NumCh'):
-        ACFstatus = classACFstatus()
+    if not hasattr(acf_status, 'NumCh'):
+        acf_status = ACFstatus()
 
         num_ch, lbz, num_filt = np.shape(ACFcoef.bz)
         num_ch, lap, _ = np.shape(ACFcoef.ap)
@@ -698,17 +700,17 @@ def acfilterbank(ACFcoef, ACFstatus, sig_in=[], sw_ordr=0):
             print("No gaurantee for usual IIR filters except for AsymCmpFilter.\n"\
                 + "Please check make_asym_cmp_filters_v2.")
     
-        ACFstatus.NumCh = num_ch
-        ACFstatus.NumFilt = num_filt
-        ACFstatus.Lbz = lbz # size of MA
-        ACFstatus.Lap = lap # size of AR
-        ACFstatus.SigInPrev = np.zeros((num_ch, lbz))
-        ACFstatus.SigOutPrev = np.zeros((num_ch, lap, num_filt))
-        ACFstatus.Count = 0
-        print("ACFilterBank: Initialization of ACFstatus")
+        acf_status.NumCh = num_ch
+        acf_status.NumFilt = num_filt
+        acf_status.Lbz = lbz # size of MA
+        acf_status.Lap = lap # size of AR
+        acf_status.SigInPrev = np.zeros((num_ch, lbz))
+        acf_status.SigOutPrev = np.zeros((num_ch, lap, num_filt))
+        acf_status.Count = 0
+        print("ACFilterBank: Initialization of acf_status")
         sig_out = []
 
-        return sig_out, ACFstatus
+        return sig_out, acf_status
     
     if utils.isrow(sig_in):
         sig_in = np.array([sig_in]).T
@@ -717,16 +719,16 @@ def acfilterbank(ACFcoef, ACFstatus, sig_in=[], sw_ordr=0):
     if len_sig != 1:
         print("Input signal sould be num_ch*1 vector (1 sample time-slice)", file=sys.stderr)
         sys.exit(1)
-    if num_ch_sig != ACFstatus.NumCh:
-        print(f"num_ch_sig ({num_ch_sig}) != ACFstatus.NumCh ({ACFstatus.NumCh})")
+    if num_ch_sig != acf_status.NumCh:
+        print(f"num_ch_sig ({num_ch_sig}) != acf_status.NumCh ({acf_status.NumCh})")
 
     # time stamp
     if hasattr(ACFcoef, 'verbose'):
         if ACFcoef.verbose == 1: # verbose when ACFcoef.verbose is specified to 1
             t_disp = 50 # ms
-            t_cnt = ACFstatus.Count/(np.fix(ACFcoef.fs/1000)) # ms
+            t_cnt = acf_status.Count/(np.fix(ACFcoef.fs/1000)) # ms
 
-            if ACFstatus.Count == 0:
+            if acf_status.Count == 0:
                 print("ACFilterBank: Start processing")
                 tic = time.time()
 
@@ -735,33 +737,33 @@ def acfilterbank(ACFcoef, ACFstatus, sig_in=[], sw_ordr=0):
                 print(f"ACFilterBank: Processed {t_cnt} (ms)." \
                       + f"elapsed Time = {np.round(tic-toc, 1)} (sec)")
     
-    ACFstatus.Count = ACFstatus.Count+1
+    acf_status.Count = acf_status.Count+1
     
     """
     Processing
     """
-    ACFstatus.SigInPrev = np.concatenate([ACFstatus.SigInPrev[:, 1:ACFstatus.Lbz], sig_in], axis=1)
+    acf_status.SigInPrev = np.concatenate([acf_status.SigInPrev[:, 1:acf_status.Lbz], sig_in], axis=1)
 
-    x = ACFstatus.SigInPrev.copy()
-    nfilt_list = np.arange(ACFstatus.NumFilt)
+    x = acf_status.SigInPrev.copy()
+    nfilt_list = np.arange(acf_status.NumFilt)
 
     if sw_ordr == 1:
         nfilt_list = np.flip(nfilt_list)
 
     for nfilt in nfilt_list:
 
-        forward = ACFcoef.bz[:, ACFstatus.Lbz::-1, nfilt] * x
-        feedback = ACFcoef.ap[:, ACFstatus.Lap:0:-1, nfilt] * \
-            ACFstatus.SigOutPrev[:, 1:ACFstatus.Lap, nfilt]
+        forward = ACFcoef.bz[:, acf_status.Lbz::-1, nfilt] * x
+        feedback = ACFcoef.ap[:, acf_status.Lap:0:-1, nfilt] * \
+            acf_status.SigOutPrev[:, 1:acf_status.Lap, nfilt]
 
         fwdSum = np.sum(forward, axis=1)
         fbkSum = np.sum(feedback, axis=1)
 
         y = np.array([(fwdSum - fbkSum) / ACFcoef.ap[:, 0, nfilt]]).T
-        ACFstatus.SigOutPrev[:, :, nfilt] = \
-            np.concatenate([ACFstatus.SigOutPrev[:, 1:ACFstatus.Lap, nfilt], y], axis=1)
-        x = ACFstatus.SigOutPrev[:, :, nfilt].copy()
+        acf_status.SigOutPrev[:, :, nfilt] = \
+            np.concatenate([acf_status.SigOutPrev[:, 1:acf_status.Lap, nfilt], y], axis=1)
+        x = acf_status.SigOutPrev[:, :, nfilt].copy()
 
     sig_out = y
 
-    return sig_out, ACFstatus
+    return sig_out, acf_status

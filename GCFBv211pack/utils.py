@@ -220,25 +220,6 @@ def erb2freq(erb_rate):
     return cf, erb_width
 
 
-def fr2fpeak(n, b, c, fr):
-    """Estimate fpeak from fr
-
-    Args:
-        n (float): a parameter of the gammachirp
-        b (float): a parameter of the gammachirp
-        c (float): a parameter of the gammachirp
-        fr (float): fr
-
-    Returns:
-        fpeak (float): peak frequency
-        erbw (float): erbwidth at fr
-    """
-    _, erb_width = freq2erb(fr)
-    fpeak = fr + c*erb_width*b/n
-
-    return fpeak, erb_width
-
-
 @lru_cache(maxsize=None)
 def out_mid_crct_filt(str_crct, sr, sw_plot=0, sw_filter=0):
     """Outer/middle ear compensation filter

@@ -451,7 +451,7 @@ def set_param(gc_param):
     gc_resp.b1_val = gc_param.b1[0]*one_vec + gc_param.b1[1]*gc_resp.ef
     gc_resp.c1_val = gc_param.c1[0]*one_vec + gc_param.c1[1]*gc_resp.ef
 
-    gc_resp.fp1, _ = fr2fpeak(gc_param.n, gc_resp.b1_val, gc_resp.c1_val, gc_resp.fr1)
+    gc_resp.fp1, _ = gc.fr2fpeak(gc_param.n, gc_resp.b1_val, gc_resp.c1_val, gc_resp.fr1)
     gc_resp.fp2 = np.zeros(np.shape(gc_resp.fp1))
 
     gc_resp.b2_val = gc_param.b2[0, 0]*one_vec + gc_param.b2[0, 1]*gc_resp.ef
@@ -573,7 +573,7 @@ def fr1_to_fp2(n, b1, c1, b2, c2, frat, fr1, sr=24000, n_fft=2048, sw_plot=0):
         fr2 (float): Center Frequency (for compressive GC)
     """
     _, erbw1 = utils.freq2erb(fr1)
-    fp1, _ = fr2fpeak(n, b1, c1, fr1)
+    fp1, _ = gc.fr2fpeak(n, b1, c1, fr1)
     fr2 = frat * fp1
     _, erbw2 = utils.freq2erb(fr2)
 
@@ -664,7 +664,7 @@ def cmprs_gc_frsp(fr1, fs=48000, n=4, b1=1.81, c1=-2.96, frat=1, b2=2.01, c2=2.2
         c2 = c2 * np.ones((num_ch, 1))
 
     pgc_frsp, freq, _, _, _ = gc.gammachirp_frsp(fr1, fs, n, b1, c1, 0.0, n_frq_rsl)
-    fp1, _ = fr2fpeak(n, b1, c1, fr1)
+    fp1, _ = gc.fr2fpeak(n, b1, c1, fr1)
     fr2 = frat * fp1
     acf_frsp, freq, asym_func = asym_cmp_frsp_v2(fr2, fs, b2, c2, n_frq_rsl)
     cgc_frsp = pgc_frsp * asym_func # cgc_frsp = pgc_frsp * acf_frsp
@@ -901,24 +901,3 @@ def acfilterbank(acf_coef, acf_status, sig_in=[], sw_ordr=0):
     sig_out = y
 
     return sig_out, acf_status
-
-
-def fr2fpeak(n, b, c, fr):
-    """Estimate fpeak from fr
-
-    Args:
-        n (float): a parameter of the gammachirp
-        b (float): a parameter of the gammachirp
-        c (float): a parameter of the gammachirp
-        fr (float): fr
-
-    Returns:
-        fpeak (float): peak frequency
-        erbw (float): erbwidth at fr
-    """
-    _, erb_width = utils.freq2erb(fr)
-    fpeak = fr + c*erb_width*b/n
-
-    return fpeak, erb_width
-
-

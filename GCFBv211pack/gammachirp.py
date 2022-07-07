@@ -201,17 +201,19 @@ def fp2_to_fr1(n, b1, c1, b2, c2, frat, fp2):
             + (c2*b2*zet0)*(2*b1**2*alp1*alp0-2*fp2))
     coef4 = (b2**2*zet0**2+(fp2-bet0)**2)*(c1*b1*alp0-n*fp2) \
             + (c2*b2*zet0)*(b1**2*alp0**2+fp2**2)
+    coefs = [coef1, coef2, coef3, coef4]
 
-    q = np.roots([coef1, coef2, coef3, coef4])
+    q = np.roots(coefs)
     fr1cand = q[np.imag(q)==0]
-
     if len(fr1cand) == 1:
         fr1 = fr1cand
-        fp1 = fr2fpeak(n, b1, c1, fr1)
+        fp1, _ = fr2fpeak(n, b1, c1, fr1)
     else:
-        fp1cand = fr2fpeak(n, b1, c1, fr1cand)
+        fp1cand, _ = fr2fpeak(n, b1, c1, fr1cand)
         ncl = np.argmin(np.abs(fp1cand - fp2)) 
         fp1 = fp1cand[ncl]
-        fr1 = fr1cand[ncl]           
+        fr1 = fr1cand[ncl]
+
+    fr1 = fr1.real.astype(float)     
 
     return fr1, fp1

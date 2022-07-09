@@ -619,6 +619,63 @@ def fr1_to_fp2(n, b1, c1, b2, c2, frat, fr1, sr=24000, n_fft=2048, sw_plot=0):
 
     return fp2, fr2
 
+def fp2_to_fr1(n, b1, c1, b2, c2, frat, fp2):
+    """Convert fp2 (for compressive GC; cGC) to fr1 (for passive GC; pGC)
+
+    Args:
+        n (int): Parameter defining the envelope of the gamma distribution (for pGC)
+        b1 (float): Parameter defining the envelope of the gamma distribution (for pGC)
+        c1 (float): Chirp factor (for pGC)
+        b2 (float): Parameter defining the envelope of the gamma distribution (for cGC)
+        c2 (float): Chirp factor  (for cGC)
+        frat (float): Frequency ratio, the main level-dependent variable
+        fr2 (float): Center Frequency (for compressive GC)
+
+    Returns:
+        fr1 (float): Center frequency (for pGC)
+        fp1 (float): Peak frequency (for pGC)
+    """    
+    # Coefficients: ERBw(fr1) = alp1*fr1+alp0
+    _, alp0 = utils.freq2erb(0)
+    _, w1 = utils.freq2erb(1)
+    alp1 = w1 - alp0
+
+    # Coefficients: fr2=bet1*fr2+bet0
+    bet1 = frat*(1+c1*b1*alp1/n)
+    bet0 = frat*c1*b1*alp0/n
+
+    # Coefficients: ERB(fr2)=zet1*Fr1+zet0
+    zet1=alp1*bet1
+    zet0=alp1*bet0+alp0
+
+    # Coef1*Fr1**3 + Coef2*Fr1**2 + Coef3*Fr1 + Coef4 = 0
+    coef1 = ((b2**2*zet1**2+bet1**2)*(c1*b1*alp1+n) + (c2*b2*zet1)*(b1**2*alp1**2+1))
+    coef2 = ((b2**2*zet1**2+bet1**2)*(c1*b1*alp0-n*fp2) \
+            + (2*b2**2*zet1*zet0-2*bet1*(fp2-bet0))*(c1*b1*alp1+n) \
+            + (c2*b2*zet1)*(2*b1**2*alp1*alp0-2*fp2) + (c2*b2*zet0)*(b1**2*alp1**2+1))
+    coef3 = ((2*b2**2*zet1*zet0-2*bet1*(fp2-bet0))*(c1*b1*alp0-n*fp2) \
+            + (b2**2*zet0**2+(fp2-bet0)**2)*(c1*b1*alp1+n) \
+            + (c2*b2*zet1)*(b1**2*alp0**2+fp2**2) \
+            + (c2*b2*zet0)*(2*b1**2*alp1*alp0-2*fp2))
+    coef4 = (b2**2*zet0**2+(fp2-bet0)**2)*(c1*b1*alp0-n*fp2) \
+            + (c2*b2*zet0)*(b1**2*alp0**2+fp2**2)
+    coefs = [coef1, coef2, coef3, coef4]
+
+    q = np.roots(coefs)
+    fr1cand = q[np.imag(q)==0]
+    if len(fr1cand) == 1:
+        fr1 = fr1cand
+        fp1, _ = gc.fr2fpeak(n, b1, c1, fr1)
+    else:
+        fp1cand, _ = gc.fr2fpeak(n, b1, c1, fr1cand)
+        ncl = np.argmin(np.abs(fp1cand - fp2)) 
+        fp1 = fp1cand[ncl]
+        fr1 = fr1cand[ncl]
+
+    fr1 = fr1.real.astype(float)     
+
+    return fr1, fp1
+
 
 def cmprs_gc_frsp(fr1, fs=48000, n=4, b1=1.81, c1=-2.96, frat=1, b2=2.01, c2=2.20, n_frq_rsl=1024):
     """Frequency Response of Compressive GammaChirp

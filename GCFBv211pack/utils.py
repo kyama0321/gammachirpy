@@ -9,20 +9,15 @@ from functools import lru_cache
 
 
 def audioread(filepath):
-    """Reads a wavfile as a float 
-        
-        Parameters
-        ----------
-        filepath: string
-            Filepath to the input wav file
+    """Reads a wavfile as a float
 
-        Returns
-        ----------
-        snd: float
-            Sound signal as a float and normalized scale (-1 ~ +1) 
-        fs: 
-            Sampling frequency
-    """
+    Args:
+        filepath (string): Filepath to the input wav file
+
+    Returns:
+        snd (float): Sound signal as a float and normalized scale (-1 ~ +1) 
+        fs (int): Sampling frequency
+    """    
     wav = wave.open(filepath)
     fs = wav.getframerate() # sampling frequency
     snd = wav.readframes(wav.getnframes())
@@ -33,19 +28,14 @@ def audioread(filepath):
 
 
 def rms(x):
-    """
-        Caliculates a root-mean-squared (RMS) value of input signal (1D)
+    """Caliculates a root-mean-squared (RMS) value of input signal (1D)
 
-        Parameters
-        ----------
-        x: float
-            Input signal (1D)
+    Args:
+        x (array_like): Input signal (1D)
 
-        Returns
-        ----------
-        y: RMS value
-
-    """
+    Returns:
+        y (float): RMS value
+    """    
     y = np.sqrt(np.mean(x * x))
     return y
 

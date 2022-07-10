@@ -93,7 +93,8 @@ def gcfb_v211(snd_in, gc_param, *args):
     Returns:
         cgc_out: ompressive GammaChirp Filter Output
         pgc_out: Passive GammaChirp Filter Output
-        p_pgc: Power at the output of passive GC
+        gc_param (struct): Parameters of dcGC-FB
+        gc_resp (struct): GC response result
 
     Note: 
         1)  This version is completely different from GCFB v.1.04 (obsolete).
@@ -134,11 +135,13 @@ def gcfb_v211(snd_in, gc_param, *args):
         snd = snd_in
     else:
         # if gc_param.out_mid_crct in ["ELC", "MAF", "MAP"]:
-        print(f"*** Outer/Middle Ear correction (minimum phase) : {gc_param.out_mid_crct} ***")
+        print("*** Outer/Middle Ear correction (minimum phase) : " \
+            + f"{gc_param.out_mid_crct} ***")
         cmpn_out_mid, _ = utils.out_mid_crct_filt(gc_param.out_mid_crct, fs, 0, 2) # 2) minimum phase
         # 1kHz: -4 dB, 2kHz: -1 dB, 4kHz: +4 dB (ELC)
         # Now we use Minimum phase version of out_mid_crctFilt (modified 16 Apr. 2006).
         # No compensation is necessary.  16 Apr. 2006
+        snd = signal.lfilter(cmpn_out_mid, 1, snd_in)
 
     """
     Gammachirp

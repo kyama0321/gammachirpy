@@ -506,7 +506,7 @@ def taper_window(len_win, type_taper, len_taper=None, range_sigma=3, sw_plot=0):
         type_taper = 'Hamming'
 
     elif type_taper == 'HAN' or type_taper == 'COS':
-        taper = np.hamming(len_taper*2+1)
+        taper = np.hanning(len_taper*2+1)
         type_taper = 'Hanning/Cosine'
 
     elif type_taper == 'BLA':
@@ -514,26 +514,26 @@ def taper_window(len_win, type_taper, len_taper=None, range_sigma=3, sw_plot=0):
         type_taper = 'Blackman'
 
     elif type_taper == 'GAU':
-        if len(range_sigma) == 0:
-            range_sigma = 3
-        nn = np.arange(-len_taper, len_taper, 1)
-        taper = np.exp(-(range_sigma/len_taper)**2 / 2)
+        nn = np.arange(-len_taper, len_taper)
+        taper = np.exp(-(range_sigma*nn/len_taper)**2 / 2)
         type_taper == 'Gauss'
 
     else:
-        taper = np.array(list(np.arange(1,len_taper+1,1)) + list([len_taper+1]) + \
-                         list(np.arange(len_taper,1-1,-1))) / (len_taper+1)
+        taper = np.array(list(np.arange(1,len_taper+1,1)) + list([len_taper+1]) \
+                        + list(np.arange(len_taper,1-1,-1))) / (len_taper+1)
         type_taper = 'Line'
 
     len_taper = int(np.fix(len_taper))
-    taper_win = list(taper[0:len_taper]) + list(np.ones(len_win-len_taper*2)) + \
-               list(taper[(len_taper+1):(len_taper*2+1)])
+    taper_win = list(taper[0:len_taper]) + list(np.ones(len_win-len_taper*2)) \
+               + list(taper[(len_taper+1):(len_taper*2+1)])
 
     if sw_plot == 1:
         _, ax = plt.subplots()
         plt.plot(taper_win)
+        ax.set_ylim([-0.05, 1.05])
         ax.set_xlabel('Points')
         ax.set_ylabel('Amplitude')
+        plt.grid()
         plt.title(f"TypeTaper: {type_taper}")
 
     return taper_win, type_taper

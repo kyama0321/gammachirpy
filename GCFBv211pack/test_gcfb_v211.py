@@ -8,18 +8,17 @@ import gcfb_v211 as gcfb
 
 
 class GCparamDefault:
-    def __init__(self):
-        self.fs = 48000 # samping frequency
-        self.num_ch = 100 # number of channels
-        self.f_range = np.array([100, 6000]) # range of center frequency
-        self.out_mid_crct = "No"
-        # self.out_mid_crrct = "ELC"
-        # self.ctrl = "dynamic" # used to be 'tyme-varying'
-        # self.ctrl = "static" # or 'fixed'
+    fs = 48000 # samping frequency
+    num_ch = 100 # number of channels
+    f_range = np.array([100, 6000]) # range of center frequency
+    out_mid_crct = 'No' # outer & middle ear correlations
+    # out_mid_crct = 'ELC' # equal loudness contour (ELC)
+    # ctrl = "dynamic" # used to be 'tyme-varying'
+    # ctrl = "static" # or 'fixed'
 
 
 def main():
-    # Stiuli : a simple pulse train
+    # stiuli : a simple pulse train
     fs = 48000
     t_pulse = 10 # (ms) 100 Hz pulse train
     snd = np.array(([1]+[0]*int(t_pulse*fs/1000-1))*10)
@@ -37,7 +36,7 @@ def main():
             dbspl = list_dbspl[sw_dbspl]
             snd_eq, _ = utils.eqlz2meddis_hc_level(snd, dbspl)
 
-            # Set paramteres for dcGC
+            # set paramteres for dcGC
             gc_param = GCparamDefault() # reset all
             if sw_ctrl == 0: 
                 ctrl = "dynamic"
@@ -52,7 +51,7 @@ def main():
             print(f"Elapsed time is {np.round(t_end-t_start, 4)} (sec) = " \
                   + f"{np.round((t_end-t_start)/t_snd, 4)} times RealTime.")
             
-            # Plot
+            # plot
             ax = plt.subplot(len(list_dbspl), 1, sw_dbspl+1)
             plt.imshow(np.maximum(cgc_out, 0), aspect='auto', origin='lower', cmap='jet')
             ax.set_title(f"GCFB control = {ctrl}; Signal Level = {dbspl} dB SPL")

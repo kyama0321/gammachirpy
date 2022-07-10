@@ -108,7 +108,7 @@ def gcfb_v211(snd_in, gc_param, *args):
         Irino,T. and Patterson,R.D. :  JASA, Vol.101, pp.412-419, 1997.
         Irino,T. and Patterson,R.D. :  JASA, Vol.109, pp.2008-2022, 2001.
         Patterson,R.D., Unoki,M. and Irino,T. :  JASA, Vol.114,pp.1529-1542,2003.
-        Irino,T. and and Patterson,R.D. : IEEE Trans.ASLP, Vol.14, Nov. 2006.
+        Irino,T. and Patterson,R.D. : IEEE Trans.ASLP, Vol.14, Nov. 2006.
     """
     # Handling Input Parameters
     if len(args) > 0:

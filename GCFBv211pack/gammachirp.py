@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from ctypes import util
 import sys
 import numpy as np
 from scipy import signal

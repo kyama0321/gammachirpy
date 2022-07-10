@@ -2,6 +2,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import time
+import os
 
 import utils
 import gcfb_v211 as gcfb
@@ -11,22 +12,27 @@ class GCparamDefault:
     fs = 48000 # samping frequency
     num_ch = 100 # number of channels
     f_range = np.array([100, 6000]) # range of center frequency
-    out_mid_crct = 'No' # outer & middle ear correlations
-    # out_mid_crct = 'ELC' # equal loudness contour (ELC)
+    # out_mid_crct = 'No' # outer & middle ear correlations
+    out_mid_crct = 'ELC' # equal loudness contour (ELC)
     # ctrl = "dynamic" # used to be 'tyme-varying'
     # ctrl = "static" # or 'fixed'
 
 
 def main():
-    # stiuli : a simple pulse train
-    fs = 48000
-    t_pulse = 10 # (ms) 100 Hz pulse train
-    snd = np.array(([1]+[0]*int(t_pulse*fs/1000-1))*10)
+    # get directory path of this file
+    path_dir = os.path.dirname(os.path.abspath(__file__))
+
+    # stiuli : a sample speech
+    file_name = 'Snd_konnichiwa.wav'
+    path_file = path_dir + '/' + file_name
+
+    # read sample speech
+    snd, fs = utils.audioread(path_file)
     t_snd = len(snd)/fs
     print(f"Duration of sound = {t_snd*1000} (ms)")
 
-    # signal levels
-    list_dbspl = np.arange(40, 100, 20)
+    # signal levels (dB)
+    list_dbspl = [40, 60, 80]
     
     for sw_ctrl in range(2): # 1: only dynamic, 2: dynamic and static
         fig = plt.subplots()

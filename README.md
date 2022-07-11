@@ -25,9 +25,9 @@ A python version of the dynamic compressive gammachirp filterbank
 
 ## About GammachirPy Project
 
-- The project name is "GammachirPy" (Gammachirp + Python).
+- The project name, "GammachirPy" is inspired from "Gammachirp + Python".
 
-- This project aims to translate the original MATLAB codes to Python codes and share them as an open souce software.
+- This project aims to translate the original MATLAB codes to Python and share them as open-souce software.
   
 - In addition, I would like to share some demo scripts on the Jupyter Notebook for educational uses.
 

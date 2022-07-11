@@ -12,7 +12,6 @@ A python version of the dynamic compressive gammachirp filterbank
   - level-dependent and asymmetric auditory filter shape
   - fast compression (cochlear amplifier)
   - two-tone supression.
- 
 
 ![](./figs/filter_level_dependency.jpg)
 
@@ -37,7 +36,8 @@ A python version of the dynamic compressive gammachirp filterbank
 
 - To compare outputs of the GammachirPy and the orginal dcGC-FB, I'm using a simple pulse train as an input signal with some sound pressure levels (SPL).
   
-    ![](./figs/gammachirpy_gammachirp.jpg)
+![](./figs/gammachirpy_gammachirp.jpg)
+
 
 - In the current version, the root-mean-squared error (RMSE) in each level is:
 
@@ -74,7 +74,7 @@ A python version of the dynamic compressive gammachirp filterbank
 
 ## Acknowledgements
 
-The packages is inspired by gammachirp filterbank (https://github.com/AMLAB-Wakayama/gammachirp-filterbank)
+The packages is inspired by gammachirp filterbank (https://github.com/AMLAB-Wakayama/gammachirp-filterbank) by Prof. Toshio Irino.
 
 ## References
 

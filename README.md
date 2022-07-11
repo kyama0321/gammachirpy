@@ -12,10 +12,10 @@ A python version of the dynamic compressive gammachirp filterbank
   - level-dependent and asymmetric auditory filter shape
   - fast compression (cochlear amplifier)
   - two-tone supression.
+ 
 
-![](./figs/filter_level_dependency.jpg)
+![](./figs/filter_level_dependency.jpg)![](./figs/IO_function.jpg)
 
-![](./figs/IO_function.jpg)
 
 - It was demonstrated that the original gammachirp filter (the static version of the dcGC-FB) explains a notched-noise masking data well for normal hearing and hearing impared listeners.
   

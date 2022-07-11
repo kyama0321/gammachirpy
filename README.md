@@ -6,7 +6,7 @@ A python version of the dynamic compressive gammachirp filterbank
 
 ## What is the Dynamic Compressive Gammachirp Filterbank
 
-- The dynamic compressive gammachirp filterbank (dcGC-FB) is a nonlinear and level-dependent auditory filterbank which has a fast-acting level control circuit.
+- The dynamic compressive gammachirp filterbank (dcGC-FB) is a nonlinear and level-dependent auditory filterbank that has a fast-acting level control circuit.
 
 - The dcGC-FB can represent:
   - level-dependent and asymmetric auditory filter shape
@@ -18,23 +18,23 @@ A python version of the dynamic compressive gammachirp filterbank
 ![](./figs/IO_function.jpg)
 
 
-- It was demonstrated that the original gammachirp filter (the static version of the dcGC-FB) explains a notched-noise masking data well for normal hearing and hearing impared listeners.
+- It was demonstrated that the original gammachirp filter (the static version of the dcGC-FB) explains a notched-noise masking data well for normal hearing and hearing impaired listeners.
   
 - The original MATLAB packages are here: https://github.com/AMLAB-Wakayama/gammachirp-filterbank
 
 
 ## About GammachirPy Project
 
-- The project name, "GammachirPy" is inspired from "Gammachirp + Python".
+- The project name, "GammachirPy (がんまちゃーぴー)" is "Gammachirp + Python".
 
 - This project aims to translate the original MATLAB codes to Python and share them as open-souce software.
   
-- In addition, I would like to share some demo scripts on the Jupyter Notebook for educational uses.
+- In addition, I would like to add some demo scripts of the Jupyter Notebook for educational uses.
 
 
 ## Reproducibility
 
-- To compare outputs of the GammachirPy and the orginal dcGC-FB, I'm using a simple pulse train as an input signal with some sound pressure levels (SPL).
+- To compare outputs of the GammachirPy and the original dcGC-FB, I'm using a simple pulse train as an input signal with some sound pressure levels (SPLs).
   
 ![](./figs/gammachirpy_gammachirp.jpg)
 
@@ -45,12 +45,12 @@ A python version of the dynamic compressive gammachirp filterbank
     | --- | --- | --- | --- |
     | RMSE    | 4.11e-14 | 2.26e-13 | 1.75e-12 |
 
-- There are still some errors between the GammachirPy and the orignal dcGC-FB, but the errors are very small.
+- There are still some errors between the GammachirPy and the original dcGC-FB, but the errors are minimal. I would like to improve them in the future:-)
 
 
 ## Repository Structure
 
-- The structure is almost same to the original MATLAB page and this repository will contain different versions in the future.
+- The directory structure is almost the same as the original MATLAB page, and this repository will contain different versions in the future.
   - GCFBv211pack: sample-by-sample processing version
   - GCFBv221pack: frame-basd processing (a future plan)
   - GCFBv233: new schemes for WHIS (a future plan)

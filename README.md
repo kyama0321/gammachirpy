@@ -2,8 +2,7 @@
 
 A python version of the dynamic compressive gammachirp filterbank
 
-![](./figs/gammachirpy_gammachirp.jpg)
-
+![](./figs/frequency_response.jpg)
 
 ## What is the Dynamic Compressive Gammachirp Filterbank
 
@@ -13,6 +12,10 @@ A python version of the dynamic compressive gammachirp filterbank
   - level-dependent and asymmetric auditory filter shape
   - fast compression (cochlear amplifier)
   - two-tone supression.
+
+![](./figs/filter_level_dependency.jpg)
+
+![](./figs/IO_function.jpg)
 
 - It was demonstrated that the original gammachirp filter (the static version of the dcGC-FB) explains a notched-noise masking data well for normal hearing and hearing impared listeners.
   
@@ -31,6 +34,8 @@ A python version of the dynamic compressive gammachirp filterbank
 ## Reproducibility
 
 - To compare outputs of the GammachirPy and the orginal dcGC-FB, I'm using a simple pulse train as an input signal with some sound pressure levels (SPL).
+  
+![](./figs/gammachirpy_gammachirp.jpg)
 
 - In the current version, the root-mean-squared error (RMSE) in each level is:
 
@@ -56,11 +61,13 @@ A python version of the dynamic compressive gammachirp filterbank
   - demo_{gammachirp/gcfb_v*}.ipynb: demo scripts on the Jupyter Notebook
 
 ## Requirements
+
 - Python >= 3.9
 
 ## Installation
 
     git clone https://github.com/kyama0321/GammachirPy
+    cd GammachirPy
 
 
 ## Acknowledgements

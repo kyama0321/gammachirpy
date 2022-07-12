@@ -50,8 +50,8 @@ A python version of the dynamic compressive gammachirp filterbank
 
 - The directory structure is almost the same as the original MATLAB page, and this repository will contain different versions in the future.
   - **gcfb_v211**: sample-by-sample processing version
-  - **gcfb_v221**: frame-basd processing (T.B.D.)
-  - **gcfb_v233**: new schemes for Wadai Hearing Impaired Simulation (T.B.D)
+  - **gcfb_v221 (T.B.D.)**: frame-basd processing
+  - **gcfb_v233 (T.B.D.)**: new schemes for Wadai Hearing Impaired Simulator (WHIS)
 
 - In each version, the directory mainly contains:
   - **gammachirp.py**: passive gammachirp (pGC) filter

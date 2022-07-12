@@ -6,7 +6,7 @@ A python version of the dynamic compressive gammachirp filterbank
 
 ## What is the Dynamic Compressive Gammachirp Filterbank
 
-- The dynamic compressive gammachirp filterbank (dcGC-FB) is a nonlinear and level-dependent auditory filterbank that has a fast-acting level control circuit.
+- The dynamic compressive gammachirp filterbank (dcGC-FB) is a time-domain, nonlinear and level-dependent auditory filterbank that has a fast-acting level control circuit.
 
 - The dcGC-FB can represent:
   - level-dependent and asymmetric auditory filter shape
@@ -17,11 +17,10 @@ A python version of the dynamic compressive gammachirp filterbank
 
 ![](./figs/IO_function.jpg)
 
-
 - It was demonstrated that the original gammachirp filter (the static version of the dcGC-FB) explains a notched-noise masking data well for normal hearing and hearing impaired listeners.
   
-- The original MATLAB packages are here: https://github.com/AMLAB-Wakayama/gammachirp-filterbank
-
+- The original MATLAB packages are here:
+  <https://github.com/AMLAB-Wakayama/gammachirp-filterbank>
 
 ## About GammachirPy Project
 
@@ -31,13 +30,11 @@ A python version of the dynamic compressive gammachirp filterbank
   
 - In addition, I would like to add some demo scripts of the Jupyter Notebook for educational uses.
 
-
 ## Reproducibility
 
 - To compare outputs of the GammachirPy and the original dcGC-FB, I'm using a simple pulse train as an input signal with some sound pressure levels (SPLs).
   
 ![](./figs/gammachirpy_gammachirp.jpg)
-
 
 - In the current version, the root-mean-squared error (RMSE) in each level is:
 
@@ -46,7 +43,6 @@ A python version of the dynamic compressive gammachirp filterbank
     | RMSE    | 4.11e-14 | 2.26e-13 | 1.75e-12 |
 
 - There are still some errors between the GammachirPy and the original dcGC-FB, but the errors are minimal. I would like to improve them in the future:-)
-
 
 ## Repository Structure
 
@@ -65,22 +61,25 @@ A python version of the dynamic compressive gammachirp filterbank
 ## Requirements
 
 - Python >= 3.9
+- NumPy >= 1.23.1
+- SciPy >= 1.8.1
+- Matplotlib > 3.5.2
 
 ## Installation
 
     git clone https://github.com/kyama0321/gammachirpy
     cd gammachirpy
 
-
 ## Acknowledgements
 
-The packages is inspired by gammachirp filterbank (https://github.com/AMLAB-Wakayama/gammachirp-filterbank) by Prof. Toshio Irino.
+The packages is inspired by gammachirp filterbank by Prof. Toshio Irino.
+<https://github.com/AMLAB-Wakayama/gammachirp-filterbank>
 
 ## References
 
-- Irino,T. and Patterson,R.D.: JASA, Vol.101, pp.412-419, 1997.  
-- Irino,T. and Patterson,R.D.: JASA, Vol.109, pp.2008-2022, 2001.
+- Irino, T. and Patterson, R.D.: JASA, Vol.101, pp.412-419, 1997.
+- Irino, T. and Patterson, R.D.: JASA, Vol.109, pp.2008-2022, 2001.
 - Patterson,R.D., Unoki,M. and Irino,T.: JASA, Vol.114, pp.1529-1542, 2003.
-- Irino,T. and Patterson,R.D.: IEEE Trans.ASLP, Vol.14, pp.2222-2232, 2006.
+- Irino, T. and Patterson,R.D.: IEEE Trans.ASLP, Vol.14, pp.2222-2232, 2006.
 - Irino, T.: ASJ, Vol.66, No.10, pp.505-512, 2010. (in Japanese)
-https://doi.org/10.20697/jasj.66.10_506
+<https://doi.org/10.20697/jasj.66.10_506>

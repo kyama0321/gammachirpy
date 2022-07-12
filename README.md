@@ -82,8 +82,7 @@ Please see more information in requirements.txt.
 
 ## Acknowledgements
 
-The packages is inspired by gammachirp filterbank by Prof. Toshio Irino.
-<https://github.com/AMLAB-Wakayama/gammachirp-filterbank>
+The packages is inspired by gammachirp filterbank by Prof. Toshio Irino. <https://github.com/AMLAB-Wakayama/gammachirp-filterbank>
 
 ## References
 

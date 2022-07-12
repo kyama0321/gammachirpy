@@ -2,11 +2,13 @@
 
 A python version of the dynamic compressive gammachirp filterbank
 
-![](./figs/frequency_response.jpg)
+![](./figs/gammachirpy_pulse.jpg)
 
 ## What is the Dynamic Compressive Gammachirp Filterbank
 
 - The dynamic compressive gammachirp filterbank (dcGC-FB) is a time-domain, nonlinear and level-dependent auditory filterbank that has a fast-acting level control circuit.
+
+![](./figs/frequency_response.jpg)
 
 - The dcGC-FB can represent:
   - level-dependent and asymmetric auditory filter shape
@@ -60,15 +62,23 @@ A python version of the dynamic compressive gammachirp filterbank
 
 ## Requirements
 
-- Python >= 3.9
+- Python >= 3.9.1
 - NumPy >= 1.23.1
 - SciPy >= 1.8.1
-- Matplotlib > 3.5.2
+- Matplotlib >= 3.5.2
+- Jupyter >= 1.0.0
+
+Please see more information in requirements.txt. 
 
 ## Installation
 
     git clone https://github.com/kyama0321/gammachirpy
     cd gammachirpy
+
+    # If you use "venv"
+    python3 -m venv venv
+    . venv/bin/activate
+    pip install -r requirements.txt
 
 ## Acknowledgements
 

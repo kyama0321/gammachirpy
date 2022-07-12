@@ -49,16 +49,17 @@ A python version of the dynamic compressive gammachirp filterbank
 ## Repository Structure
 
 - The directory structure is almost the same as the original MATLAB page, and this repository will contain different versions in the future.
-  - GCFBv211pack: sample-by-sample processing version
-  - GCFBv221pack: frame-basd processing (a future plan)
-  - GCFBv233: new schemes for WHIS (a future plan)
+  - **gcfb_v211**: sample-by-sample processing version
+  - **gcfb_v221**: frame-basd processing (T.B.D.)
+  - **gcfb_v233**: new schemes for Wadai Hearing Impaired Simulation (T.B.D)
 
 - In each version, the directory mainly contains:
-  - gammachirp.py: passive gammachirp (pGC) filter
-  - gcfb_v*.py: dynamic compressive gammachirp (dcGC) filter
-  - utils.py: useful functions for auditory signal processing
-  - test_gcfb_v*_{pulse/speech}.py: test codes to check
-  - demo_{gammachirp/gcfb_v*}.ipynb: demo scripts on the Jupyter Notebook
+  - **gammachirp.py**: passive gammachirp (pGC) filter
+  - **gcfb_v\*.py**: dynamic compressive gammachirp (dcGC) filter
+  - **utils.py**: useful functions for auditory signal processing
+  - **test_gcfb_v\*_{pulse/speech}.py**: test codes to check
+  - **demo_gammachirp.ipynb**: demo scripts for educational uses of the dcGC-FB on the Jupyter Notebook
+  - **demo_gcfb_v\*_{pulse/speech}.py**: demo spripts for practical uses on the Jupyter Notebook. The scripts are based on test_gcfb_v*_{pulse/speech}.py. 
 
 ## Requirements
 

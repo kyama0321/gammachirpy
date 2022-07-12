@@ -68,8 +68,8 @@ A python version of the dynamic compressive gammachirp filterbank
 
 ## Installation
 
-    git clone https://github.com/kyama0321/GammachirPy
-    cd GammachirPy
+    git clone https://github.com/kyama0321/gammachirpy
+    cd gammachirpy
 
 
 ## Acknowledgements

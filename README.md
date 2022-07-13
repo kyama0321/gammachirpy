@@ -1,6 +1,6 @@
 # GammachirPy
 
-A python version of the dynamic compressive gammachirp filterbank
+A Python package of the dynamic compressive gammachirp filterbank
 
 <!-- ![gammachirpy](./figs/gammachirpy_pulse.jpg) -->
 <img src="./figs/gammachirpy_pulse.jpg" width="425px">

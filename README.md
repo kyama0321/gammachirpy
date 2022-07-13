@@ -44,22 +44,7 @@ A python version of the dynamic compressive gammachirp filterbank
     | RMSE    | 4.11e-14 | 2.26e-13 | 1.75e-12 |
 
 - There are still some errors between the GammachirPy and the original dcGC-FB, but the errors are minimal. I would like to improve them in the future:-)
-
-## Repository Structure
-
-- The directory structure is almost the same as the original MATLAB page, and this repository will contain different versions in the future.
-  - **gcfb_v211**: sample-by-sample processing version
-  - **gcfb_v221 (T.B.D.)**: frame-basd processing
-  - **gcfb_v233 (T.B.D.)**: new schemes for Wadai Hearing Impaired Simulator (WHIS)
-
-- In each version, the directory mainly contains:
-  - **gammachirp.py**: passive gammachirp (pGC) filter
-  - **gcfb_v\*.py**: dynamic compressive gammachirp (dcGC) filter
-  - **utils.py**: useful functions for auditory signal processing
-  - **test_gcfb_v\*_{pulse/speech}.py**: test codes to check
-  - **demo_gammachirp.ipynb**: demo scripts for educational uses of the dcGC-FB on the Jupyter Notebook
-  - **demo_gcfb_v\*_{pulse/speech}.py**: demo spripts for practical uses on the Jupyter Notebook. The scripts are based on test_gcfb_v*_{pulse/speech}.py.
-
+  
 ## Requirements
 
 - Python >= 3.9.1
@@ -79,6 +64,21 @@ Please see more information in requirements.txt.
     python3 -m venv venv
     . venv/bin/activate
     pip install -r requirements.txt
+
+## Repository Structure
+
+- The directory structure is almost the same as the original MATLAB page, and this repository will contain different versions in the future.
+  - **gcfb_v211**: sample-by-sample processing version
+  - **gcfb_v221 (T.B.D.)**: frame-basd processing
+  - **gcfb_v233 (T.B.D.)**: new schemes for Wadai Hearing Impaired Simulator (WHIS)
+
+- In each version, the directory mainly contains:
+  - **gammachirp.py**: passive gammachirp (pGC) filter
+  - **gcfb_v\*.py**: dynamic compressive gammachirp (dcGC) filter
+  - **utils.py**: useful functions for auditory signal processing
+  - **test_gcfb_v\*_{pulse/speech}.py**: test codes to check
+  - **demo_gammachirp.ipynb**: demo scripts for educational uses of the dcGC-FB on the Jupyter Notebook
+  - **demo_gcfb_v\*_{pulse/speech}.py**: demo spripts for practical uses on the Jupyter Notebook. The scripts are based on test_gcfb_v*_{pulse/speech}.py.
 
 ## Getting Started
 

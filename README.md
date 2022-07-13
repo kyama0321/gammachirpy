@@ -2,7 +2,8 @@
 
 A python version of the dynamic compressive gammachirp filterbank
 
-![gammachirpy](./figs/gammachirpy_pulse.jpg)
+<!-- ![gammachirpy](./figs/gammachirpy_pulse.jpg) -->
+<img src="./figs/gammachirpy_pulse.jpg" width="425px">
 
 ## What is the Dynamic Compressive Gammachirp Filterbank
 

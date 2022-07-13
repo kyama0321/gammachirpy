@@ -37,7 +37,7 @@ A python version of the dynamic compressive gammachirp filterbank
   
 ![gammachirpy and gammachirp](./figs/gammachirpy_gammachirp.jpg)
 
-- In the current version, the root-mean-squared error (RMSE) in each level is:
+- In the latest version of **gcfb_v211**, the root-mean-squared error (RMSE) in each level is:
 
     | SPL (dB) | 40 | 60 | 80 |
     | --- | --- | --- | --- |
@@ -82,7 +82,18 @@ Please see more information in requirements.txt.
 
 ## Getting Started
 
-1. Set default parameters for the gammachirp filterbank as a class variables. Note that if you don't set any parameters, **gcfb.dcgc_v\*()** automaticaly set a default paramters determined in **gcfb.set_param()**
+The following guide is based on **gcfb_v211/demo_gcfb_v211_speech.ipynb**.
+
+1. Import packages.
+   
+    ```Python
+    import numpy as np
+
+    import utils
+    import gcfb_v211 as gcfb
+    ```
+   
+2. Set default parameters for the gammachirp filterbank as a class variables. Note that if you don't set any parameters, **gcfb.dcgc_v\*()** automaticaly set a default paramters determined in **gcfb.set_param()**
 
     ```python
     class GCparamDefault:
@@ -93,7 +104,7 @@ Please see more information in requirements.txt.
           ctrl = 'dynamic' # time-varying
     ```
 
-2. Read an audio sound and normalize the signal's amplitude (-1 ~ +1). I recomend to use **utils.audioread()**. Note that the recommended sampling frequency of the input sound is 48,000 Hz.
+3. Read an audio sound and normalize the signal's amplitude (-1 ~ +1). I recomend to use **utils.audioread()**. Note that the recommended sampling frequency of the input sound is 48,000 Hz.
 
     ```python
     # read the sample speech
@@ -101,7 +112,7 @@ Please see more information in requirements.txt.
     snd, fs = utils.audioread(path_file)
     ```
 
-3. Adjust the input signal level as a sound pressure level (SPL) by **utils.eqlz2meddis_hc_level()**.
+4. Adjust the input signal level as a sound pressure level (SPL) by **utils.eqlz2meddis_hc_level()**.
 
     ```python
     # sound pressure level (SPL)
@@ -110,7 +121,7 @@ Please see more information in requirements.txt.
     snd_eq, _ = utils.eqlz2meddis_hc_level(snd, dbspl)
     ```
 
-4. Analyze the input signal by **gcfb.gcfb_v\*()** with default parameters.
+5. Analyze the input signal by **gcfb.gcfb_v\*()** with default parameters.
 
     ```python
     # GCFB
@@ -118,7 +129,7 @@ Please see more information in requirements.txt.
     cgc_out, pgc_out, _, _ = gcfb.gcfb_v211(snd_eq, gc_param)
     ```
 
-5. You can get the output signal (num_ch $\times$ len(snd)) as :
+6. You can get the output signal (num_ch $\times$ len(snd)) as :
    - **cgc_out**: outputs of the dynamic "compressive" gammachirp filterbank (dependent on the input signal level)
    - **pgc_out**: outputs of the "passive" gammachirp filterbank (not dependent on the input signal level)
 

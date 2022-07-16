@@ -964,7 +964,7 @@ def acfilterbank(acf_coef, acf_status, sig_in=[], sw_ordr=0):
     return sig_out, acf_status
 
 
-def cal_smooth_spech(fb_out, fb_param):
+def cal_smooth_spec(fb_out, fb_param):
     """Caluculation of smoothed spectrogram from GCFB
 
     Args:

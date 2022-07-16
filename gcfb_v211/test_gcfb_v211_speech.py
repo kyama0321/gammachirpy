@@ -37,7 +37,7 @@ def main():
 
     max_aud_spec = np.zeros([2, len(list_dbspl)])    
     for sw_ctrl in range(2): # 1: only dynamic, 2: dynamic and static
-        fig = plt.subplots()
+        fig, ax = plt.subplots()
 
         for sw_dbspl in range(len(list_dbspl)): # each dbspl
             # calibrate the signal level
@@ -47,9 +47,9 @@ def main():
             # set paramteres for dcGC
             gc_param = GCparamDefault() # reset all
             if sw_ctrl == 0: 
-                ctrl = "static"
-            else: 
                 ctrl = "dynamic"
+            else: 
+                ctrl = "static"
             gc_param.ctrl = ctrl
             
             # dcGC processing
@@ -59,31 +59,38 @@ def main():
             print(f"Elapsed time is {np.round(t_end-t_start, 4)} (sec) = " \
                   + f"{np.round((t_end-t_start)/t_snd, 4)} times RealTime.")
             
+            # Caluculation of smoothed spectrogram from GCFB
             gcfb_param = GCparamDefault()
             gcfb_param.fs = fs # using default. See inside cal_smooth_spec for parameters
-            aud_spec, _ = gcfb.cal_smooth_spech(np.maximum(cgc_out, 0), gcfb_param)
+            aud_spec, _ = gcfb.cal_smooth_spec(np.maximum(cgc_out, 0), gcfb_param)
 
             # plot
             ax = plt.subplot(len(list_dbspl), 1, sw_dbspl+1)
             max_aud_spec[sw_ctrl, sw_dbspl] = np.max(np.max(aud_spec))
-            print(max_aud_spec)
 
+            """
+            Normalized by max value
+            It is a data specific value. Please change it.
+            """
             if sw_ctrl == 1:
-                # Normalized by max value. 
-                # It is a data specific value. 
-                # Please change it.
                 amp_img = (64*1.2)/49
             else:
                 amp_img = (64*1.2)/166
 
-            plt.imshow(amp_img*aud_spec, extent=[min(t), max(t), 1, 100], \
+            plt.imshow(amp_img*aud_spec, extent=[min(t), max(t), 0, 100], \
                        aspect='auto', origin='lower', cmap='jet')
             ax.set_title(f"GCFB control = {ctrl}; Signal Level = {dbspl} dB SPL")
             ax.set_yticks([0, 20, 40, 60, 80, 100])
+            ax.set_ylabel("channel")
             plt.tight_layout()
             plt.pause(0.05)
 
+        ax.set_xlabel("time (s)")
+        plt.tight_layout()
+        plt.pause(0.05)
+            
     plt.show()
+    print(max_aud_spec)
 
 
 if __name__ == '__main__':

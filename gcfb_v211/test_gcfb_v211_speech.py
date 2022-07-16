@@ -34,7 +34,8 @@ def main():
 
     # signal levels (dB)
     list_dbspl = [40, 60, 80]
-    
+
+    max_aud_spec = np.zeros([2, len(list_dbspl)])    
     for sw_ctrl in range(2): # 1: only dynamic, 2: dynamic and static
         fig = plt.subplots()
 
@@ -46,9 +47,9 @@ def main():
             # set paramteres for dcGC
             gc_param = GCparamDefault() # reset all
             if sw_ctrl == 0: 
-                ctrl = "dynamic"
-            else: 
                 ctrl = "static"
+            else: 
+                ctrl = "dynamic"
             gc_param.ctrl = ctrl
             
             # dcGC processing
@@ -58,9 +59,24 @@ def main():
             print(f"Elapsed time is {np.round(t_end-t_start, 4)} (sec) = " \
                   + f"{np.round((t_end-t_start)/t_snd, 4)} times RealTime.")
             
+            gcfb_param = GCparamDefault()
+            gcfb_param.fs = fs # using default. See inside cal_smooth_spec for parameters
+            aud_spec, _ = gcfb.cal_smooth_spech(np.maximum(cgc_out, 0), gcfb_param)
+
             # plot
             ax = plt.subplot(len(list_dbspl), 1, sw_dbspl+1)
-            plt.imshow(np.maximum(cgc_out, 0), extent=[min(t), max(t), 1, 100], \
+            max_aud_spec[sw_ctrl, sw_dbspl] = np.max(np.max(aud_spec))
+            print(max_aud_spec)
+
+            if sw_ctrl == 1:
+                # Normalized by max value. 
+                # It is a data specific value. 
+                # Please change it.
+                amp_img = (64*1.2)/49
+            else:
+                amp_img = (64*1.2)/166
+
+            plt.imshow(amp_img*aud_spec, extent=[min(t), max(t), 1, 100], \
                        aspect='auto', origin='lower', cmap='jet')
             ax.set_title(f"GCFB control = {ctrl}; Signal Level = {dbspl} dB SPL")
             ax.set_yticks([0, 20, 40, 60, 80, 100])

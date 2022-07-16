@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from tkinter import N
 import numpy as np
 import sys
 import time
@@ -961,3 +962,112 @@ def acfilterbank(acf_coef, acf_status, sig_in=[], sw_ordr=0):
     sig_out = y
 
     return sig_out, acf_status
+
+
+def cal_smooth_spech(fb_out, fb_param):
+    """Caluculation of smoothed spectrogram from GCFB
+
+    Args:
+        fb_out (array_like): outputs of GCFB
+        fb_param (struct): parameters of GCFB
+
+    Returns:
+        smooth_spec: smoothed spectrogram
+        fb_param: parameters of GCFB
+    """
+
+    fs = fb_param.fs
+
+    if not hasattr(fb_param, 'method'):
+        fb_param.method = 1 # default setting
+    
+    # secction of method
+    if fb_param.method == 1: # default setting
+        fb_param.t_shift = 0.005 # 5 ms from HTK MFCC
+        fb_param.n_shift = fb_param.t_shift * fs
+        fb_param.t_win = 0.025 # 25 ms from HTK MFCC
+        fb_param.n_win = fb_param.t_win * fs
+        fb_param.type_win = 'hamming' # hamming window from HTK MFCC
+    elif fb_param.method == 2:
+        fb_param.t_shift = 0.005 # 5 ms from HTK MFCC
+        fb_param.n_shift = fb_param.t_shift * fs
+        fb_param.t_win = 0.010 # 10 ms from HTK MFCC
+        fb_param.n_win = fb_param.t_win * fs
+        fb_param.type_win = 'hamming' # hamming window from HTK MFCC
+    else:
+        print("Specify FBparam.Method : 1 or 2", file=sys.stderr)
+        sys.exit(1)
+
+    print(f"fb_param.Win = {fb_param.type_win} (fb_param.n_win)")
+    fb_param.win = fb_param.win / np.sum(fb_param.win) # normalized
+    fb_param.type_smooth \
+        = f"Temporal smoothing with a {fb_param.type_win} window"
+    
+    # calculation
+    num_ch, len_snd = np.size(fb_out)
+    for nch in range(num_ch):
+        val_frame, n_smpl_pt = \
+            set_frame4time_sequence(fb_out[nch, :], fb_param.n_win, fb_param.n_shift)
+        if nch == 0:
+            len_frame = np.size(val_frame, 1)
+            smooth_spec = np.zeros(num_ch, len_frame)
+        val_frame_win = np.array([fb_param.win[:]]).T * val_frame
+        smooth_spec[nch, :] = val_frame_win
+
+    fb_param.tempral_positions = np.arange(len_frame-1) * fb_param.t_shift
+    
+    return smooth_spec, fb_param
+
+
+def set_frame4time_sequence(snd, len_frame, shift_frame=0.5):
+    """Set frame for Time sequence signal used for Spectral feature extraction etc.
+
+    Args:
+        snd (array_like): Sound data
+        len_frame (int): Frame length in sample
+        shift_frame (float, optional): Frame shift in sample (== len_frame/integer_value). 
+            Defaults to 0.5.
+
+    Returns:
+        mtrx_data (array_like): Frame matrix
+        num_smpl_pnt (array_like): Number of sample point which is center of each frame
+    """
+    shift_frame = len_frame * shift_frame
+    int_div_frame = len_frame / shift_frame
+
+    if not np.rem(int_div_frame, 1) or not np.rem(int_div_frame, 2):
+        print(f"len_frame = {len_frame}, \n" \
+                + f"shift_frame = {shift_frame}, \n" \
+                 + f"ratio = {int_div_frame} \n" \
+                    + " <-- should be integer value")
+        print("len_frame must be even number")
+        print("shift_frame must be len_frame/integer value", file=sys.stderr)
+        sys.exit(1)
+    
+    snd1 = np.array([list(np.zeros(1, len_frame/2)), list(np.array([snd]).T), \
+                        list(np.zeros(len_frame/2))]) # zero-padding
+    len_snd1 = len(snd1)
+    num_frame1 = np.ceil(len_snd1/len_frame)
+    n_lim = len_frame * num_frame1
+    snd1 = np.array([list(snd1[0:min(n_lim, len_snd1)]), list(np.zeros(1, n_lim - len_snd1))])
+    len_snd1 = len(snd1)
+
+    num_frame_all = (num_frame1-1) * int_div_frame + 1
+    mtrx_data = np.zeros(len_frame, num_frame_all)
+    num_smpl_pnt = np.zeros(num_frame_all)
+
+    for nid in range(int_div_frame):
+        num_frame2 = num_frame1 - (nid > 0)
+        n_snd = shift_frame*nid + np.arange(num_frame2*len_frame)
+        snd2 = snd1(n_snd)
+        mtrx = snd2.reshape(len_frame, num_frame2, order='F').copy()
+        num = np.arange(nid+1, num_frame_all, int_div_frame)
+        n_indx = (num-1) * shift_frame # center of frame
+        mtrx_data[:, num] = mtrx
+        num_smpl_pnt[num] = n_indx
+    
+    n_valid_num_smpl_pnt = np.find(num_smpl_pnt <= len(snd))
+    mtrx_data = mtrx_data[:, n_valid_num_smpl_pnt]
+    num_smpl_pnt = num_smpl_pnt[n_valid_num_smpl_pnt]
+    
+    return mtrx_data, num_smpl_pnt

@@ -23,7 +23,7 @@ def main():
     path_dir = os.path.dirname(os.path.abspath(__file__))
 
     # stiuli : a sample speech
-    file_name = '/sample/Snd_konnichiwa.wav'
+    file_name = '/sample/snd_gammachirpy.wav'
     path_file = path_dir + file_name
 
     # read sample speech

@@ -54,13 +54,18 @@ def main():
             
             # plot
             ax = plt.subplot(len(list_dbspl), 1, sw_dbspl+1)
-            plt.imshow(np.maximum(cgc_out, 0), extent=[min(t), max(t), 1, 100], \
+            plt.imshow(np.maximum(cgc_out, 0), extent=[min(t), max(t), 0, 100], \
                        aspect='auto', origin='lower', cmap='jet')
             ax.set_title(f"GCFB control = {ctrl}; Signal Level = {dbspl} dB SPL")
             ax.set_yticks([0, 20, 40, 60, 80, 100])
+            ax.set_ylabel("channel")
             plt.tight_layout()
             plt.pause(0.05)
 
+        ax.set_xlabel("time (s)")
+        plt.tight_layout()
+        plt.pause(0.05)
+    
     plt.show()
 
 

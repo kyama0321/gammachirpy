@@ -9,12 +9,17 @@ import gcfb_v211 as gcfb
 
 
 class GCparamDefault:
+    # basic paramters
     fs = 48000 # samping frequency
     num_ch = 100 # number of channels
     f_range = np.array([100, 6000]) # range of center frequency
-    # out_mid_crct = 'No' # outer & middle ear correlations
+    
+    # outer & middle ear correlations
+    # out_mid_crct = 'No'
     out_mid_crct = 'ELC' # equal loudness contour (ELC)
-    # ctrl = "dynamic" # used to be 'tyme-varying'
+
+    # time-varying setting
+    # ctrl = "dynamic" # used to be 'time-varying'
     # ctrl = "static" # or 'fixed'
 
 

@@ -42,7 +42,7 @@ def main():
     max_aud_spec = np.zeros([2, len(list_dbspl)])
 
     for sw_ctrl, ctrl in enumerate(list_ctrl): # each time-varying setting
-        fig, ax = plt.subplots()
+        fig = plt.subplots()
 
         for sw_dbspl, dbspl in enumerate(list_dbspl): # each dbspl
             # calibrate the signal level

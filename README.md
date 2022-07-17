@@ -5,9 +5,15 @@ A Python package of the dynamic compressive gammachirp filterbank
 <!-- ![gammachirpy](./figs/gammachirpy_pulse.jpg) -->
 <img src="./figs/gammachirpy_pulse.jpg" width="425px">
 
+## Links
+
+- GitHub: [https://github.com/kyama0321/gammachirpy](https://github.com/kyama0321/gammachirpy)
+- Documents: T.B.D.
+
+
 ## What is the Dynamic Compressive Gammachirp Filterbank?
 
-- [The dynamic compressive gammachirp filterbank (dcGC-FB)](https://ieeexplore.ieee.org/document/1709909) is a time-domain and non-linear cochlear processing model.
+- The dynamic compressive gammachirp filterbank (dcGC-FB) is a time-domain and non-linear cochlear processing model ([Irino and Patterson, 2006](https://ieeexplore.ieee.org/document/1709909)).
 
 ![frequency response](./figs/frequency_response.jpg)
 
@@ -23,40 +29,40 @@ A Python package of the dynamic compressive gammachirp filterbank
 
 ![I/O function](./figs/IO_function.jpg)
 
-- It was demonstrated that the original gammachirp filter (the static version of the dcGC-FB) explains a notched-noise masking data well for normal hearing and hearing impaired listeners.
+- The Gammachirp filter explains a notched-noise masking data well for normal hearing and hearing impaired listeners ([Patterson+, 2003](https://doi.org/10.1121/1.1600720); [Matsui+, 2016](https://asa.scitation.org/doi/10.1121/1.4970396)).
   
-- The original MATLAB packages of the gammachirp filterbank are [HERE](https://github.com/AMLAB-Wakayama/gammachirp-filterbank).
+- The MATLAB packages of the original Gammachirp filterbank are [HERE](https://github.com/AMLAB-Wakayama/gammachirp-filterbank).
 
-## About GammachirPy Project
+## About the GammachirPy Project
 
 - The project name, "GammachirPy (がんまちゃーぴー)" is "Gammachirp + Python".
 
-- This project aims to translate the original MATLAB codes to Python and share them as open-souce software (Apache-2.0 license).
+- This project aims to translate the original MATLAB codes to Python and share them as an open-souce software ([Apache-2.0 license](https://github.com/kyama0321/gammachirpy/blob/main/LICENSE.md)).
   
-- In addition, I have made some demo scripts of the Jupyter Notebook for educational uses. See **demo_*.ipynb** files.
+- In addition, I have made some demo scripts of the Jupyter Notebook for educational uses. See **[gcfb_v211/demo_gammachirp.ipynb](https://github.com/kyama0321/gammachirpy/blob/main/gcfb_v211/demo_gammachirp.ipynb)** files.
 
 ## Reproducibility
 
-- Basic characteristics of the gammachirp filterbank has been checked on **./gcfb_v211/demo_gammachirp.ipynb** with the GammachirPy package.
+- In the **[gcfb_v211/demo_gammachirp.ipynb](https://github.com/kyama0321/gammachirpy/blob/main/gcfb_v211/demo_gammachirp.ipynb)**, basic characteristics of the gammachirp filterbank has been explained and checked with the GammachirPy package.
   
-- To compare outputs of the GammachirPy and the original Gammachirp, a simple pulse train has been used as an input signal with some sound pressure levels (SPLs).
+- In the **[gcfb_v211/demo_gcfb_v211_pulse.ipynb](https://github.com/kyama0321/gammachirpy/blob/main/gcfb_v211/demo_gammachirp.ipynb)**, a simple pulse train has been used as an input signal with some sound pressure levels (SPLs) to compare outputs of the GammachirPy and the original Gammachirp.
   
 ![gammachirpy and gammachirp](./figs/gammachirpy_gammachirp.jpg)
 
-- In the latest version of **gcfb_v211**, the root-mean-squared error (RMSE) between output signals (cgc_out) of GammachirPy and Gammachirp in each level is:
+- In the latest release, the root-mean-squared error (RMSE) between output signals (cgc_out) of the GammachirPy and the original Gammachirp in each level is:
 
-    | SPL (dB) | 40 | 60 | 80 |
-    | --- | --- | --- | --- |
-    | RMSE    | 4.11e-14 | 2.26e-13 | 1.75e-12 |
-
-- You can see the result on **./gcfb_v211/demo_gcfb_v211_pulse.ipynb**.
+    | gcfb | SPL (dB) | RMSE |
+    | --- | --- | --- |
+    | v211 | 40 | 4.11e-14 |
+    | v211 | 60 | 2.26e-13 |
+    | v211 | 80 | 1.75e-12 |
 
 - There are still some errors between the GammachirPy and the original gammachirp, but the errors are minimal. I would like to improve them in the future:-)
 
 ## Repository Structure
 
 - The directory structure is almost the same as the original MATLAB page, and this repository will contain different versions in the future.
-  - **gcfb_v211**: sample-by-sample processing version
+  - **[gcfb_v211](https://github.com/kyama0321/gammachirpy/tree/main/gcfb_v211)**: sample-by-sample processing version
   - **gcfb_v221 (T.B.D.)**: frame-basd processing version
   - **gcfb_v233 (T.B.D.)**: new schemes for Wadai Hearing Impaired Simulator (WHIS)
 
@@ -77,7 +83,7 @@ A Python package of the dynamic compressive gammachirp filterbank
 - Matplotlib >= 3.5.2
 - Jupyter >= 1.0.0
 
-Please see more information in requirements.txt.
+Please see more information in [requirements.txt](https://github.com/kyama0321/gammachirpy/blob/main/requirements.txt).
 
 ## Installation
 
@@ -91,7 +97,7 @@ Please see more information in requirements.txt.
 
 ## Getting Started
 
-The following guide is based on **./gcfb_v211/demo_gcfb_v211_speech.ipynb**.
+The following guide is based on **[gcfb_v211/demo_gcfb_v211_speech.ipynb](https://github.com/kyama0321/gammachirpy/blob/main/gcfb_v211/demo_gcfb_v211_speech.ipynb)**.
 
 1. Import packages.
    
@@ -144,7 +150,7 @@ The following guide is based on **./gcfb_v211/demo_gcfb_v211_speech.ipynb**.
    - **pgc_out**: outputs of the "passive" gammachirp filterbank (not dependent on the input signal level)
 
 
-7. If you change a parameter of input sound pressure level, you can get and compare different outputs (**cgc_out**) from the dynamic compressive gammachirp filterbank:-)
+7. If you change a parameter of an input sound pressure level, you can get and compare different outputs (**cgc_out**) from the dynamic compressive gammachirp filterbank. For exmaple, the below figure is available at **[gcfb_v211/test_gcfb_v211_speech.py](https://github.com/kyama0321/gammachirpy/blob/main/gcfb_v211/test_gcfb_v211_speech.py)**.
 
     <img src="./figs/gammachirpy_speech_dbspl.jpg" width="425px">
 
@@ -154,9 +160,8 @@ The packages is inspired by [AMLAB-Wakayama/gammachirp-filterbank](https://githu
 
 ## References
 
-- [Toshio Irino and Roy D. Patterson, "A time-domain, level-dependent auditory filter: the gammachirp," J. Acoust. Soc. Am., 101 (1), pp.412-419, January 1997.](https://doi.org/10.1121/1.417975)
-- [Toshio Irino and Roy D. Patterson, "A compressive gammachirp auditory filter for both physiological and psychophysical data," J. Acoust. Soc. Am., 109 (5), pp.2008-2022, May 2001.](https://doi.org/10.1121/1.1367253)
-- [Roy D. Patterson, Masashi Unoki, and Toshio Irino "Extending the domain of center frequencies for the compressive gammachirp auditory filter," J. Acoust. Soc. Am., 114 (3), pp.1529-1542, Sept 2003.](https://doi.org/10.1121/1.1600720)
-- [Toshio Irino and Roy D. Patterson, "A dynamic compressive gammachirp auditory filterbank" IEEE Trans. Audio, Speech, and Language Process., 14(6), pp.2222-2232, Nov. 2006.](https://doi.org/10.1109/TASL.2006.874669)
-- [Toshio Irino, "An introduction to auditory filter," J. Acoust. Soc. Jpn., 66(10), pp.505-512, 2010. (in Japanese)](https://doi.org/10.20697/jasj.66.10_506)
-- [Toshio Irino and Roy D. Patterson, "The gammachirp auditory filter and its application to speech perception," Acoust. Sci. & Tech., 41(1), pp.99-107, Jan. 2020.](https://doi.org/10.1250/ast.41.99)
+- [R. D. Patterson, M. Unoki, and T. Irino "Extending the domain of center frequencies for the compressive gammachirp auditory filter," J. Acoust. Soc. Am., 114 (3), pp.1529-1542, 2003.](https://doi.org/10.1121/1.1600720)
+- [T. Irino and R. D. Patterson, "A dynamic compressive gammachirp auditory filterbank" IEEE Trans. Audio, Speech, and Language Process., 14(6), pp.2222-2232, 2006.](https://doi.org/10.1109/TASL.2006.874669)
+- [T. Irino, "An introduction to auditory filter," J. Acoust. Soc. Jpn., 66(10), pp.505-512, 2010. (in Japanese)](https://doi.org/10.20697/jasj.66.10_506)
+- [T Matsui, T. Irino, H. Inabe, Y. Nishimura and R. D. Patterson, "Estimation of auditory compression and filter shape of elderly listeners using notched noise masking," J. Acoust. Soc. Am., 140, p.3274, 2016.](https://asa.scitation.org/doi/10.1121/1.4970396)
+- [T. Irino and R. D. Patterson, "The gammachirp auditory filter and its application to speech perception," Acoust. Sci. & Tech., 41(1), pp.99-107, 2020.](https://doi.org/10.1250/ast.41.99)

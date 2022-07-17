@@ -32,7 +32,7 @@ def main():
     t = np.arange(0, len(snd), 1)/fs
     print(f"Duration of sound = {t_snd*1000} (ms)")
 
-    # signal levels (dB)
+    # sound pressure level of the input signal (dB)
     list_dbspl = [40, 60, 80]
 
     # time-varying setting of GCFB

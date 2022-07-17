@@ -26,7 +26,7 @@ def main():
     t = np.arange(0, len(snd), 1)/fs
     print(f"Duration of sound = {t_snd*1000} (ms)")
 
-    # signal levels
+    # sound pressure level of the input signal (dB)
     list_dbspl = np.arange(40, 100, 20)
     
     # time-varying setting of dcGC-FB

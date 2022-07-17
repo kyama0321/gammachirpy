@@ -13,7 +13,7 @@ class GCparamDefault:
     f_range = np.array([100, 6000]) # range of center frequency
     out_mid_crct = 'No' # outer & middle ear correlations
     # out_mid_crct = 'ELC' # equal loudness contour (ELC)
-    # ctrl = "dynamic" # used to be 'tyme-varying'
+    # ctrl = "dynamic" # used to be 'time-varying'
     # ctrl = "static" # or 'fixed'
 
 
@@ -29,20 +29,18 @@ def main():
     # signal levels
     list_dbspl = np.arange(40, 100, 20)
     
-    for sw_ctrl in range(2): # 1: only dynamic, 2: dynamic and static
+    # time-varying setting of dcGC-FB
+    list_ctrl = ['dynamic', 'static']
+
+    for ctrl in list_ctrl: # each time-varying setting
         fig = plt.subplots()
 
-        for sw_dbspl in range(len(list_dbspl)): # each dbspl
+        for sw_dbspl, dbspl in enumerate(list_dbspl): # each dbspl
             # calibrate the signal level
-            dbspl = list_dbspl[sw_dbspl]
             snd_eq, _ = utils.eqlz2meddis_hc_level(snd, dbspl)
 
-            # set paramteres for dcGC
-            gc_param = GCparamDefault() # reset all
-            if sw_ctrl == 0: 
-                ctrl = "dynamic"
-            else: 
-                ctrl = "static"
+            # set paramteres for dcGC-fB
+            gc_param = GCparamDefault()
             gc_param.ctrl = ctrl
             
             # dcGC processing

@@ -35,21 +35,21 @@ def main():
     # signal levels (dB)
     list_dbspl = [40, 60, 80]
 
-    max_aud_spec = np.zeros([2, len(list_dbspl)])    
-    for sw_ctrl in range(2): # 1: only dynamic, 2: dynamic and static
+    # time-varying setting of GCFB
+    list_ctrl = ['dynamic', 'static']
+
+    # maximum value of smoothed audio spectrogram from dcGC-FB
+    max_aud_spec = np.zeros([2, len(list_dbspl)])
+
+    for sw_ctrl, ctrl in enumerate(list_ctrl): # each time-varying setting
         fig, ax = plt.subplots()
 
-        for sw_dbspl in range(len(list_dbspl)): # each dbspl
+        for sw_dbspl, dbspl in enumerate(list_dbspl): # each dbspl
             # calibrate the signal level
-            dbspl = list_dbspl[sw_dbspl]
             snd_eq, _ = utils.eqlz2meddis_hc_level(snd, dbspl)
 
-            # set paramteres for dcGC
-            gc_param = GCparamDefault() # reset all
-            if sw_ctrl == 0: 
-                ctrl = "dynamic"
-            else: 
-                ctrl = "static"
+            # set paramteres for dcGC-FB
+            gc_param = GCparamDefault()
             gc_param.ctrl = ctrl
             
             # dcGC processing
@@ -59,7 +59,7 @@ def main():
             print(f"Elapsed time is {np.round(t_end-t_start, 4)} (sec) = " \
                   + f"{np.round((t_end-t_start)/t_snd, 4)} times RealTime.")
             
-            # Caluculation of smoothed spectrogram from GCFB
+            # caluculation of smoothed spectrogram from dcGC-FB
             gcfb_param = GCparamDefault()
             gcfb_param.fs = fs # using default. See inside cal_smooth_spec for parameters
             aud_spec, _ = gcfb.cal_smooth_spec(np.maximum(cgc_out, 0), gcfb_param)
@@ -90,7 +90,6 @@ def main():
         plt.pause(0.05)
             
     plt.show()
-    print(max_aud_spec)
 
 
 if __name__ == '__main__':

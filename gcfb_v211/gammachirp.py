@@ -25,10 +25,9 @@ def gammachirp(frs, sr, order_g=4, coef_erbw=1.019, coef_c=0, phase=0, sw_carr='
         len_gc (array_like): Length of gc for each channel
         fps (array_like): Peak frequency
         inst_freq (array_like): Instanteneous frequency
-    """    
-
-    if len(sw_carr) == 0:
-        sw_carr = 'cos'
+    """
+    if isinstance(frs, (int, float)):
+        frs = np.array([frs])
 
     num_ch = len(frs)
     order_g = order_g * np.ones((num_ch, 1))

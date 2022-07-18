@@ -2,8 +2,9 @@
 
 A Python package of the dynamic compressive gammachirp filterbank
 
-<!-- ![gammachirpy](./figs/gammachirpy_pulse.jpg) -->
-<img src="./figs/gammachirpy_pulse.jpg" width="425px">
+<div style="text-align: center">
+    <img src="./figs/gammachirpy_pulse.jpg" width="425px">
+</div>
 
 ## Links
 
@@ -14,7 +15,9 @@ A Python package of the dynamic compressive gammachirp filterbank
 
 - The dynamic compressive gammachirp filterbank (dcGC-FB) is a time-domain and non-linear cochlear processing model ([Irino and Patterson, 2006](https://ieeexplore.ieee.org/document/1709909)).
 
-![frequency response](./figs/frequency_response.jpg)
+<div style="text-align: center">
+    <img src="./figs/frequency_response.jpg" width="425px">
+</div>
 
 - The dcGC-FB can represent:
   - level-dependent and asymmetric auditory filter shape
@@ -22,11 +25,11 @@ A Python package of the dynamic compressive gammachirp filterbank
   - fast compression (cochlear amplifier)
   - two-tone supression.
 
-![frequency response gc gt](./figs/gc_gt_freq.jpg)
-
-![filter level dependency](./figs/filter_level_dependency.jpg)
-
-![I/O function](./figs/IO_function.jpg)
+<div style="text-align: center">
+    <img src="./figs/gc_gt_freq.jpg" width="425px">
+    <img src="./figs/filter_level_dependency.jpg" width="425px">
+    <img src="./figs/IO_function.jpg" width="425px">
+</div>
 
 - The Gammachirp filter explains a notched-noise masking data well for normal hearing and hearing impaired listeners ([Patterson+, 2003](https://doi.org/10.1121/1.1600720); [Matsui+, 2016](https://asa.scitation.org/doi/10.1121/1.4970396)).
   
@@ -50,7 +53,9 @@ A Python package of the dynamic compressive gammachirp filterbank
 
     [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/kyama0321/gammachirpy/blob/main/gcfb_v211/demo_gcfb_v211_pulse.ipynb)
 
-![gammachirpy and gammachirp](./figs/gammachirpy_gammachirp.jpg)
+<div style="text-align: center">
+    <img src="./figs/gammachirpy_gammachirp.jpg" width="425px">
+</div>
 
 - In the latest release, the root-mean-squared error (RMSE) between output signals (cgc_out) of the GammachirPy and the original Gammachirp in each level is:
 
@@ -60,7 +65,7 @@ A Python package of the dynamic compressive gammachirp filterbank
     | v211 | 60 | 2.27e-13 |
     | v211 | 80 | 1.75e-12 |
 
-- There are still small errors between the GammachirPy and the original gammachirp. I would like to improve them with code refactorings in the future:-)
+- There are still small errors between the GammachirPy and the original Gammachirp. I would like to improve them with code refactorings in the future:-)
 
 ## Repository Structure
 
@@ -153,10 +158,11 @@ The following guide is based on **[gcfb_v211/demo_gcfb_v211_speech.ipynb](https:
    - **cgc_out**: outputs of the dynamic "compressive" gammachirp filterbank (dependent on the input signal level)
    - **pgc_out**: outputs of the "passive" gammachirp filterbank (not dependent on the input signal level)
 
+7. If you change a parameter of an input sound pressure level, you can get and compare different outputs (**cgc_out**) from the dynamic compressive gammachirp filterbank. For example, the below figure is available at **[gcfb_v211/test_gcfb_v211_speech.py](https://github.com/kyama0321/gammachirpy/blob/main/gcfb_v211/test_gcfb_v211_speech.py)**.
 
-7. If you change a parameter of an input sound pressure level, you can get and compare different outputs (**cgc_out**) from the dynamic compressive gammachirp filterbank. For exmaple, the below figure is available at **[gcfb_v211/test_gcfb_v211_speech.py](https://github.com/kyama0321/gammachirpy/blob/main/gcfb_v211/test_gcfb_v211_speech.py)**.
-
+<div style="text-align: center">
     <img src="./figs/gammachirpy_speech_dbspl.jpg" width="425px">
+</div>
 
 ## Acknowledgements
 

@@ -54,10 +54,10 @@ A Python package of the dynamic compressive gammachirp filterbank
     | gcfb | SPL (dB) | RMSE |
     | --- | --- | --- |
     | v211 | 40 | 4.11e-14 |
-    | v211 | 60 | 2.26e-13 |
+    | v211 | 60 | 2.27e-13 |
     | v211 | 80 | 1.75e-12 |
 
-- There are still some errors between the GammachirPy and the original gammachirp, but the errors are minimal. I would like to improve them in the future:-)
+- There are still small errors between the GammachirPy and the original gammachirp. I would like to improve them with code refactorings in the future:-)
 
 ## Repository Structure
 
@@ -163,5 +163,5 @@ The packages is inspired by [AMLAB-Wakayama/gammachirp-filterbank](https://githu
 - [R. D. Patterson, M. Unoki, and T. Irino "Extending the domain of center frequencies for the compressive gammachirp auditory filter," J. Acoust. Soc. Am., 114 (3), pp.1529-1542, 2003.](https://doi.org/10.1121/1.1600720)
 - [T. Irino and R. D. Patterson, "A dynamic compressive gammachirp auditory filterbank" IEEE Trans. Audio, Speech, and Language Process., 14(6), pp.2222-2232, 2006.](https://doi.org/10.1109/TASL.2006.874669)
 - [T. Irino, "An introduction to auditory filter," J. Acoust. Soc. Jpn., 66(10), pp.505-512, 2010. (in Japanese)](https://doi.org/10.20697/jasj.66.10_506)
-- [T Matsui, T. Irino, H. Inabe, Y. Nishimura and R. D. Patterson, "Estimation of auditory compression and filter shape of elderly listeners using notched noise masking," J. Acoust. Soc. Am., 140, p.3274, 2016.](https://asa.scitation.org/doi/10.1121/1.4970396)
+- [T. Matsui, T. Irino, H. Inabe, Y. Nishimura and R. D. Patterson, "Estimation of auditory compression and filter shape of elderly listeners using notched noise masking," J. Acoust. Soc. Am., 140, p.3274, 2016.](https://asa.scitation.org/doi/10.1121/1.4970396)
 - [T. Irino and R. D. Patterson, "The gammachirp auditory filter and its application to speech perception," Acoust. Sci. & Tech., 41(1), pp.99-107, 2020.](https://doi.org/10.1250/ast.41.99)

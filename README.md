@@ -10,7 +10,6 @@ A Python package of the dynamic compressive gammachirp filterbank
 - GitHub: [https://github.com/kyama0321/gammachirpy](https://github.com/kyama0321/gammachirpy)
 - Documents: T.B.D.
 
-
 ## What is the Dynamic Compressive Gammachirp Filterbank?
 
 - The dynamic compressive gammachirp filterbank (dcGC-FB) is a time-domain and non-linear cochlear processing model ([Irino and Patterson, 2006](https://ieeexplore.ieee.org/document/1709909)).
@@ -39,10 +38,7 @@ A Python package of the dynamic compressive gammachirp filterbank
 
 - This project aims to translate the original MATLAB codes to Python and share them as an open-souce software ([Apache-2.0 license](https://github.com/kyama0321/gammachirpy/blob/main/LICENSE.md)).
   
-- In addition, I have made some demo scripts of the Jupyter Notebook for educational uses. See **[gcfb_v211/demo_gammachirp.ipynb](https://github.com/kyama0321/gammachirpy/blob/main/gcfb_v211/demo_gammachirp.ipynb)** files.
-
-    [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/kyama0321/gammachirpy/blob/main/gcfb_v211/demo_gammachirp.ipynb)
-
+- In addition, I have made some demo scripts of the Jupyter Notebook for educational uses. You can also open and execute them of Google Colaboratory. See **gcfb_v211/demo_*.ipynb** files.
 
 ## Reproducibility
 
@@ -81,7 +77,6 @@ A Python package of the dynamic compressive gammachirp filterbank
   - **demo_gcfb_v\*_{pulse/speech}.ipynb**: demo scripts for practical uses on the Jupyter Notebook. The scripts are based on test_gcfb_v*_{pulse/speech}.py.
   - **demo_gammachirp.ipynb**: demo scripts for educational uses of the dcGC-FB on the Jupyter Notebook
 
-
 ## Requirements
 
 - Python >= 3.9.1
@@ -109,15 +104,15 @@ The following guide is based on **[gcfb_v211/demo_gcfb_v211_speech.ipynb](https:
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/kyama0321/gammachirpy/blob/main/gcfb_v211/demo_gcfb_v211_speech.ipynb)
 
 1. Import packages.
-   
-    ```Python
+
+    ```python
     import numpy as np
     import matplotlib.pyplot as plt
 
     import utils
     import gcfb_v211 as gcfb
     ```
-   
+
 2. Set default parameters for the gammachirp filterbank as a class variables. Note that if you don't set any parameters, **gcfb.dcgc_v\*()** automaticaly set a default paramters determined in **gcfb.set_param()**
 
     ```python
@@ -126,7 +121,7 @@ The following guide is based on **[gcfb_v211/demo_gcfb_v211_speech.ipynb](https:
           num_ch = 100 # number of channels
           f_range = np.array([100, 6000]) # range of center frequencies
           out_mid_crct = 'ELC' # equal loudness contour (ELC)
-          ctrl = 'dynamic' # time-varying
+          ctrl = 'dynamic' # time-varying parameter of dcGC-FB
     ```
 
 3. Read an audio sound and normalize the signal's amplitude (-1 ~ +1). I recomend to use **utils.audioread()**. Note that the recommended sampling frequency of the input sound is 48,000 Hz.

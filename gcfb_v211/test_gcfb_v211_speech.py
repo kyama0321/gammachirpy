@@ -31,7 +31,7 @@ def main():
     file_name = '/sample/snd_gammachirpy.wav'
     path_file = path_dir + file_name
 
-    # read sample speech
+    # read the sample speech
     snd, fs = utils.audioread(path_file)
     t_snd = len(snd)/fs
     t = np.arange(0, len(snd), 1)/fs

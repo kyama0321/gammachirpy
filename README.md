@@ -13,7 +13,7 @@ A Python package of the dynamic compressive gammachirp filterbank
 
 ## What is the Dynamic Compressive Gammachirp Filterbank?
 
-- The dynamic compressive gammachirp filterbank (dcGC-FB) is a time-domain and non-linear cochlear processing model ([Irino and Patterson, 2006](https://ieeexplore.ieee.org/document/1709909)).
+- The dynamic compressive gammachirp filterbank (dcGC-FB) is a time-domain and non-linear cochlea processing model ([Irino and Patterson, 2006](https://ieeexplore.ieee.org/document/1709909)).
 
 <div style="text-align: center">
     <img src="./figs/frequency_response.jpg" width="425px">

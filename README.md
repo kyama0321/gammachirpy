@@ -19,7 +19,7 @@ A Python package of the dynamic compressive gammachirp filterbank
     <img src="./figs/frequency_response.jpg" width="425px">
 </div>
 
-- The compressive gammachirp auditory filter (cGC) consists of a passive gammachirp filter (pGC) and an high-pass asymmetric function (HP-AF). 
+- The compressive gammachirp auditory filter (cGC) consists of a passive gammachirp filter (pGC) and a high-pass asymmetric function (HP-AF) which shifts in frequency with stimulus level as dictated by data on the compression of basilar membrane motion.
 
 <div style="text-align: center">
     <img src="./figs/cgc_pgc_hpaf.jpg" width="425px">

@@ -19,7 +19,13 @@ A Python package of the dynamic compressive gammachirp filterbank
     <img src="./figs/frequency_response.jpg" width="425px">
 </div>
 
-- The dcGC-FB can represent:
+- The compressive gammachirp auditory filter (cGC) consists of a passive gammachirp filter (pGC) and an high-pass asymmetric function (HP-AF). 
+
+<div style="text-align: center">
+    <img src="./figs/cgc_pgc_hpaf.jpg" width="425px">
+</div>
+
+- The dcGC-FB contains a fast-acting level control circuit for the cGC filter, and it can explain:
   - level-dependent and asymmetric auditory filter shape
   - masking patterns and excitation patterns
   - fast compression (cochlear amplifier)

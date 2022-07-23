@@ -597,7 +597,7 @@ def fr1_to_fp2(n, b1, c1, b2, c2, frat, fr1, sr=24000, n_fft=2048, sw_plot=0):
         fp2 = fp2cand
     else:
         val, ncl = np.min(np.abs(fp2cand - fp1))
-        fp2 = fp2cand(ncl) # in usual cGC range, fp2 is close to fp1
+        fp2 = fp2cand[ncl] # in usual cGC range, fp2 is close to fp1
 
     # sw_plot = 1
     if sw_plot == 1: # Check

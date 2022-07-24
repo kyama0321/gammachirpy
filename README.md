@@ -47,7 +47,7 @@ A Python package of the dynamic compressive gammachirp filterbank
 
 - The project name, "GammachirPy (がんまちゃーぴー)" is "Gammachirp + Python".
 
-- This project aims to translate the original MATLAB codes to Python and share them as an open-souce software ([Apache-2.0 license](https://github.com/kyama0321/gammachirpy/blob/main/LICENSE.md)).
+- This project aims to translate the original MATLAB codes to Python and share them as an open-source software ([Apache-2.0 license](https://github.com/kyama0321/gammachirpy/blob/main/LICENSE.md)).
   
 - In addition, I have made some demo scripts of the Jupyter Notebook for educational uses. You can also open and execute them of Google Colaboratory. See **gcfb_v211/demo_*.ipynb** files.
 

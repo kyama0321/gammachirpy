@@ -53,7 +53,7 @@ A Python package of the dynamic compressive gammachirp filterbank
 
 ## Reproducibility
 
-- In the **[gcfb_v211/demo_gammachirp.ipynb](https://github.com/kyama0321/gammachirpy/blob/main/gcfb_v211/demo_gammachirp.ipynb)**, basic characteristics of the gammachirp filterbank has been explained and checked with the GammachirPy package.
+- In the **[gcfb_v211/demo_gammachirp.ipynb](https://github.com/kyama0321/gammachirpy/blob/main/gcfb_v211/demo_gammachirp.ipynb)**, essential characteristics of the gammachirp filterbank have been explained and checked with the GammachirPy package.
 
     [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/kyama0321/gammachirpy/blob/main/gcfb_v211/demo_gammachirp.ipynb)
 
@@ -126,7 +126,7 @@ The following guide is based on **[gcfb_v211/demo_gcfb_v211_speech.ipynb](https:
     import gcfb_v211 as gcfb
     ```
 
-2. Set default parameters for the gammachirp filterbank as a class variables. Note that if you don't set any parameters, **gcfb.dcgc_v\*()** automaticaly set a default paramters determined in **gcfb.set_param()**
+2. Set default parameters for the gammachirp filterbank as class variables. Note that if you don't set any parameters, **gcfb.dcgc_v\*()** automaticaly set default paramters determined in **gcfb.set_param()**
 
     ```python
     class GCparamDefault:
@@ -166,7 +166,7 @@ The following guide is based on **[gcfb_v211/demo_gcfb_v211_speech.ipynb](https:
    - **cgc_out**: outputs of the dynamic "compressive" gammachirp filterbank (dependent on the input signal level)
    - **pgc_out**: outputs of the "passive" gammachirp filterbank (not dependent on the input signal level)
 
-7. If you change a parameter of an input sound pressure level, you can get and compare different outputs (**cgc_out**) from the dynamic compressive gammachirp filterbank. For example, the below figure is available at **[gcfb_v211/test_gcfb_v211_speech.py](https://github.com/kyama0321/gammachirpy/blob/main/gcfb_v211/test_gcfb_v211_speech.py)**.
+7. If you change the SPL (**dbspl**), you can get and compare different outputs (**cgc_out**) from the dynamic compressive gammachirp filterbank. For example, the below figure is available at **[gcfb_v211/test_gcfb_v211_speech.py](https://github.com/kyama0321/gammachirpy/blob/main/gcfb_v211/test_gcfb_v211_speech.py)**.
 
 <div style="text-align: center">
     <img src="./figs/gammachirpy_speech_dbspl.jpg" width="425px">

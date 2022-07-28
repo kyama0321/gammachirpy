@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from tkinter import N
 import numpy as np
 import sys
 import time

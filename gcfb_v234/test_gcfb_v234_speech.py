@@ -148,7 +148,7 @@ def main():
             ax3 = fig.add_subplot(3, 1, 3)
             plt.imshow(np.maximum(gcem_loss, 0), vmax=scaling, extent=[0, num_frame, 0, num_ch], \
                        aspect='auto', origin='lower', cmap='jet')
-            ax3.set_title('Type: ' + gc_param_hl3.hloss.type + ' + TMTF reduction' \
+            ax3.set_title('Type: ' + gc_param_hl3.hloss.type + '+TMTF reduct.' \
                           + f', Signal Level: {dbspl}dB SPL')
             ax3.set_yticks((y_ticks))
             ax3.set_xlabel("# of frame")

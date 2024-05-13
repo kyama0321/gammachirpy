@@ -47,12 +47,22 @@ A Python package of the dynamic compressive gammachirp filterbank
 - The Gammachirp filter explains a notched-noise masking data well for normal hearing and hearing impaired listeners ([Patterson+, 2003](https://doi.org/10.1121/1.1600720); [Matsui+, 2016](https://asa.scitation.org/doi/10.1121/1.4970396)).
 
 - **The new version (gcfb_v234) includes hearing loss characteristics ([Irino, 2023](https://doi.org/10.1109/ACCESS.2023.3298673))**
-    - **audiograms with compression factor $\alpha$**
-    - **Input/output functions with compression factor $\alpha$ and audiogram**
+    - **audiogram with a compression factor $\alpha$**
 
     <div style="text-align: center">
       <img src="./figs/audiogram_hl3_compression_05.jpg" width="425px">
+    </div>
+
+    - **input/output function with a compression factor $\alpha$ and a audiogram**
+
+    <div style="text-align: center">
       <img src="./figs/IO_function_NH_HL3.jpg" width="425px">
+    </div>
+
+    - **filter outputs based frame-based processing**
+
+    <div style="text-align: center">
+      <img src="./figs/gammachirpy_speech_NH_HL3_40dbspl.jpg" width="425px">
     </div>
   
 - The MATLAB packages of the original Gammachirp filterbank are [HERE](https://github.com/AMLAB-Wakayama/gammachirp-filterbank).
@@ -117,11 +127,13 @@ Please see the README file in each directory.
 
 ## Reproducibility
 
-- In the **[gcfb_v234/demo_gammachirp.ipynb](https://github.com/kyama0321/gammachirpy/blob/main/gcfb_v234/demo_gammachirp.ipynb)**, essential characteristics of the gammachirp filterbank are explained and checked with the GammachirPy package.
+- In the **[gcfb_v234/demo_gammachirp.ipynb](https://github.com/kyama0321/gammachirpy/blob/main/gcfb_v234/demo_gammachirp.ipynb)** and **[gcfb_v211/demo_gammachirp.ipynb](https://github.com/kyama0321/gammachirpy/blob/main/gcfb_v211/demo_gammachirp.ipynb)**, essential characteristics of the gammachirp filterbank are explained and checked with the GammachirPy package.
 
-    [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/kyama0321/gammachirpy/blob/main/gcfb_v211/demo_gammachirp.ipynb)
+    - v211: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/kyama0321/gammachirpy/blob/main/gcfb_v211/demo_gammachirp.ipynb)
+    - v234: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/kyama0321/gammachirpy/blob/main/gcfb_v234/demo_gammachirp.ipynb)
 
-- In the **[gcfb_v211/demo_gcfb_v211_pulse.ipynb](https://github.com/kyama0321/gammachirpy/blob/main/gcfb_v211/demo_gammachirp.ipynb)** and **[gcfb_v234/demo_gcfb_v234_pulse.ipynb](https://github.com/kyama0321/gammachirpy/blob/main/gcfb_v234/demo_gammachirp.ipynb)**, a simple pulse train are used as an input signal with some sound pressure levels (SPLs) to compare outputs of the GammachirPy and the original Gammachirp.
+
+- In the **[gcfb_v234/demo_gcfb_v234_pulse.ipynb](https://github.com/kyama0321/gammachirpy/blob/main/gcfb_v234/demo_gammachirp.ipynb)** and **[gcfb_v211/demo_gcfb_v211_pulse.ipynb](https://github.com/kyama0321/gammachirpy/blob/main/gcfb_v211/demo_gammachirp.ipynb)**, a simple pulse train are used as an input signal with some sound pressure levels (SPLs) to compare outputs of the GammachirPy and the original Gammachirp.
 
 <div style="text-align: center">
     <img src="./figs/gammachirpy_gammachirp.jpg" width="425px">

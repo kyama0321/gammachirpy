@@ -47,24 +47,16 @@ A Python package of the dynamic compressive gammachirp filterbank
 - The Gammachirp filter explains a notched-noise masking data well for normal hearing and hearing impaired listeners ([Patterson+, 2003](https://doi.org/10.1121/1.1600720); [Matsui+, 2016](https://asa.scitation.org/doi/10.1121/1.4970396)).
 
 - **The new version (gcfb_v234) includes hearing loss characteristics ([Irino, 2023](https://doi.org/10.1109/ACCESS.2023.3298673))**
-    - **audiogram with a compression factor $\alpha$**
-
-    <div style="text-align: center">
-      <img src="./figs/audiogram_hl3_compression_05.jpg" width="425px">
-    </div>
-
+    - **audiogram with a compression factor $\alpha$**    
     - **input/output function with a compression factor $\alpha$ and a audiogram**
-
-    <div style="text-align: center">
-      <img src="./figs/IO_function_NH_HL3.jpg" width="425px">
-    </div>
-
     - **filter outputs based frame-based processing**
 
-    <div style="text-align: center">
-      <img src="./figs/gammachirpy_speech_NH_HL3_40dbspl.jpg" width="425px">
-    </div>
-  
+<div style="text-align: center">
+    <img src="./figs/audiogram_hl3_compression_05.jpg" width="425px">
+    <img src="./figs/IO_function_NH_HL3.jpg" width="425px">
+    <img src="./figs/gammachirpy_speech_NH_HL3_40dbspl.jpg" width="425px">
+</div>
+
 - The MATLAB packages of the original Gammachirp filterbank are [HERE](https://github.com/AMLAB-Wakayama/gammachirp-filterbank).
 
 ## About the GammachirPy Project

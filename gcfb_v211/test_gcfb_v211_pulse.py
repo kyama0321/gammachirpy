@@ -13,12 +13,12 @@ class GCparamDefault:
     num_ch = 100 # number of channels
     f_range = np.array([100, 6000]) # range of center frequency
     
-    # outer & middle ear correlations
+    # outer & middle ear corrections
     out_mid_crct = 'No'
-    # out_mid_crct = 'ELC' # equal loudness contour (ELC)
+    # out_mid_crct = 'ELC' # equal loudness contour (ELC), incompatible with the original version due to specifications of the 'firpm' function in MATLAB
 
     # time-varying setting
-    # ctrl = "dynamic" # used to be 'time-varying'
+    ctrl = "dynamic" # used to be 'time-varying'
     # ctrl = "static" # or 'fixed'
 
 

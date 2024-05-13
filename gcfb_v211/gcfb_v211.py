@@ -168,7 +168,7 @@ def gcfb_v211(snd_in, gc_param, *args):
         fr2lvl_est = gc_param.lvl_est.frat * gc_resp.fp1
         # default gc_param.lvl_est.frat = 1.08 (GCFBv208_SetParam(gc_param))
         # ---> Linear filter for level estimation
-        acf_coef_lvl_est = make_asym_cmp_filters_v2(fs,fr2lvl_est,gc_param.lvl_est.b2, gc_param.lvl_est.c2)
+        acf_coef_lvl_est = make_asym_cmp_filters_v2(fs, fr2lvl_est, gc_param.lvl_est.b2, gc_param.lvl_est.c2)
 
     """
     Start calculation
@@ -368,10 +368,7 @@ def set_param(gc_param):
         gc_param.c2 = np.array([[2.20, 0], [0, 0]]) # no level-dependency; no freq-dependency (3 Jun 05)
 
     if not hasattr(gc_param, 'ctrl'):
-        gc_param.ctrl = 'static'      
-
-    if not hasattr(gc_param, 'ctrl'):
-        gc_param.ctrl = 'static'
+        gc_param.ctrl = 'static' # default
     if 'fix' in gc_param.ctrl:
         gc_param.ctrl = 'static'
     if 'tim' in gc_param.ctrl:
@@ -993,7 +990,10 @@ def cal_smooth_spec(fb_out, fb_param):
         fb_param.t_win = 0.010 # 10 ms from HTK MFCC
         fb_param.n_win = fb_param.t_win * fs
         fb_param.type_win = 'hanning' # hamming window from HTK MFCC
-        fb_param.win = np.hanning(fb_param.n_win)
+        # np.hanning: does not match to Matlab 'hannig()'
+        # https://stackoverflow.com/questions/56485663/hanning-window-values-doesnt-match-in-python-and-matlab
+        fb_param.val_win = np.hanning(fb_param.n_win+2)[1:-1]
+
     else:
         print("Specify FBparam.Method : 1 or 2", file=sys.stderr)
         sys.exit(1)

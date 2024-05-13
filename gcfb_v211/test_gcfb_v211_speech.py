@@ -14,12 +14,12 @@ class GCparamDefault:
     num_ch = 100 # number of channels
     f_range = np.array([100, 6000]) # range of center frequency
     
-    # outer & middle ear correlations
-    # out_mid_crct = 'No'
-    out_mid_crct = 'ELC' # equal loudness contour (ELC)
+    # outer & middle ear corrections
+    out_mid_crct = 'No'
+    #out_mid_crct = 'ELC' # equal loudness contour (ELC), incompatible with the original version due to specifications of the 'firpm' function in MATLAB.
 
     # time-varying setting
-    # ctrl = "dynamic" # used to be 'time-varying'
+    ctrl = "dynamic" # used to be 'time-varying'
     # ctrl = "static" # or 'fixed'
 
 
@@ -88,11 +88,11 @@ def main():
             ax.set_yticks([0, 20, 40, 60, 80, 100])
             ax.set_ylabel("channel")
             plt.tight_layout()
-            plt.pause(0.05)
+            plt.pause(0.5)
 
         ax.set_xlabel("time (s)")
         plt.tight_layout()
-        plt.pause(0.05)
+        plt.pause(0.5)
             
     plt.show()
 

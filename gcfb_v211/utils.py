@@ -269,16 +269,13 @@ def out_mid_crct_filt(str_crct, sr, sw_plot=0, sw_filter=0):
     crct = np.sqrt(crct_pwr[:,0])
     freq = freq[:,0]
 
-    len_coef = 200 # ( -45 dB) <- 300 (-55 dB)
-    n_coef= int(np.fix(len_coef/16000*sr/2)*2) # even number only
-
     if sw_filter == 1:
         crct = 1 / np.max(np.sqrt(crct_pwr), 0.1) # Giving up less tan -20 dB : f>15000 Hz
                                                  # if requered, the response becomes worse
     
     len_coef = 200 # ( -45 dB) <- 300 (-55 dB)
     n_coef= int(np.fix(len_coef/16000*sr/2)*2) # even number only
-    
+
     """ 
     Calculate the minimax optimal filter with a frequency response
     instead of "fir_coef = firpm(n_coef,freq/sr*2,crct)" in the original code out_mid_crct_filt.m
@@ -498,7 +495,9 @@ def taper_window(len_win, type_taper, len_taper=None, range_sigma=3, sw_plot=0):
         type_taper = 'Hamming'
 
     elif type_taper == 'HAN' or type_taper == 'COS':
-        taper = np.hanning(len_taper*2+1)
+        # np.hanning: does not match to Matlab 'hannig()'
+        # https://stackoverflow.com/questions/56485663/hanning-window-values-doesnt-match-in-python-and-matlab
+        taper = np.hanning(len_taper*2+1 +2)[1:-1]
         type_taper = 'Hanning/Cosine'
 
     elif type_taper == 'BLA':
@@ -538,61 +537,45 @@ def rceps(x):
         x (array_like): input signal
 
     Returns:
-        x_hat: real cepstrum
-        y_hat: a unique minimum-phase sequence that has the reame real cepstrum as x
+        cep (array_like): real cepstrum
+        min_phase (array_like): a unique minimum-phase sequence that has the real cepstrum as x
 
-    Note:
-        This code is based on "rceps.m" in MATLAB and is under-construction. 
-
-    Examples:
-        x = [4 1 5]; % Non-minimum phase sequence
-        x_hat = array([1.62251148, 0.3400368 , 0.3400368 ])
-        y_hat = array([5.33205452, 3.49033278, 1.1776127 ])
-
-    References:
-    - A.V. Oppenheim and R.W. Schafer, Digital Signal Processing, Prentice-Hall, 1975.
-    - Programs for Digital Signal Processing, IEEE Press, John Wiley & Sons, 1979, algorithm 7.2.
-    - https://mathworks.com/help/signal/ref/rceps.html
+    Reference:
+        Oppenheim & Schafer (2009) Discrete-Time Signal Processing, 3rd ed. Pearson.
     """
     if isrow(x):
         x_t = np.array([x]).T
-    else:
-        x_t = x
 
-    fft_x_abs = np.abs(np.fft.fft(x_t, n=None, axis=0))
-
-    x_hat_t = np.real(np.fft.ifft(np.log(fft_x_abs), n=None, axis=0))
-
-    # x_hat
-    if isrow(x):
-        # transform the result to a row vector
-        x_hat = x_hat_t[:,0]
-    else:
-        x_hat = x_hat_t
-
-    # y_hat
-    n_rows = x_hat_t.shape[0]
-    n_cols = x_hat_t.shape[1]
+    # Cepstrum
+    # Compute the Fourier Transform of the signal
+    x_spec = np.fft.fft(x_t, n=None, axis=0)
+    
+    # Take the logarithm of the magnitude of the Fourier Transform
+    log_x_spec = np.log(np.abs(x_spec))
+    
+    # Compute the real cepstrum by taking the inverse Fourier Transform of the log magnitude
+    cep = np.real(np.fft.ifft(log_x_spec, n=None, axis=0))
+    
+    # Minimum-phase reconstruction by Homomorphic filtering (Oppenheim & , )
+    # Calculate the asymmetric part of the cepstrum to construct the minimum-phase signal
+    n_rows = cep.shape[0]
+    n_cols = cep.shape[1]
     odd = n_rows % 2
+
+    # Construct the window function
     a1 = np.array([1])
     a2 = 2*np.ones((int((n_rows+odd)/2)-1, 1))
-    a3 = np.zeros((int((n_rows+odd)/2)-1,1))
-    wn = np.kron(np.ones((1, n_cols)), np.vstack((a1, a2, a3)))
-    """
-    Matlab can use zero and negative numbers for args of ones function, 
-    but the np.ones cannot. So, an internal array is removed. 
-    The original code is: 
-    wn = np.kron(np.ones((1, n_cols)), np.array([[1], 2*np.ones((int((n_rows+odd)/2)-1, 1)), 
-         np.ones(1-odd, 1), np.zeros((int((n_rows+odd)/2)-1,1))]))
-    """
-    y_hat_t = np.real(np.fft.ifft(np.exp(np.fft.fft((wn*x_hat_t),n=None, axis=0)), n=None, axis=0))
-    if isrow(x):
-        # transform the result to a row vector
-        y_hat = y_hat_t[:,0]
-    else:
-        y_hat = y_hat_t
+    a3 = np.zeros((int((n_rows+odd)/2)-1, 1))
+    win = np.kron(np.ones((1, n_cols)), np.vstack((a1, a2, a3)))
 
-    return x_hat, y_hat
+    # Calculate the minimum-phase signal
+    min_phase = np.real(np.fft.ifft(np.exp(np.fft.fft((win * cep),n=None, axis=0)), n=None, axis=0))
+
+    if isrow(x):
+        cep = cep[:,0]
+        min_phase = min_phase[:,0]
+
+    return cep, min_phase
 
 
 def isrow(x):
@@ -633,7 +616,7 @@ def iscolumn(x):
 
 
 def fftfilt(b, x):
-    """FFTFILT Overlap-add method for FIR filtering using FFT.
+    """Overlap-add method for FIR filtering using FFT.
 
     Args:
         b (array_like): Impulse response of the filter
@@ -642,67 +625,43 @@ def fftfilt(b, x):
     Returns:
         y (array_like): Output signal filtered
 
-    Note: 
-        This code is based on the "fftfilt" fuction of Matlab.
-    """    
+    Note:
+        This code is implimented based on pambox.utils.fftfilt() in the pambox package.
+        https://github.com/achabotl/pambox/blob/develop/pambox/utils.py#L246
+    """
+
     if isrow(x):
-        x_col = np.array([x]).T
-    else:
-        x_col = x.copy()
-    nx, mx = np.shape(x_col)
-    
+        x_t = np.array([x]).T
     if isrow(b):
-        b_col = np.array([b]).T
-    else:
-        b_col = b.copy()
-    nb, mb = np.shape(b_col)
+        b_t = np.array([b]).T
 
-    # figure out which n_fft and lx to use
-    if nb >= nx or nb > 2**20:
-        n_fft = 2<<(nb + nx -1).bit_length()
-        lx = nx
-    else:
-        fft_flops = np.array([18, 59, 138, 303, 660, 1441, 3150, 6875, 14952, 32373,\
-                             69762, 149647, 319644, 680105, 1441974, 3047619, 6422736, \
-                             13500637, 28311786, 59244791, 59244791*2.09])
-        n = 2**np.arange(1,22)
-        n_valid = n[n > nb-1]
-        fft_flops_valid = np.extract([n > nb-1], fft_flops)
-        # minimize (number of blocks) * (number of flops per fft)
-        lx1 = n_valid - (nb - 1)
-        ind = np.argmin(np.ceil(nx/lx1)*fft_flops_valid)
-        n_fft = n_valid[ind] # must have n_fft > (nb-1)
-        lx = lx1[ind]
-    
-    b_spec = np.fft.fft(b_col, n=n_fft, axis=0)
-    if iscolumn(b_col):
-        b_spec1 = b_spec[:, 0]
-    else:
-        b_spec1 = b_spec
-    if iscolumn(x_col):
-        x_col1 = x_col[:, 0]
-    else:
-        x_col1 = x_col
+    n_x = len(x_t)
+    n_b = len(b_t)
 
-    y1 = np.zeros(np.shape(x_col), dtype=np.complex)
-    istart = 0
-    while istart <= nx:
-        iend = np.minimum(istart+lx, nx)
-        if (iend - (istart-1)) == 0:
-            x_spec = x_col1[istart[np.ones((n_fft, 1))]] # need to fft a scalar
-        else:
-            x_spec = np.fft.fft(x_col1[istart:iend], n=n_fft, axis=0)
-        y_spec = np.fft.ifft(x_spec*b_spec1, n=n_fft, axis=0)
-        yend = np.minimum(nx, istart+n_fft)
-        y1[istart:yend, 0] = y1[istart:yend, 0] + y_spec[0:(yend-istart)]
-        istart += lx
-    
-    if not any(np.imag(b)) or not any(np.imag(x)):
-        y1 = np.real(y1)
-    
-    if isrow(x) and iscolumn(y1):
-        y = y1[:,0]
+    # figure out which n_fft and l_x to use
+    if n_b >= n_x:
+        n_fft = 2<<(n_b + n_x -1).bit_length()
     else:
-        y = y1
+        fft_flops = 2**np.arange(np.ceil(np.log2(n_b)), 27)
+        cost = np.ceil(n_x/(fft_flops - n_b + 1)) * fft_flops * (np.log2(fft_flops) + 1)
+        n_fft = fft_flops[np.argmin(cost)]
+    n_fft = int(n_fft)
+    l = int(n_fft - n_b + 1)
+    
+    # spectral representation of the filter
+    b_spec = np.fft.fft(b_t, n=n_fft, axis=0)
 
-    return y
+    # filtering using overlap-add method
+    y = np.zeros(np.shape(x_t), dtype=np.complex128)
+    i = 0
+    while i <= n_x:
+        il = np.min([i + l, n_x])
+        k = np.min([i + n_fft, n_x])
+        y_t = np.fft.ifft(b_spec * np.fft.fft(x_t[i:il], n=n_fft, axis=0), n=n_fft, axis=0)
+        y[i:k] = y[i:k] + y_t[:(k-i)]
+        i += l
+
+    if isrow(x):
+        y = y[:, 0]
+
+    return np.real(y)

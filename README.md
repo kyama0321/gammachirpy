@@ -125,7 +125,7 @@ Please see the README file in each directory.
     - v234: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/kyama0321/gammachirpy/blob/main/gcfb_v234/demo_gammachirp.ipynb)
 
 
-- In the **[gcfb_v234/demo_gcfb_v234_pulse.ipynb](https://github.com/kyama0321/gammachirpy/blob/main/gcfb_v234/demo_gammachirp.ipynb)** and **[gcfb_v211/demo_gcfb_v211_pulse.ipynb](https://github.com/kyama0321/gammachirpy/blob/main/gcfb_v211/demo_gammachirp.ipynb)**, a simple pulse train are used as an input signal with some sound pressure levels (SPLs) to compare outputs of the GammachirPy and the original Gammachirp.
+- In the **[gcfb_v234/demo_gcfb_v234_pulse.ipynb](https://github.com/kyama0321/gammachirpy/blob/main/gcfb_v234/demo_gcfb_v234_pulse.ipynb)** and **[gcfb_v211/demo_gcfb_v211_pulse.ipynb](https://github.com/kyama0321/gammachirpy/blob/main/gcfb_v211/demo_gcfb_v211_pulse.ipynb)**, a simple pulse train are used as an input signal with some sound pressure levels (SPLs) to compare outputs of the GammachirPy and the original Gammachirp.
 
 <div style="text-align: center">
     <img src="./figs/gammachirpy_gammachirp.jpg" width="425px">

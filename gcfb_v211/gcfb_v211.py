@@ -585,7 +585,7 @@ def fr1_to_fp2(n, b1, c1, b2, c2, frat, fr1, sr=24000, n_fft=2048, sw_plot=0):
     coef2 = c1*bw1 + c2*bw2 + n*fr1 + 2*n*fr2
     coef3 = -2*fr2*(c1*bw1+n*fr1) - n*((bw2)**2+fr2**2) - 2*c2*bw2*fr1
     coef4 = c2*bw2*((bw1)**2+fr1**2) + (c1*bw1+n*fr1)*(bw2**2+fr2**2)
-    coefs = [coef1, coef2, coef3, coef4]
+    coefs = np.array([coef1, coef2[0], coef3[0], coef4[0]])
 
     p = np.roots(coefs)
     fp2cand = p[np.imag(p)==0]

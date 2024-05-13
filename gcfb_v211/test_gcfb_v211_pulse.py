@@ -63,11 +63,11 @@ def main():
             ax.set_yticks([0, 20, 40, 60, 80, 100])
             ax.set_ylabel("channel")
             plt.tight_layout()
-            plt.pause(0.05)
+            plt.pause(0.5)
 
         ax.set_xlabel("time (s)")
         plt.tight_layout()
-        plt.pause(0.05)
+        plt.pause(0.5)
     
     plt.show()
 

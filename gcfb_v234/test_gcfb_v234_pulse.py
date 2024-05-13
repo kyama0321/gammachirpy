@@ -153,7 +153,7 @@ def main():
 
             plt.tight_layout()
             plt.show(block=False)
-            plt.pause(0.05)
+            plt.pause(0.5)
 
             plt.savefig(f'{path_dir}/figs/spec_{ctrl}_pulse_{dbspl}dB.png')
 

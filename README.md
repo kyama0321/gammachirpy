@@ -52,6 +52,7 @@ A Python package of the dynamic compressive gammachirp filterbank
     - **filter outputs based frame-based processing**
 
 <div style="text-align: center">
+    <img src="./figs/audiograms.jpg" width="425px">
     <img src="./figs/audiogram_hl3_compression_05.jpg" width="425px">
     <img src="./figs/IO_function_NH_HL3.jpg" width="425px">
     <img src="./figs/gammachirpy_speech_NH_HL3_40dbspl.jpg" width="425px">
